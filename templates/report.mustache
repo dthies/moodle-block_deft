@@ -1,0 +1,37 @@
+{{!
+    This file is part of Moodle - http://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+}}
+{{!
+    @template block_deft/report
+
+    This template renders the admins usage report for the deft response block.
+
+    Example context (json):
+    {
+        "current": 4,
+        "maximum": 10,
+        "cumulative": 145
+    }
+}}
+
+    <div class="container-fluid p-0">
+        <table class="table table-striped">
+            <tr><td></td><td>{{# str }} connections, block_deft {{/ str}}</td></tr>
+            <tr><td>{{# str }} current, block_deft {{/ str}}</td><td>{{ current }}</td></tr>
+            <tr><td>{{# str }} maximum, block_deft {{/ str}}</td><td>{{ maximum }}</td></tr>
+            <tr><td>{{# str }} cumulative, block_deft {{/ str}}</td><td>{{ cumulative }}</td></tr>
+        </table>
+    </div>

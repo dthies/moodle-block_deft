@@ -1,0 +1,44 @@
+{{!
+    This file is part of Moodle - http://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+}}
+{{!
+    @template block_deft/configuration
+
+    This template renders the registration page
+
+    Example context (json):
+    {
+         "configured": false,
+         "registrationurl": "https://deftly.us/enrol/lti/register.php?token=5fb5b5ca827e76092897cd369d3a59cdf266813496a3285dasf0ef98b04",
+         "registrationurl": "https://moodlesite/admin/settings.php?settion=blocksettingdeft"
+    }
+}}
+<div>
+    {{^ configured }}
+        <div class="registrationcontainer"></div>
+    {{/ configured }}
+    {{# configured }}
+        <p>The tool has already been configured.</p>
+        <p><a href="{{ returnurl }}">return to settings</a></p>
+    {{/ configured }}
+</div>
+{{# js }}
+    {{^ configured }}
+    require(['block_deft/configure'], function(Configure) {
+        Configure.init("{{ registrationurl }}", "{{ returnurl }}");
+    });
+    {{/ configured }}
+{{/ js }}

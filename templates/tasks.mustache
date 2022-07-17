@@ -1,0 +1,59 @@
+{{!
+    This file is part of Moodle - http://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+}}
+{{!
+    @template block_deft/tasks
+
+    This template renders the tasks manager for deft response block
+
+    Example context (json):
+    {
+        "tasks": [
+            {
+                "type": "text",
+                "configdata": {
+                    "name": "Welcome",
+                    "content": "hello"
+                }
+            }
+        ]
+    }
+}}
+<div class="row">
+    {{# tasks }}
+    <div class="col-3 p-1">
+        <div class="card deft-task-{{ type }}" data-id="{{ id }}" data-type="{{ type }}">
+            <div class="card-body">
+                <h5 class="card-title">{{configdata.name}}</h5>
+                {{ type }}
+                <div class="task-controls">
+                    <form onsubmit="return false;">
+                    <input type="hidden" name="id" value="{{ id }}" />
+                    <input type="hidden" name="type" value="{{ type }}" />
+                    {{# canedit }}
+                    <button name="action" value="edit" class="icon fa fa-cog border-0"></button>
+                    <button name="action" value="delete" class="icon fa fa-trash border-0"></button>
+                    <button name="action" value="move" class="icon fa fa-arrows border-0"></button>
+                    {{/ canedit }}
+                    {{# statedata.visible }}<button name="action" value="status" class="icon fa fa-eye border-0"></button>{{/ statedata.visible }}
+                    {{^ statedata.visible }}<button name="action" value="status" class="icon fa fa-eye-slash border-0"></button>{{/ statedata.visible }}
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    {{/ tasks }}
+</div>
