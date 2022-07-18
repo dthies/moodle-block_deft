@@ -1,14 +1,18 @@
 # Deft response block #
 
-Provides polling and chat which updates live without reloading main activity
+Provides polling and chat that update live without reloading main activity
 
-Teachers may configure a number of questions or prompts in the block and change
-the visibilities and other conditions of the items. Comments may also be enabled
-to conduct discussions. A service is offered to enable updating the contents in
-users browsers via a websocket protocol. The service is free for testing and limited
-usage, but may be capped. The service is linked as an External Tool (LTI), but user
-information is not shared with the service other than what is necessary to provide
-connection i.e IP number associated with block's context.
+Teachers may configure a number of questions or prompts in the block
+and change the visibilities and other conditions of the items. Comments
+may also be enabled to conduct discussions.
+
+An external service is available to enable updating the contents in users
+browsers via the websocket protocol. The service is free for testing and
+limited usage, but will be capped for larger sites without a service
+agreement in the future. The service is linked as an External Tool
+(LTI), but user information is not shared with the service other than
+what is necessary to provide connection i.e IP number associated with
+block's context.
 
 ## Installing via uploaded ZIP file ##
 

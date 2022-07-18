@@ -31,6 +31,7 @@ use core_privacy\local\request\approved_contextlist;
 use core_privacy\local\request\contextlist;
 use core_privacy\local\request\userlist;
 use core_privacy\local\request\approved_userlist;
+use core_privacy\local\request\writer;
 
 /**
  * Privacy Subsystem implementation for block_deft.
@@ -88,9 +89,9 @@ class provider implements
         $contextlist->add_from_sql($sql, $params);
 
         $sql = "SELECT c.id
-                  FROM {block_deft_reponse} r
-                  JOIN {block_deft} ON t.id = r.task
-                  JOIN {context} c ON t.instance = c.instanceid
+                  FROM {context} c
+                  JOIN {block_deft} t ON t.instance = c.instanceid
+                  JOIN {block_deft_response} r ON t.id = r.task
                  WHERE c.contextlevel = :contextlevel
                    AND userid = :userid";
         $params = [
@@ -112,8 +113,8 @@ class provider implements
         $context = $userlist->get_context();
 
         $params = [
-            'contextid' => $context->id,
             'component' => 'block_deft',
+            'contextlevel' => CONTEXT_BLOCK,
         ];
 
         $sql = "SELECT userid as userid
@@ -125,7 +126,7 @@ class provider implements
 
         $sql = "SELECT r.userid
                   FROM {block_deft_reponse} r
-                  JOIN {block_deft} ON t.id = r.task
+                  JOIN {block_deft} t ON t.id = r.task
                   JOIN {context} c ON t.instance = c.instanceid
                  WHERE c.contextlevel = :contextlevel
                    AND c.id = :contextid";
@@ -150,7 +151,6 @@ class provider implements
         foreach ($contexts as $context) {
             if (
                 $context->contextlevel != CONTEXT_BLOCK
-                || $context->component != 'block_deft'
             ) {
                 continue;
             }
@@ -159,19 +159,18 @@ class provider implements
                 \core_comment\privacy\provider::export_comments(
                     $context,
                     'block_deft',
-                    'deft_comments',
+                    'task',
                     $task->get('id'),
                     []
                 );
                 if ($responses = $DB->get_records('block_deft_response', [
                     'task' => $task->get('id'),
                     'userid' => $user->id,
-                ], 'task', 'task, answer, timemodified')) {
+                ], 'task', 'task, response, timemodified')) {
                     foreach ($responses as $key => $response) {
                         $response->timemodified = \core_privacy\local\request\transform::datetime($response->timemodified);
-                        $responses[$key] = (array) $response;
+                        writer::with_context($context)->export_data([], $response);
                     }
-                    writer::with_context($context)->export_data([], $contextdata);
                 }
             }
         }
