@@ -66,7 +66,7 @@ class status_task extends edit_task {
         $mform->addElement('advcheckbox', 'showtitle', '', get_string('showtitle', 'block_deft'));
         $mform->setType('showtitle', PARAM_BOOL);
         $mform->setDefault('showtitle', get_config('block_deft', 'showtitle'));
-        $mform->disabledIf('showtitle', 'visible', false);
+        $mform->disabledIf('showtitle', 'visible', 0);
     }
 
     /**

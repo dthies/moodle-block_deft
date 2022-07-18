@@ -52,11 +52,11 @@ class status_choice extends status_task {
         $mform->addElement('advcheckbox', 'preventresponse', '', get_string('preventresponse', 'block_deft'));
         $mform->setType('preventresponse', PARAM_BOOL);
         $mform->setDefault('preventresponse', get_config('block_deft', 'addcomments'));
-        $mform->disabledIf('preventresponse', 'visible', false);
+        $mform->disabledIf('preventresponse', 'visible', 0);
 
         $mform->addElement('advcheckbox', 'showsummary', '', get_string('showsummary', 'block_deft'));
         $mform->setType('showsummary', PARAM_BOOL);
         $mform->setDefault('showsummary', get_config('block_deft', 'addcomments'));
-        $mform->disabledIf('showsummary', 'visible', false);
+        $mform->disabledIf('showsummary', 'visible', 0);
     }
 }

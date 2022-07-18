@@ -53,7 +53,7 @@ class status_text extends status_task {
         $mform->addElement('advcheckbox', 'showcomments', '', get_string('showcomments', 'block_deft'));
         $mform->setType('showcomments', PARAM_BOOL);
         $mform->setDefault('showcomments', get_config('block_deft', 'showcomments'));
-        $mform->disabledIf('showcomments', 'visible', false);
+        $mform->disabledIf('showcomments', 'visible', 0);
     }
 
     /**

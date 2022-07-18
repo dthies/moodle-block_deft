@@ -14,6 +14,9 @@ agreement in the future. The service is linked as an External Tool
 what is necessary to provide connection i.e IP number associated with
 block's context.
 
+The service will remain free for smaller sites, but sites with larger usage
+may be require a service agreement after 60 day to prevent usage caps.
+
 ## Installing via uploaded ZIP file ##
 
 1. Log in to your Moodle site as an admin and go to _Site administration >
