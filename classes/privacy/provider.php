@@ -54,6 +54,10 @@ class provider implements
      */
     public static function get_metadata(collection $collection) : collection {
 
+        $collection->add_external_location_link('lti_client', [
+            'context' => 'privacy:metadata:lti_client:context',
+        ], 'privacy:metadata:lti_client');
+
         $collection->add_database_table(
             'block_deft_response',
             [

@@ -67,3 +67,4 @@ $string['privacy:metadata:block_deft_response:task'] = 'The ID of the task';
 $string['privacy:metadata:block_deft_response:response'] = 'The text of the response that the user provided.';
 $string['privacy:metadata:block_deft_response:userid'] = 'The ID of the user answering this task';
 $string['privacy:metadata:block_deft_response:timemodified'] = 'The timestamp indicating when the choice was modified by the user';
+$string['privacy:metadata:lti_client:context'] = 'The Deft response block configures an external LTI connection to send messages that user information in a particular Moodle context may have been updated; however, no actual infomation is exported. The block loads a client that connects to the external site to recieve messages, but does not provide information other than establishing the connection.';
