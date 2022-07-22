@@ -53,7 +53,7 @@ class edit_choice extends edit_task {
         $mform = $this->_form;
         parent::definition();
 
-        $mform->addElement('text', 'question', get_string('configquestion', 'block_deft'));
+        $mform->addElement('textarea', 'question', get_string('configquestion', 'block_deft'));
         $mform->setType('question', PARAM_TEXT);
 
         $mform->addElement('advcheckbox', 'charttype', get_string('charttype', 'block_deft'));

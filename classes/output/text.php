@@ -91,8 +91,11 @@ class text implements renderable, templatable {
         }
 
         return [
-            'name' => $this->state->showtitle ? $this->config->name : '',
-            'content' => $this->config->content,
+            'name' => !empty($this->state->showtitle) ? $this->config->name : '',
+            'content' => format_text($this->config->content, FORMAT_MOODLE, [
+                'blanktarget' => true,
+                'para' => true,
+            ]),
             'comments' => !empty($this->comment) ? $this->comment->output(true) : null,
         ];
     }

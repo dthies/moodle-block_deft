@@ -30,9 +30,9 @@
 {{# visible }}
 <div>
     <h5>{{ name }}</h5>
-    <div>
-        <div>{{ question }}</div>
-        <div class="deft-choice-selector" data-id="{{id}}">
+    <div class="block_deft_choice">
+        <div class="deft-choice-prompt p-3">{{{ question }}}</div>
+        <div class="deft-choice-selector form-inline" data-id="{{id}}">
             {{{select}}}
         </div>
     </div>

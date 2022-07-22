@@ -41,6 +41,11 @@
                 <div class="container-fluid bg-success tasks">
                    {{> block_deft/tasks }}
                 </div>
+                <div>
+                {{# report }}
+                    {{> block_deft/report }}
+                {{/ report }}
+                </div>
             </div>
             {{^ blockpresent }}
             <div class="col-12 col-md-4 col-lg-3">
@@ -48,11 +53,6 @@
             </div>
             {{/ blockpresent }}
         </div>
-    </div>
-    <div>
-    {{# report }}
-        {{> block_deft/report }}
-    {{/ report }}
     </div>
 </div>
 {{# js }}

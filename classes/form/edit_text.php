@@ -52,8 +52,8 @@ class edit_text extends edit_task {
         $mform = $this->_form;
         parent::definition();
 
-        $mform->addElement('text', 'content', get_string('content', 'page'));
-        $mform->setType('content', PARAM_TEXT);
+        $mform->addElement('textarea', 'content', get_string('content', 'page'));
+        $mform->setType('content', PARAM_CLEANHTML);
 
         $mform->addElement('advcheckbox', 'addcomments', '', get_string('addcomments', 'block_deft'));
         $mform->setType('addcomments', PARAM_BOOL);

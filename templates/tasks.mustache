@@ -44,12 +44,12 @@
                     <input type="hidden" name="id" value="{{ id }}" />
                     <input type="hidden" name="type" value="{{ type }}" />
                     {{# canedit }}
-                    <button name="action" value="edit" class="icon fa fa-cog border-0"></button>
-                    <button name="action" value="delete" class="icon fa fa-trash border-0"></button>
-                    <button name="action" value="move" class="icon fa fa-arrows border-0"></button>
+                    <button name="action" value="edit" title="{{# str }} edit {{/ str }}" class="icon fa fa-cog border-0"></button>
+                    <button name="action" value="delete" title="{{# str }} delete {{/ str }}" class="icon fa fa-trash border-0"></button>
+                    <button name="action" value="move" title="{{# str }} move {{/ str }}" class="icon fa fa-arrows border-0"></button>
                     {{/ canedit }}
-                    {{# statedata.visible }}<button name="action" value="status" class="icon fa fa-eye border-0"></button>{{/ statedata.visible }}
-                    {{^ statedata.visible }}<button name="action" value="status" class="icon fa fa-eye-slash border-0"></button>{{/ statedata.visible }}
+                    {{# statedata.visible }}<button name="action" value="status" title="{{# str }} hide {{/ str }}" class="icon fa fa-eye border-0"></button>{{/ statedata.visible }}
+                    {{^ statedata.visible }}<button name="action" value="status" title="{{# str }} show {{/ str }}" class="icon fa fa-eye-slash border-0"></button>{{/ statedata.visible }}
                     </form>
                 </div>
             </div>

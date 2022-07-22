@@ -58,7 +58,7 @@ const handleSubmit = (e) => {
                 title = getString('changestatus', 'block_deft');
                 break;
             default:
-                title = getString('edittask', 'block_deft');
+                title = getString('edit' + type, 'block_deft');
                 break;
         }
         Log.debug('Create ' + type);

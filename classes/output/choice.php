@@ -84,8 +84,11 @@ class choice extends text implements renderable, templatable {
 
         return [
             'contextid' => $this->context->id,
-            'name' => $this->state->showtitle ? $this->config->name : '',
-            'question' => s($this->config->question),
+            'name' => !empty($this->state->showtitle) ? $this->config->name : '',
+            'question' => format_text($this->config->question, FORMAT_MOODLE, [
+                'blanktarget' => true,
+                'para' => true,
+            ]),
             'select' => $form->render(),
             'summary' => $output->render($summary),
             'visible' => true,

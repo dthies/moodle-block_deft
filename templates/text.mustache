@@ -28,6 +28,8 @@
 }}
 <div>
     <h5>{{ name }}</h5>
-    <div>{{ content }}</div>
+    {{# content }}
+    <div class="block_deft_text p-3">{{{ content }}}</div>
+    {{/ content }}
         {{{ comments }}}
 </div>
