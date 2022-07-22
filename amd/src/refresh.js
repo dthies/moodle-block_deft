@@ -8,6 +8,7 @@
  */
 
 import Fragment from "core/fragment";
+import Log from "core/log";
 import Notification from "core/notification";
 import Socket from "block_deft/socket";
 import Templates from "core/templates";
@@ -40,7 +41,8 @@ export default {
      * @param {int} throttle Throttle dely in ms
      */
     refresh: function(contextid, selector, throttle) {
-        let content = document.querySelector(selector).parentNode;
+        let content = document.querySelector(selector).parentNode,
+            data = {};
         if (!content)  {
             return;
         }
@@ -56,11 +58,20 @@ export default {
             return;
         }
 
+        document.querySelector(selector)
+            .querySelectorAll('a.comment-link[aria-expanded="true"]')
+            .forEach((opencomments) => {
+                data.opencomments = data.opencomments || [];
+                data.opencomments.push(opencomments.closest('[data-task]').getAttribute('data-task'));
+            });
+
+        Log.debug(data);
         Fragment.loadFragment(
             'block_deft',
             'content',
             contextid,
             {
+                jsondata: JSON.stringify(data)
             }
         ).done(
             Templates.replaceNodeContents.bind(Templates, content)

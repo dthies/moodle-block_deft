@@ -29,7 +29,10 @@
 <div>
     <h5>{{ name }}</h5>
     {{# content }}
-    <div class="block_deft_text p-3">{{{ content }}}</div>
+        <div class="block_deft_text p-3">{{{ content }}}
+    {{# comments }}
+        <div class="block_deft_comments p-2">{{{ comments }}}</div>
+    {{/ comments }}
+        </div>
     {{/ content }}
-        {{{ comments }}}
 </div>
