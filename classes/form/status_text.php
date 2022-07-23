@@ -54,6 +54,11 @@ class status_text extends status_task {
         $mform->setType('showcomments', PARAM_BOOL);
         $mform->setDefault('showcomments', get_config('block_deft', 'showcomments'));
         $mform->disabledIf('showcomments', 'visible', 0);
+
+        $mform->addElement('advcheckbox', 'expandcomments', '', get_string('expandcomments', 'block_deft'));
+        $mform->setType('expandcomments', PARAM_BOOL);
+        $mform->setDefault('expandcomments', get_config('block_deft', 'expandcomments'));
+        $mform->disabledIf('expandcomments', 'showcomments', 0);
     }
 
     /**
@@ -69,6 +74,7 @@ class status_text extends status_task {
 
         if (!$this->configdata['addcomments']) {
             $mform->removeElement('showcomments');
+            $mform->removeElement('expandcomments');
         }
     }
 }

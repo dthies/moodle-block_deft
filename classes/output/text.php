@@ -68,9 +68,9 @@ class text implements renderable, templatable {
         $args->itemid    = $task->id;
         $args->component = 'block_deft';
         $args->linktext  = get_string('comments');
-        $args->notoggle  = false;
+        $args->notoggle  = !empty($this->state->expandcomments);
         $args->showcount  = true;
-        $args->autostart = !empty($task->opencomments);
+        $args->autostart = !empty($this->state->expandcomments) || !empty($task->opencomments);
         $args->displaycancel = false;
         $this->comment = new comment($args);
         $this->comment->set_view_permission(true);
