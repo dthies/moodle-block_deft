@@ -27,12 +27,12 @@ defined('MOODLE_INTERNAL') || die();
 
 $capabilities = [
 
-    'block/deft:addmyinstance' => [
+    'block/deft:myaddinstance' => [
         'riskbitmask' => RISK_SPAM,
         'captype' => 'write',
         'contextlevel' => CONTEXT_SYSTEM,
         'archetypes' => [
-            'user' => CAP_ALLOW,
+            'manager' => CAP_ALLOW,
         ],
         'clonepermissionsfrom' => 'moodle/my:manageblocks',
     ],

@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
 /**
- * Form for modifying text task status
+ * Form for modifying comments task status
  *
  * @package     block_deft
  * @copyright   2022 Daniel Thies <dethies@gmail.com>
@@ -38,5 +38,26 @@ use block_deft\task;
  * @copyright   2022 Daniel Thies <dethies@gmail.com>
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class status_text extends status_task {
+class status_comments extends status_task {
+
+    /**
+     * Form definition
+     */
+    public function definition() {
+        global $CFG, $USER;
+
+        parent::definition();
+
+        $mform = $this->_form;
+
+        $mform->addElement('advcheckbox', 'showcomments', '', get_string('showcomments', 'block_deft'));
+        $mform->setType('showcomments', PARAM_BOOL);
+        $mform->setDefault('showcomments', get_config('block_deft', 'showcomments'));
+        $mform->disabledIf('showcomments', 'visible', 0);
+
+        $mform->addElement('advcheckbox', 'expandcomments', '', get_string('expandcomments', 'block_deft'));
+        $mform->setType('expandcomments', PARAM_BOOL);
+        $mform->setDefault('expandcomments', get_config('block_deft', 'expandcomments'));
+        $mform->disabledIf('expandcomments', 'showcomments', 0);
+    }
 }

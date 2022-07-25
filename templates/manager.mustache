@@ -34,8 +34,9 @@
                  {{^ blockpresent }} class="col-12 col-md-8 col-lg-9" {{/ blockpresent }}>
                 {{# canedit }}
                 <form onsubmit="return false;">
-                     <button name="addtask" value="text" class="btn btn-secondary">{{# str }} addtext, block_deft {{/ str }}</button>
                      <button name="addtask" value="choice" class="btn btn-secondary">{{# str }} addchoice, block_deft {{/ str }}</button>
+                     <button name="addtask" value="comments" class="btn btn-secondary">{{# str }} addcomments, block_deft {{/ str }}</button>
+                     <button name="addtask" value="text" class="btn btn-secondary">{{# str }} addtext, block_deft {{/ str }}</button>
                 </form>
                 {{/ canedit }}
                 <div class="container-fluid bg-success tasks">

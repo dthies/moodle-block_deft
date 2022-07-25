@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
 /**
- * Form for modifying text task status
+ * Edit form for comments task
  *
  * @package     block_deft
  * @copyright   2022 Daniel Thies <dethies@gmail.com>
@@ -32,11 +32,27 @@ use moodle_url;
 use block_deft\task;
 
 /**
- * Form for modifying text task status
+ * Edit form for comments task
  *
  * @package     block_deft
  * @copyright   2022 Daniel Thies <dethies@gmail.com>
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class status_text extends status_task {
+class edit_comments extends edit_task {
+
+    /** @var {string} $type Type of task */
+    protected $type = 'comments';
+
+    /**
+     * Form definition
+     */
+    public function definition() {
+        global $CFG, $USER;
+
+        $mform = $this->_form;
+        parent::definition();
+
+        $mform->addElement('text', 'label', get_string('label', 'block_deft'));
+        $mform->setType('label', PARAM_CLEANHTML);
+    }
 }

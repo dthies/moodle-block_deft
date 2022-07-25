@@ -172,8 +172,8 @@ function block_deft_output_fragment_content($args) {
         foreach ($data['tasks'] as $task) {
             if (in_array($task->id, $jsondata->opencomments)) {
                 $task->opencomments = 1;
-                $text = new \block_deft\output\text($context, $task);
-                $task->html = $OUTPUT->render($text);
+                $comments = new \block_deft\output\comments($context, $task);
+                $task->html = $OUTPUT->render($comments);
             }
         }
     }

@@ -15,19 +15,19 @@
     along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 }}
 {{!
-    @template block_deft/text
+    @template block_deft/comments
 
     This template renders the view for the text task
 
     Example context (json):
     {
         "name": "Welcome",
-        "content": "hello"
+        "comments": ""
     }
 }}
 <div>
     <h5>{{ name }}</h5>
-    {{# content }}
-        <div class="block_deft_text p-3">{{{ content }}}</div>
-    {{/ content }}
+        {{# comments }}
+        <div class="block_deft_comments p-2">{{{ comments }}}</div>
+        {{/ comments }}
 </div>

@@ -54,9 +54,5 @@ class edit_text extends edit_task {
 
         $mform->addElement('textarea', 'content', get_string('content', 'page'));
         $mform->setType('content', PARAM_CLEANHTML);
-
-        $mform->addElement('advcheckbox', 'addcomments', '', get_string('addcomments', 'block_deft'));
-        $mform->setType('addcomments', PARAM_BOOL);
-        $mform->setDefault('addcomments', get_config('block_deft', 'addcomments'));
     }
 }

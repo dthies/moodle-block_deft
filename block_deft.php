@@ -95,7 +95,9 @@ class block_deft extends block_base {
      */
     public function applicable_formats() {
         return array(
-            'all' => true,
+            'course' => true,
+            'mod' => true,
+            'site' => true,
         );
     }
 

@@ -25,6 +25,9 @@ namespace block_deft\output;
 
 defined('MOODLE_INTERNAL') || die();
 
+require_once($CFG->dirroot . '/comment/lib.php');
+
+use comment;
 use moodle_url;
 use renderable;
 use renderer_base;
@@ -41,7 +44,7 @@ require_once($CFG->libdir . '/completionlib.php');
  * @copyright 2022 Daniel Thies <dethies@gmail.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class text implements renderable, templatable {
+class comments implements renderable, templatable {
 
     /**
      * Constructor.
@@ -54,6 +57,21 @@ class text implements renderable, templatable {
         $this->task = $task;
         $this->config = json_decode($task->configdata);
         $this->state = json_decode($task->statedata);
+        $course = get_course($context->get_course_context()->instanceid);
+        $args = new stdClass();
+        $args->context   = $context;
+        $args->course    = $course;
+        $args->area      = 'task';
+        $args->itemid    = $task->id;
+        $args->component = 'block_deft';
+        $args->linktext  = empty($this->config->label) ? get_string('comments') : $this->config->label;
+        $args->notoggle  = !empty($this->state->expandcomments);
+        $args->showcount  = true;
+        $args->autostart = !empty($this->state->expandcomments) || !empty($task->opencomments);
+        $args->displaycancel = false;
+        $this->comment = new comment($args);
+        $this->comment->set_view_permission(true);
+        $this->comment->set_fullwidth();
     }
 
     /**
@@ -71,10 +89,7 @@ class text implements renderable, templatable {
 
         return [
             'name' => !empty($this->state->showtitle) ? $this->config->name : '',
-            'content' => format_text($this->config->content, FORMAT_MOODLE, [
-                'blanktarget' => true,
-                'para' => true,
-            ]),
+            'comments' => !empty($this->comment) ? $this->comment->output(true) : null,
         ];
     }
 }

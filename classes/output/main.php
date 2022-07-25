@@ -88,6 +88,10 @@ class main implements renderable, templatable {
                     $choice = new choice($this->context, $record);
                     $record->html = $output->render($choice);
                     break;
+                case 'comments':
+                    $comments = new comments($this->context, $record);
+                    $record->html = $output->render($comments);
+                    break;
                 case 'text':
                     $text = new text($this->context, $record);
                     $record->html = $output->render($text);
