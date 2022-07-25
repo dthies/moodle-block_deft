@@ -8,7 +8,6 @@
  */
 
 import Fragment from "core/fragment";
-import Log from "core/log";
 import Notification from "core/notification";
 import Socket from "block_deft/socket";
 import Templates from "core/templates";
@@ -42,16 +41,33 @@ export default {
      */
     refresh: function(contextid, selector, throttle) {
         let content = document.querySelector(selector).parentNode,
+            comments = false,
             data = {};
         if (!content)  {
             return;
         }
+        content.querySelectorAll('.block_deft_comments textarea').forEach((textarea) => {
+            if (
+                textarea.value != textarea.getAttribute('aria-label')
+                || !textarea.value
+            ) {
+                // User is writing a comment.
+                comments = true;
+            }
+        });
 
-        if (this.lastupdate + throttle > Date.now()) {
-            if (!this.throttled) {
+        if (
+            comments
+            || (this.lastupdate + throttle > Date.now())
+            || (document.activeElement.closest(selector) && document.activeElement.closest('select'))
+        ) {
+            if (
+                !this.throttled
+                || (this.lastupdate + throttle < Date.now())
+            ) {
                 setTimeout(() => {
                     this.refresh(contextid, selector, throttle);
-                }, this.lastupdate + throttle - Date.now());
+                }, Math.max(this.lastupdate + throttle - Date.now(), 40));
                 this.throttled = true;
             }
 
@@ -65,7 +81,6 @@ export default {
                 data.opencomments.push(opencomments.closest('[data-task]').getAttribute('data-task'));
             });
 
-        Log.debug(data);
         Fragment.loadFragment(
             'block_deft',
             'content',

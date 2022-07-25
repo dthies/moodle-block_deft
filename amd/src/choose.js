@@ -34,6 +34,7 @@ const handleChange = (e) => {
                 option: option
             }
         ).fail(Notification.exception);
+        document.activeElement.blur();
     }
 };
 
