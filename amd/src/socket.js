@@ -20,6 +20,7 @@ export default {
      *
      * @param {int} contextid Context id of block
      * @param {string} token Authentication token to connect service
+     * @returns {object}
      * @chainable
      */
     open: function(contextid, token) {
@@ -66,6 +67,7 @@ export default {
      * Subscribe listener
      *
      * @param {function} callback
+     * @returns {object}
      * @chainable
      */
     subscribe: function(callback) {

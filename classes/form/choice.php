@@ -144,8 +144,8 @@ class choice extends dynamic_form {
                 );
             }
             if (
-                ($statedata = $task->get_state())
-                && $statedata->preventresponse
+                !has_capability('block/deft:choose', $this->get_context_for_dynamic_submission()) ||
+                (($statedata = $task->get_state()) && $statedata->preventresponse)
             ) {
                 $mform->disabledIf('option', 'id', 'neq', '-1');
             }
