@@ -20,6 +20,7 @@ export default {
      *
      * @param {int} contextid Context id of block
      * @param {string} token Authentication token to connect service
+     * @chainable
      */
     open: function(contextid, token) {
         websocket.onopen = () => websocket.send(token);
@@ -65,9 +66,12 @@ export default {
      * Subscribe listener
      *
      * @param {function} callback
+     * @chainable
      */
     subscribe: function(callback) {
         websocket.addEventListener('message', callback);
         listeners.push(callback);
+
+        return this;
     }
 };

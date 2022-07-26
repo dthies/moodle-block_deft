@@ -29,16 +29,22 @@
 <div>
     {{^ configured }}
         <div class="registrationcontainer"></div>
+        {{# error }}
+        <p>{{# str }} configuremanually, block_deft {{/ str }}</p>
+        <p><a href="{{ returnurl }}">{{# str }} returntosettings, block_deft {{/ str }}</a></p>
+        {{/ error }}
     {{/ configured }}
     {{# configured }}
-        <p>The tool has already been configured.</p>
-        <p><a href="{{ returnurl }}">return to settings</a></p>
+        <p>{{# str }} toolconfigured, block_deft {{/ str }}</p>
+        <p><a href="{{ returnurl }}">{{# str }} returntosettings, block_deft {{/ str }}</a></p>
     {{/ configured }}
 </div>
 {{# js }}
     {{^ configured }}
+    {{^ error }}
     require(['block_deft/configure'], function(Configure) {
-        Configure.init("{{ registrationurl }}", "{{ returnurl }}");
+        Configure.init("{{ registrationurl }}", "{{ finishurl }}");
     });
+    {{/ error }}
     {{/ configured }}
 {{/ js }}

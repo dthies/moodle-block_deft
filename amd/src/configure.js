@@ -18,7 +18,6 @@ export default {
         document.querySelector('.registrationcontainer').innerHTML = '<iframe src="' +
             registrationurl + '" style="height: 400px; width: 400px;"></iframe>';
         window.addEventListener('message', () => {
-            alert('Registration complete');
             window.location.href = url;
         }, false);
     }

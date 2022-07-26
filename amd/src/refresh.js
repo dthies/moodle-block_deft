@@ -43,7 +43,7 @@ export default {
         let content = document.querySelector(selector).parentNode,
             comments = false,
             data = {};
-        if (!content)  {
+        if (!content) {
             return;
         }
         content.querySelectorAll('.block_deft_comments textarea').forEach((textarea) => {

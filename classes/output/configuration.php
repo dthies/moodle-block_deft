@@ -53,6 +53,9 @@ class configuration implements renderable, templatable {
         $url = new moodle_url('/admin/settings.php', [
             'section' => 'blocksettingdeft',
         ]);
+        $finishurl = new moodle_url('/blocks/deft/toolconfigure.php', [
+            'registration' => 'complete',
+        ]);
         if (!get_config('block_deft', 'enableupdating')) {
             return [
                 'disabled' => true,
@@ -82,8 +85,10 @@ class configuration implements renderable, templatable {
             'sesskey' => sesskey(),
         ]);
         return [
+            'error' => optional_param('registration', '', PARAM_ALPHA) == 'complete',
             'registrationurl' => $registrationurl->out(false),
             'returnurl' => $url->out(false),
+            'finishurl' => $finishurl->out(false),
         ];
     }
 }

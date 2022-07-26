@@ -25,6 +25,8 @@
 
 defined('MOODLE_INTERNAL') || die();
 
+$string['activate'] = 'Activate';
+$string['activatemessage'] = 'This will contact the server and deftly.us and obtain and registration url to configure an LTI connection. It will then a External tool configuration to you site. This will be used to authenticate messages sent to clients to update the block content.';
 $string['addchoice'] = 'Add choice';
 $string['addcomments'] = 'Add comments';
 $string['addtext'] = 'Add text';
@@ -34,6 +36,7 @@ $string['changestatus'] = 'Change status';
 $string['charttype'] = 'Display results in pie graph';
 $string['configquestion'] = 'Question';
 $string['configtitle'] = 'Deft response block title';
+$string['configuremanually'] = 'The automatic registration process has failed for some reason. The LTI tool must be configured manually. Contact the developers to report this and obtain the urls for manual configuration.';
 $string['confirmdelete'] = 'Confirm delete \'{$a}\'?';
 $string['connections'] = '# of connections';
 $string['cumulative'] = 'Cumulative';
@@ -66,11 +69,13 @@ $string['privacy:metadata:block_deft_response:userid'] = 'The ID of the user ans
 $string['privacy:metadata:block_deft_response:timemodified'] = 'The timestamp indicating when the choice was modified by the user';
 $string['privacy:metadata:lti_client:context'] = 'The Deft response block configures an external LTI connection to send messages that user information in a particular Moodle context may have been updated; however, no actual infomation is exported. The block loads a client that connects to the external site to recieve messages, but does not provide information other than establishing the connection.';
 $string['responses'] = 'Responses';
+$string['returntosettings'] = 'Return to Deft response block settings';
 $string['showcomments'] = 'Show comments';
 $string['showsummary'] = 'Show summary';
 $string['showtitle'] = 'Show title';
 $string['statusok'] = 'Successfully connected with service. Usage displayed below.';
 $string['taskname'] = 'Task name';
+$string['toolconfigured'] = 'The tool is configured now with deftly.us. The content of the Deft response block should update itself deftly when there are changes.';
 $string['throttle_desc'] = 'When updating content is enabled, this sets a minumum time between updates to the clients in milliseconds';
 $string['throttle'] = 'Throttle period';
 $string['visible'] = 'Visible';

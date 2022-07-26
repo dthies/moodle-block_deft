@@ -25,8 +25,25 @@
     }
 }}
 
-    <div class="container-fluid p-0">
-        <div>Please automatically activate service by clicking the button below</div>
-        <a class="btn btn-secondary" href="{{ url }}">Activate</a>
+<div id="activate_deft" class="container-fluid p-0">
+    <div>Please automatically activate service by clicking the button below</div>
+    <a class="btn btn-secondary" href="{{ url }}">Activate</a>
         
-    </div>
+</div>
+{{# js }}
+require(['jquery', 'core/modal_factory', 'core/modal_events', 'core/str'], function($, ModalFactory, ModalEvents, Str) {
+    var trigger = $('#activate_deft');
+    ModalFactory.create({
+        title: Str.get_string('activate', 'block_deft'),
+        type: ModalFactory.types.SAVE_CANCEL,
+        buttons: {save: Str.get_string('confirm')},
+        body: Str.get_string('activatemessage', 'block_deft'),
+    }, trigger)
+    .done(function(modal) {
+        modal.getRoot().on(ModalEvents.save, function(e) {
+            e.preventDefault();
+            window.location.href = '{{ url }}';
+        });
+    });
+});
+{{/ js }}
