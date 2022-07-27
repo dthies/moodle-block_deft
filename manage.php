@@ -45,9 +45,9 @@ if ($parentcontext->contextlevel == CONTEXT_MODULE) {
     require_login($course);
 }
 
-$managesharedfeeds = has_capability('block/rss_client:manageanyfeeds', $context);
-if (!$managesharedfeeds) {
-    require_capability('block/rss_client:manageownfeeds', $context);
+$managetasks = has_capability('block/deft:edit', $context);
+if (!$managetasks) {
+    require_capability('block/deft:manage', $context);
 }
 
 $urlparams = array('id' => $id);

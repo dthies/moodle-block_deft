@@ -142,6 +142,10 @@ class socket {
             'contextid' => $this->context->id,
         ]);
 
+        if (empty($response))  {
+            return null;
+        }
+
         $cache->set($this->context->id, $response);
 
         return $response->token;
