@@ -27,6 +27,7 @@ defined('MOODLE_INTERNAL') || die;
 
 require_once($CFG->dirroot.'/mod/lti/locallib.php');
 
+use context_system;
 use moodle_url;
 use renderable;
 use templatable;
@@ -67,6 +68,7 @@ class configuration implements renderable, templatable {
         if ($clientid = $DB->get_field_select('lti_types', 'clientid', "tooldomain = 'deftly.us'")) {
             return [
                 'configured' => true,
+                'contextid' => context_system::instance()->id,
                 'returnurl' => $url->out(false),
             ];
         }

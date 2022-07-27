@@ -142,7 +142,7 @@ class socket {
             'contextid' => $this->context->id,
         ]);
 
-        if (empty($response))  {
+        if (empty($response)) {
             return null;
         }
 
@@ -165,7 +165,10 @@ class socket {
      * Validate context and availabilty
      */
     protected function validate() {
-        if ($this->context->contextlevel != CONTEXT_BLOCK) {
+        if (
+            $this->context->contextlevel != CONTEXT_BLOCK
+            && $this->context->contextlevel != CONTEXT_SYSTEM
+        ) {
             throw new moodle_exception('invalidcontext');
         }
 

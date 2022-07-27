@@ -84,6 +84,7 @@ class admin_setting_deftoverview extends admin_setting {
 
         $return = "";
         $brtag = html_writer::empty_tag('br');
+        $url = new moodle_url("/blocks/deft/toolconfigure.php");
 
         $ltitype = $DB->get_record('lti_types', ['tooldomain' => 'deftly.us']);
         if (!get_config('block_deft', 'enableupdating')) {
@@ -105,7 +106,6 @@ class admin_setting_deftoverview extends admin_setting {
             ));
             $return .= $OUTPUT->render_from_template('block_deft/report', $response);
         } else {
-            $url = new moodle_url("/blocks/deft/toolconfigure.php");
             $return .= $OUTPUT->render_from_template('block_deft/activation', [
                 'url' => $url->out(true),
             ]);

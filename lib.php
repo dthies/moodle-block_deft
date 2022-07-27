@@ -182,6 +182,28 @@ function block_deft_output_fragment_content($args) {
 }
 
 /**
+ * Serve the comments as a fragment.
+ *
+ * @param array $args List of named arguments for the fragment loader.
+ * @return string
+ */
+function block_deft_output_fragment_test($args) {
+    global $CFG, $OUTPUT;
+
+    $context = $args['context'];
+
+    if (!is_siteadmin()) {
+        return null;
+    }
+
+    $socket = new socket($context);
+    $socket->dispatch();
+
+    return get_string('messagesent', 'block_deft');
+
+}
+
+/**
  * Callback to remove linked logins for deleted users.
  *
  * @param stdClass $user

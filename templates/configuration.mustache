@@ -41,10 +41,15 @@
 </div>
 {{# js }}
     {{^ configured }}
-    {{^ error }}
-    require(['block_deft/configure'], function(Configure) {
-        Configure.init("{{ registrationurl }}", "{{ finishurl }}");
-    });
-    {{/ error }}
+        {{^ error }}
+            require(['block_deft/configure'], function(Configure) {
+                Configure.init("{{ registrationurl }}", "{{ finishurl }}");
+            });
+        {{/ error }}
+    {{/ configured }}
+    {{# configured }}
+        require(['block_deft/test'], function(Test) {
+            Test.init("{{ contextid }}");
+        });
     {{/ configured }}
 {{/ js }}
