@@ -28,6 +28,14 @@
 }}
 
     <div class="container-fluid p-0">
+        {{^ enableupdating }}
+            <div class="text-danger bg-warning">{{# str }} enableservicemessage, block_deft {{/ str }}</div>
+            <a href="{{ url }}" class="text-info">{{# str }} returntosettings, block_deft {{/ str }}</a>
+        {{/ enableupdating }}
+        {{^ registered }}
+            <div class="text-danger bg-warning">{{# str }} notregistered, block_deft {{/ str }}</div>
+            <a href="{{ url }}" class="text-info">{{# str }} returntosettings, block_deft {{/ str }}</a>
+        {{/ registered }}
         <table class="table table-striped">
             <tr><td></td><td>{{# str }} connections, block_deft {{/ str}}</td></tr>
             <tr><td>{{# str }} current, block_deft {{/ str}}</td><td>{{ current }}</td></tr>

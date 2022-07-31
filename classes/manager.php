@@ -28,8 +28,10 @@ defined('MOODLE_INTERNAL') || die();
 
 use block_deft\output\main;
 use templatable;
+use moodle_url;
 use renderable;
 use renderer_base;
+use stdClass;
 
 require_once($CFG->dirroot . '/mod/lti/locallib.php');
 
@@ -51,13 +53,18 @@ class manager implements renderable, templatable {
      * @param context $context Context of block
      */
     public function __construct ($context) {
+        global $DB;
+
         $this->context = $context;
 
         if (is_siteadmin()) {
             $socket = new socket($context);
             $this->report = $socket->execute([
                 'action' => 'report',
-            ]);
+            ]) ?? new stdClass();
+            $this->report->enableupdating = get_config('block_deft', 'enableupdating');
+            $this->report->registered = !!$DB->get_field('lti_types', 'clientid', ['tooldomain' => 'deftly.us']);
+            $this->report->url = (new moodle_url('/admin/settings.php', ['section' => 'blocksettingdeft']))->out();
         }
     }
 

@@ -61,6 +61,7 @@ $string['maximum'] = 'Maximum';
 $string['messagereceived'] = 'Message received';
 $string['messagesent'] = 'Message sent';
 $string['overview'] = 'Overview';
+$string['notregistered'] = 'The service is not activated yet. That needs to be done in the Deft response block settings.';
 $string['pluginname'] = 'Deft response';
 $string['position'] = 'Position';
 $string['preventresponse'] = 'Prevent response';

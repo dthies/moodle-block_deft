@@ -48,6 +48,7 @@ export default {
                     }).fail(Notification.exception);
                 }, 500);
             },
-            fail: Notification.exception }]);
+            fail: Notification.exception
+        }]);
     }
 };

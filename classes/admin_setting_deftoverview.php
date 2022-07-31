@@ -23,6 +23,7 @@ use html_writer;
 use html_table;
 use lang_string;
 use moodle_url;
+use stdClass;
 
 require_once($CFG->dirroot . '/mod/lti/locallib.php');
 
@@ -103,7 +104,9 @@ class admin_setting_deftoverview extends admin_setting {
 
             $response = json_decode(file_get_contents(
                 $endpoint . '?' . $query
-            ));
+            )) ?? new stdClass();
+            $response->enableupdating = true;
+            $response->registered = !!$DB->get_field('lti_types', 'clientid', ['tooldomain' => 'deftly.us']);
             $return .= $OUTPUT->render_from_template('block_deft/report', $response);
         } else {
             $return .= $OUTPUT->render_from_template('block_deft/activation', [
