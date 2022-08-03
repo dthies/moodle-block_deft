@@ -37,9 +37,12 @@ class restore_deft_block_structure_step extends restore_structure_step {
     protected function define_structure() {
 
         $paths = array();
+        $userinfo = $this->get_setting_value('userinfo');
 
         $paths[] = new restore_path_element('task', '/block/tasks/task');
-        $paths[] = new restore_path_element('response', '/block/tasks/task/responses/response');
+        if ($userinfo) {
+            $paths[] = new restore_path_element('response', '/block/tasks/task/responses/response');
+        }
 
         return $paths;
     }

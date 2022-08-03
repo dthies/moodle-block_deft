@@ -86,6 +86,44 @@ class configuration implements renderable, templatable {
             'url' => json_decode($response),
             'sesskey' => sesskey(),
         ]);
+
+        if (optional_param('registration', '', PARAM_ALPHA) == 'complete') {
+            // Registration url failed. We need to complete manually.
+            $type = new stdClass();
+            $data = (object) [
+                'lti_typename' => 'Deftly',
+                'lti_ltiversion' => '1.3.0',
+                'lti_keytype' => 'JWK_KEYSET',
+                'lti_publickeyset' => 'https://deftly.us/enrol/lti/jwks.php',
+                'lti_toolurl' => 'https://deftly.us/enrol/lti/launch.php',
+                'lti_initiatelogin' => str_replace('register', 'login', json_decode($response)),
+                'lti_contentitem' => 1,
+                'lti_toolurl_ContentItemSelectionRequest' => 'https://deftly.us/enrol/lti/launch_deeplink.php',
+                'lti_organizationid_default' => 'SITEID',
+            ];
+            $type->state = LTI_TOOL_STATE_CONFIGURED;
+            lti_load_type_if_cartridge($data);
+            $id = lti_add_type($type, $data);
+
+            $clientid = $DB->get_field('lti_types', 'clientid', ['id' => $id]);
+            $requestparams = [
+                'action' => 'manual',
+                'contextid' => 0,
+                'clientid' => $clientid,
+                'deploymentid' => $id,
+            ];
+            $jwt = lti_sign_jwt($requestparams, $endpoint, 'none');
+            $requestparams = array_merge($requestparams, $jwt);
+            $query = html_entity_decode(http_build_query($requestparams));
+
+            $response = file_get_contents($endpoint . '?' . $query);
+
+            return [
+                'configured' => true,
+                'contextid' => context_system::instance()->id,
+                'returnurl' => $url->out(false),
+            ];
+        }
         return [
             'error' => optional_param('registration', '', PARAM_ALPHA) == 'complete',
             'registrationurl' => $registrationurl->out(false),

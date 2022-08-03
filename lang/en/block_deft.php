@@ -46,6 +46,7 @@ $string['deft:addinstance'] = 'Add instance';
 $string['deft:myaddinstance'] = 'Add instance to dashboard';
 $string['deft:edit'] = 'Edit tasks';
 $string['deft:manage'] = 'Manage tasks';
+$string['deft:choose'] = 'Make choice';
 $string['editchoice'] = 'Edit choice';
 $string['editcomments'] = 'Edit comments';
 $string['edittext'] = 'Edit text';
