@@ -109,7 +109,7 @@ function block_deft_output_fragment_choose($args) {
 
     $context = $args['context'];
     $id = $args['id'];
-    $option = $args['option'];
+    $option = (string) $args['option'];
 
     if ($context->contextlevel != CONTEXT_BLOCK) {
         return null;
@@ -118,6 +118,10 @@ function block_deft_output_fragment_choose($args) {
 
     $task = new task($id);
     $config = $task->get_config();
+    if (!empty($task->get_state()->preventresponse)) {
+        return null;
+    }
+
     $timenow = time();
     if ($option == '') {
         $DB->delete_records('block_deft_response', [

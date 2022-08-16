@@ -89,7 +89,10 @@ class comments implements renderable, templatable {
 
         return [
             'name' => !empty($this->state->showtitle) ? $this->config->name : '',
+            'count' => $this->comment->count(),
+            'label' => $this->config->label,
             'comments' => !empty($this->comment) ? $this->comment->output(true) : null,
+            'rawcomments' => !empty($this->comment) ? $this->comment->get_comments() : null,
         ];
     }
 }

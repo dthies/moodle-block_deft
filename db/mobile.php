@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
 /**
- * Plugin version and other meta-data are defined here.
+ * Mobie addon definition
  *
  * @package     block_deft
  * @copyright   2022 Daniel Thies <dethies@gmail.com>
@@ -24,11 +24,22 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-$plugin->component = 'block_deft';
-$plugin->release = '1.0 Beta';
-$plugin->version = 2022071714;
-$plugin->requires = 2021051700;
-$plugin->maturity = MATURITY_BETA;
-$plugin->dependencies = [
-    'mod_lti' => 2021051700,
+$addons = [
+    'block_deft' => [
+        'handlers' => [
+            'blockdeft' => [
+                'displaydata' => [
+                    'icon' => $CFG->wwwroot . '/blocks/deft/pix/icon.png',
+                    'class' => '',
+                    'type' => 'template',
+                ],
+
+                'delegate' => 'CoreBlockDelegate',
+                'method' => 'mobile_content_view',
+            ],
+        ],
+        'lang' => [ // Language strings that are used in all the handlers.
+            ['pluginname', 'block_deft'],
+        ],
+    ],
 ];

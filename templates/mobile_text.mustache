@@ -15,16 +15,19 @@
     along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 }}
 {{!
-    @template block_deft/summary
+    @template block_deft/mobile_text
 
-    This template renders the view of result summary for choice task
+    This template renders the view for the text task
 
     Example context (json):
     {
-       "chart": "<div>...</div>"
+        "name": "Welcome",
+        "content": "hello"
     }
 }}
 <div>
-      {{{ chart }}}
-{{json}}
+    <h5>{{ name }}</h5>
+    {{# content }}
+        <div class="block_deft_text p-3">{{{ content }}}</div>
+    {{/ content }}
 </div>

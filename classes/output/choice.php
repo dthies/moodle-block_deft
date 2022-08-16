@@ -81,15 +81,29 @@ class choice extends text implements renderable, templatable {
         $form->set_data_for_dynamic_submission();
 
         $summary = new summary($this->context, $this->task);
+        $options = [];
+        $response = $DB->get_record('block_deft_response', [
+            'task' => $this->task->id,
+            'userid' => $USER->id,
+        ]);
+        foreach ($this->config->option as $key => $option) {
+            $options[] = [
+                'key' => $key + 1,
+                'value' => $option,
+                'selected' => !$response ?: $response->response == $this->config->option[$key],
+            ];
+        }
 
         return [
             'contextid' => $this->context->id,
+            'disabled' => !empty($this->state->preventresponse),
             'name' => !empty($this->state->showtitle) ? $this->config->name : '',
             'question' => format_text($this->config->question, FORMAT_MOODLE, [
                 'blanktarget' => true,
                 'para' => true,
             ]),
             'select' => $form->render(),
+            'options' => $options,
             'summary' => $output->render($summary),
             'visible' => true,
         ];

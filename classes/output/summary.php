@@ -96,6 +96,7 @@ class summary extends text implements renderable, templatable {
 
         return [
             'chart' => $output->render($chart),
+            'results' => $this->results,
         ];
     }
 }

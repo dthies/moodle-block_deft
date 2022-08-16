@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Class containing data for deft choice block.
+ * Class containing data for deft response block.
  *
  * @package     block_deft
  * @copyright   2022 Daniel Thies <dethies@gmail.com>
@@ -87,14 +87,17 @@ class main implements renderable, templatable {
                 case 'choice':
                     $choice = new choice($this->context, $record);
                     $record->html = $output->render($choice);
+                    $record->choice = $choice->export_for_template($output);
                     break;
                 case 'comments':
                     $comments = new comments($this->context, $record);
                     $record->html = $output->render($comments);
+                    $record->comments = $comments->export_for_template($output);
                     break;
                 case 'text':
                     $text = new text($this->context, $record);
                     $record->html = $output->render($text);
+                    $record->text = $text->export_for_template($output);
                     break;
             }
             $tasklist[] = $record;
