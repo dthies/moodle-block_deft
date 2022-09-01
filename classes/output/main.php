@@ -86,18 +86,18 @@ class main implements renderable, templatable {
             switch ($task->get('type')) {
                 case 'choice':
                     $choice = new choice($this->context, $record);
-                    $record->html = $output->render($choice);
                     $record->choice = $choice->export_for_template($output);
+                    $record->html = $output->render_from_template('block_deft/choice', $record->choice);
                     break;
                 case 'comments':
                     $comments = new comments($this->context, $record);
-                    $record->html = $output->render($comments);
                     $record->comments = $comments->export_for_template($output);
+                    $record->html = $output->render_from_template('block_deft/comments', $record->comments);
                     break;
                 case 'text':
                     $text = new text($this->context, $record);
-                    $record->html = $output->render($text);
                     $record->text = $text->export_for_template($output);
+                    $record->html = $output->render_from_template('block_deft/text', $record->text);
                     break;
             }
             $tasklist[] = $record;
