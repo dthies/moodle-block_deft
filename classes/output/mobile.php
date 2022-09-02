@@ -32,7 +32,7 @@ require_once($CFG->dirroot . '/lib/blocklib.php');
 
 use block_deft\task;
 use cache;
-use comment;
+use block_deft\comment;
 use stdClass;
 
 /**

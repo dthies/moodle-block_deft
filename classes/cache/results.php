@@ -26,12 +26,9 @@ declare(strict_types=1);
 
 namespace block_deft\cache;
 
-defined('MOODLE_INTERNAL') || die();
-
-require_once($CFG->dirroot . '/mod/lti/locallib.php');
-
 use cache_definition;
 use cache_data_source;
+use block_deft\task;
 
 /**
  * Data source class for deft choice results
@@ -76,6 +73,21 @@ class results implements cache_data_source {
            GROUP BY response',
             ['task' => $taskid],
         );
+
+        $task = new task($taskid);
+
+        if ($task->get('type') == 'choice') {
+            $options = [];
+            $config = $task->get_config();
+            foreach ($config->option as $option) {
+                $options[$option] = $results[$option] ?? (object) [
+                    'response' => $option,
+                    'count' => 0,
+                ];
+            }
+            $results = $options + $results;
+            unset($results['']);
+        }
 
         return $results;
     }

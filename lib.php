@@ -52,7 +52,7 @@ function block_deft_comment_validate($commentparam) {
     }
     if (
         !$task = new task($commentparam->itemid)
-        || $task->get('type') != 'text'
+        || $task->get('type') != 'comments'
     ) {
         throw new comment_exception('invalidcommentitemid');
     }
@@ -91,7 +91,7 @@ function block_deft_comment_display($comments, $args) {
     }
     if (
         !$task = new task($args->itemid)
-        || $task->get('type') != 'text'
+        || $task->get('type') != 'comments'
     ) {
         throw new comment_exception('invalidcommentitemid');
     }

@@ -23,12 +23,8 @@
  */
 namespace block_deft\output;
 
-defined('MOODLE_INTERNAL') || die();
-
-require_once($CFG->dirroot . '/comment/lib.php');
-
 use cache;
-use comment;
+use block_deft\comment;
 use core\chart_bar;
 use core\chart_pie;
 use core\chart_series;

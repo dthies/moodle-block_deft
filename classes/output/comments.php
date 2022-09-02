@@ -23,20 +23,12 @@
  */
 namespace block_deft\output;
 
-defined('MOODLE_INTERNAL') || die();
-
-require_once($CFG->dirroot . '/comment/lib.php');
-
-use comment;
+use block_deft\comment;
 use moodle_url;
 use renderable;
 use renderer_base;
 use stdClass;
 use templatable;
-use core_course\external\course_summary_exporter;
-
-require_once($CFG->dirroot . '/course/lib.php');
-require_once($CFG->libdir . '/completionlib.php');
 
 /**
  * Class containing data for deft choice block.

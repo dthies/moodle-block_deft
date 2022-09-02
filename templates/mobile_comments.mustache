@@ -35,7 +35,7 @@
 }}
 <ion-list>
     <ion-item>
-        <ion-textarea 
+        <ion-textarea
             expand="block" title="label"
             showError="true"
             autoGrow="true"
@@ -60,15 +60,17 @@
     </ion-item>
     {{# rawcomments }}
     <ion-item-sliding>
-    <ion-item-options side="end">
-        <ion-item-option color="danger"
-            core-site-plugins-call-ws
-            name="core_comment_delete_comments"
-            [params]="{comments: [{{ id }}]}"
-        >
-            {{# str }} delete {{/ str }}
-        </ion-item-option>
-    </ion-item-options>
+    {{# delete }}
+        <ion-item-options side="end">
+            <ion-item-option color="danger"
+                core-site-plugins-call-ws
+                name="core_comment_delete_comments"
+                [params]="{comments: [{{ id }}]}"
+            >
+                {{# str }} delete {{/ str }}
+            </ion-item-option>
+        </ion-item-options>
+    {{/ delete }}
     <ion-item-options side="start">
         <ion-item-option color="info" expandable>
             <div>{{ time }}</div>
