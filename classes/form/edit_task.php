@@ -104,10 +104,10 @@ class edit_task extends dynamic_form {
                     'visible' => 0,
                     'statedata' => '{}',
                 ];
-                $task = new task(0, $record);
+                $task = $this->get_task(0, $record);
                 $task->create();
             } else {
-                $task = new task($data->id);
+                $task = $this->get_task($data->id);
                 unset($data->id);
                 $task->set('configdata', json_encode($data));
                 $task->update();
@@ -128,7 +128,7 @@ class edit_task extends dynamic_form {
 
         if (
             !empty((int) $this->_ajaxformdata['id'])
-            && $task = new task($this->_ajaxformdata['id'])
+            && $task = $this->get_task($this->_ajaxformdata['id'])
         ) {
             $configdata = (array) $task->get_config();
             $mform->setDefault('id', $task->get('id'));
@@ -162,15 +162,47 @@ class edit_task extends dynamic_form {
     protected function task_html(): array {
         global $OUTPUT;
 
-        $manager = new manager($this->get_context_for_dynamic_submission());
+        $manager = $this->get_manager($this->get_context_for_dynamic_submission());
         $data = $manager->export_for_template($OUTPUT);
 
         // Update block display.
-        $socket = new socket($this->get_context_for_dynamic_submission());
+        $socket = $this->get_socket($this->get_context_for_dynamic_submission());
         $socket->dispatch();
 
         return [
             'html' => $OUTPUT->render_from_template('block_deft/tasks', $data),
         ];
+    }
+
+    /**
+     * Get task
+     *
+     * @param int $id record id
+     * @param stdClass $record
+     * @return task
+     *
+     */
+    protected function get_task($id, $record = null) {
+        return new task($id, $record);
+    }
+
+    /**
+     * Get manager
+     *
+     * @param context $context context
+     * @return object
+     */
+    protected function get_manager($context) {
+        return new manager($context);
+    }
+
+    /**
+     * Get socket
+     *
+     * @param context $context context
+     * @return object
+     */
+    protected function get_socket($context) {
+        return new socket($context);
     }
 }

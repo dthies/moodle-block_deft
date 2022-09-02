@@ -69,11 +69,11 @@ class edit_move extends edit_task {
         }
 
         $instance = $this->get_context_for_dynamic_submission()->instanceid;
-        $tasks = task::get_records(
+        $tasks = $this->get_records(
             ['instance' => $instance],
             'sortorder'
         );
-        $task = new task($data->id);
+        $task = $this->get_task($data->id);
         $current = $task->get('sortorder');
         if ($current == $data->position) {
             return '';
@@ -102,11 +102,22 @@ class edit_move extends edit_task {
 
         $id = $mform->getElementValue('id');
         $instance = $this->get_context_for_dynamic_submission()->instanceid;
-        $tasks = task::get_records(['instance' => $instance], 'sortorder');
+        $tasks = $this->get_records(['instance' => $instance], 'sortorder');
         foreach ($tasks as $task) {
             $options[] = $task->get_config()->name;
         }
         $mform->removeElement('position');
         $mform->addElement('select', 'position', get_string('position', 'block_deft'), $options);
+    }
+
+    /**
+     * Get task records
+     *
+     * @param array $params
+     * @param string $sort
+     * @return array task list
+     */
+    protected function get_records(array $params, string $sort = ''): array {
+        return task::get_records($params, $sort);
     }
 }

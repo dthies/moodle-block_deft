@@ -66,8 +66,7 @@ class edit_delete extends edit_task {
 
         if ($data = $this->get_data()) {
             if (!empty($data->id)) {
-                $DB->delete_records('block_deft_response', ['task' => $data->id]);
-                $task = new task($data->id);
+                $task = $this->get_task($data->id);
                 $task->delete();
                 $tasks = task::get_records(['instance' => $this->get_context_for_dynamic_submission()->instanceid]);
                 foreach (array_values($tasks) as $sortorder => $task) {
@@ -93,7 +92,7 @@ class edit_delete extends edit_task {
         $mform = $this->_form;
 
         $id = $mform->getElementValue('id');
-        $task = new task($id);
+        $task = $this->get_task($id);
         $mform->addElement('html', get_string('confirmdelete', 'block_deft', $task->get_config()->name));
     }
 }

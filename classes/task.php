@@ -23,8 +23,9 @@
  */
 namespace block_deft;
 
+use cache;
 use core\persistent;
-use core\comment;
+use comment;
 use context_block;
 
 /**
@@ -87,14 +88,28 @@ class task extends persistent {
     }
 
     /**
-     * Delete user responses for the task
-     *
+     * Clear cache on create
      */
-    public function pre_delete() {
+    public function before_create() {
+        $this->clear_cache();
+    }
+
+    /**
+     * Clear cache on update
+     */
+    public function before_update() {
+        $this->clear_cache();
+    }
+
+    /**
+     * Delete user responses for the task
+     */
+    public function before_delete() {
         global $DB;
 
         $id = $this->get('id');
         $contect = context_block::instance($this->get('instance'));
+        $this->clear_cache();
 
         $DB->delete_records('block_deft_response', ['task' => $id]);
 
@@ -102,5 +117,13 @@ class task extends persistent {
             'contextid' => $context->id,
             'itemid' => $id,
         ]);
+    }
+
+    /**
+     * Clear cache when task data changed
+     */
+    public function clear_cache() {
+        $cache = cache::make('block_deft', 'tasks');
+        $cache->delete($this->get('instance'));
     }
 }

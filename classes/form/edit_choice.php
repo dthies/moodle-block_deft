@@ -71,7 +71,7 @@ class edit_choice extends edit_task {
 
         if (
             !empty((int) $this->_ajaxformdata['id'])
-            && $task = new task($this->_ajaxformdata['id'])
+            && $task = $this->get_task($this->_ajaxformdata['id'])
         ) {
             $configdata = (array) $task->get_config();
             $mform->setDefault('id', $task->get('id'));

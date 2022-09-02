@@ -32,6 +32,7 @@ $string['addcomments'] = 'Add comments';
 $string['addtext'] = 'Add text';
 $string['authorizationreceived'] = 'Authorization received';
 $string['cachedef_results'] = 'Deft choice results';
+$string['cachedef_tasks'] = 'Deft tasks';
 $string['cachedef_tokens'] = 'Deft service auth tokens';
 $string['changestatus'] = 'Change status';
 $string['charttype'] = 'Display results in pie graph';

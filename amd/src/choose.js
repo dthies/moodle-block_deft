@@ -22,11 +22,14 @@ const handleChange = (e) => {
     if (form) {
         let formdata = new FormData(form),
             id = formdata.get('id'),
+            component = form.closest('[data-component]')
+                && form.closest('[data-component]').getAttribute('data-component')
+                || 'block_deft',
             option = formdata.get('option');
         e.stopPropagation();
         e.preventDefault();
         Fragment.loadFragment(
-            'block_deft',
+            component,
             'choose',
             contextid,
             {

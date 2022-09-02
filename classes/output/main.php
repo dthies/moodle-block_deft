@@ -76,12 +76,12 @@ class main implements renderable, templatable {
             return ['option' => $option];
         }, array_filter($this->config->option ?? []));
 
-        $tasks = task::get_records(['instance' => $this->context->instanceid], 'sortorder');
+        $cache = cache::make('block_deft', 'tasks');
+        $tasks = $cache->get($this->context->instanceid);
 
         $tasklist = [];
-        foreach ($tasks as $task) {
-            $record = $task->to_record();
-            switch ($task->get('type')) {
+        foreach ($tasks as $record) {
+            switch ($record->type) {
                 case 'choice':
                     $choice = new choice($this->context, $record);
                     $record->choice = $choice->export_for_template($output);

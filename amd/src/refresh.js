@@ -42,6 +42,9 @@ export default {
     refresh: function(contextid, selector, throttle) {
         let content = document.querySelector(selector).parentNode,
             comments = false,
+            component = content.closest('[data-component]')
+                && content.closest('[data-component]').getAttribute('data-component')
+                || 'block_deft',
             data = {};
         if (!content) {
             return;
@@ -82,7 +85,7 @@ export default {
             });
 
         Fragment.loadFragment(
-            'block_deft',
+            component,
             'content',
             contextid,
             {

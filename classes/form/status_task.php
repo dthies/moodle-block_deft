@@ -30,6 +30,8 @@ use core_form\dynamic_form;
 use moodle_exception;
 use moodle_url;
 use block_deft\task;
+use block_deft\manager;
+use block_deft\socket;
 
 /**
  * Form base for modifying task status
@@ -89,7 +91,7 @@ class status_task extends edit_task {
             unset($data->contextid);
             $instance = $this->get_context_for_dynamic_submission()->instanceid;
             if (!empty($data->id)) {
-                $task = new task($data->id);
+                $task = $this->get_task($data->id);
                 unset($data->id);
                 $task->set('statedata', json_encode($data));
                 $task->update();
@@ -110,7 +112,7 @@ class status_task extends edit_task {
 
         if (
             !empty((int) $this->_ajaxformdata['id'])
-            && $task = new task($this->_ajaxformdata['id'])
+            && $task = $this->get_task($this->_ajaxformdata['id'])
         ) {
             $this->configdata = (array) $task->get_config();
             $this->statedata = (array) $task->get_state();
@@ -127,5 +129,37 @@ class status_task extends edit_task {
                 'visible'
             );
         }
+    }
+
+    /**
+     * Get task
+     *
+     * @param int $id record id
+     * @param stdClass $record
+     * @return task
+     *
+     */
+    protected function get_task($id, $record = null) {
+        return new task($id, $record);
+    }
+
+    /**
+     * Get manager
+     *
+     * @param context $context context
+     * @return object
+     */
+    protected function get_manager($context) {
+        return new manager($context);
+    }
+
+    /**
+     * Get socket
+     *
+     * @param context $context context
+     * @return object
+     */
+    protected function get_socket($context) {
+        return new socket($context);
     }
 }

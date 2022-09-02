@@ -38,6 +38,9 @@ const submitForm = (e) => {
 const handleSubmit = (e) => {
     if (e.target.matches('form')) {
         let formdata = new FormData(e.target),
+            component = e.target.closest('[data-component]')
+                && e.target.closest('[data-component]').getAttribute('data-component')
+                || 'block_deft',
             id = formdata.get('id'),
             type = formdata.get('type') || e.submitter.value,
             title,
@@ -63,7 +66,7 @@ const handleSubmit = (e) => {
         }
         Log.debug('Create ' + type);
         const modalForm = new ModalForm({
-            formClass: "block_deft\\form\\" + (action === 'status' ? "status_" : "edit_") + type,
+            formClass: component + "\\form\\" + (action === 'status' ? "status_" : "edit_") + type,
             args: {
                 contextid: contextid,
                 id: id
