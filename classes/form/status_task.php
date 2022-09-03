@@ -24,6 +24,7 @@
 
 namespace block_deft\form;
 
+use cache;
 use context;
 use context_user;
 use core_form\dynamic_form;
@@ -140,7 +141,16 @@ class status_task extends edit_task {
      *
      */
     protected function get_task($id, $record = null) {
-        return new task($id, $record);
+        if (empty($id)) {
+            return new task($id, $record);
+        }
+
+        $cache = cache::make('block_deft', 'tasks');
+        $tasks = $cache->get($this->get_context_for_dynamic_submission()->instanceid);
+        $task = new task();
+        $task->from_record($tasks[$id]);
+
+        return $task;
     }
 
     /**

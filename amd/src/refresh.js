@@ -8,7 +8,7 @@
  */
 
 import Fragment from "core/fragment";
-import Notification from "core/notification";
+import Log from "core/log";
 import Socket from "block_deft/socket";
 import Templates from "core/templates";
 
@@ -93,7 +93,7 @@ export default {
             }
         ).done(
             Templates.replaceNodeContents.bind(Templates, content)
-        ).fail(Notification.exception);
+        ).catch(Log.debug);
 
         this.throttled = false;
         this.lastupdate = Date.now();

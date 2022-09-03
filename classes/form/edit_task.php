@@ -25,6 +25,7 @@
 namespace block_deft\form;
 
 use block_deft\socket;
+use cache;
 
 defined('MOODLE_INTERNAL') || die();
 
@@ -183,7 +184,16 @@ class edit_task extends dynamic_form {
      *
      */
     protected function get_task($id, $record = null) {
-        return new task($id, $record);
+        if (empty($id)) {
+            return new task($id, $record);
+        }
+
+        $cache = cache::make('block_deft', 'tasks');
+        $tasks = $cache->get($this->get_context_for_dynamic_submission()->instanceid);
+        $task = new task();
+        $task->from_record($tasks[$id]);
+
+        return $task;
     }
 
     /**

@@ -108,7 +108,7 @@ class task extends persistent {
         global $DB;
 
         $id = $this->get('id');
-        $contect = context_block::instance($this->get('instance'));
+        $context = context_block::instance($this->get('instance'));
         $this->clear_cache();
 
         $DB->delete_records('block_deft_response', ['task' => $id]);

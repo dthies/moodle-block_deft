@@ -50,9 +50,11 @@ function block_deft_comment_validate($commentparam) {
     if ($commentparam->commentarea != 'task') {
         throw new comment_exception('invalidcommentarea');
     }
+    $cache = cache::make('block_deft', $tasks);
     if (
-        !$task = new task($commentparam->itemid)
-        || $task->get('type') != 'comments'
+        (!$tasks = $cache->get($commentparam->context->istanceid))
+        (!$task = tasks[$commentparam->itemid])
+        || $task->type != 'comments'
     ) {
         throw new comment_exception('invalidcommentitemid');
     }
@@ -89,9 +91,11 @@ function block_deft_comment_display($comments, $args) {
     if ($args->commentarea != 'task') {
         throw new comment_exception('invalidcommentarea');
     }
+    $cache = cache::make('block_deft', $tasks);
     if (
-        !$task = new task($args->itemid)
-        || $task->get('type') != 'comments'
+        (!$tasks = $cache->get($commentparam->context->istanceid))
+        (!$task = $tasks[$commentparam->itemid])
+        || $task->type != 'comments'
     ) {
         throw new comment_exception('invalidcommentitemid');
     }
@@ -116,7 +120,10 @@ function block_deft_output_fragment_choose($args) {
     }
     require_capability('block/deft:choose', $context);
 
-    $task = new task($id);
+    $cache = cache::make('block_deft', 'tasks');
+    $tasks = $cache->get($context->instanceid);
+    $task = new task();
+    $task->from_record($tasks[$id]);
     $config = $task->get_config();
     if (!empty($task->get_state()->preventresponse)) {
         return null;

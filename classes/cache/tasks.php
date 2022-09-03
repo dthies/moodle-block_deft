@@ -69,7 +69,7 @@ class tasks implements cache_data_source {
 
         $tasklist = [];
         foreach ($tasks as $task) {
-            $tasklist[] = $task->to_record();
+            $tasklist[$task->get('id')] = $task->to_record();
         }
 
         return $tasklist;

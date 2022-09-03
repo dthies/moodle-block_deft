@@ -47,7 +47,7 @@ class comment extends \comment {
      * @param  str $sortdirection sort direction, ASC or DESC
      * @return array
      */
-    public function xget_comments($page = '', $sortdirection = 'DESC') {
+    public function get_comments($page = '', $sortdirection = 'DESC') {
         $comments = parent::get_comments();
         foreach ($comments as $c) {
             $c->strftimeformat = get_string('strftimerecent', 'langconfig');

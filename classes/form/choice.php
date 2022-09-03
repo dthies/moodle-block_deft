@@ -32,6 +32,7 @@ require_once($CFG->dirroot . '/blocks/deft/lib.php');
 
 use block_deft\manager;
 use block_deft\task;
+use cache;
 use context;
 use context_user;
 use core_form\dynamic_form;
@@ -122,11 +123,16 @@ class choice extends dynamic_form {
 
         $mform = $this->_form;
 
+        $cache = cache::make('block_deft', 'tasks');
+        $tasks = $cache->get($this->get_context_for_dynamic_submission()->instanceid);
         if (
             !empty((int) $this->_ajaxformdata['id'])
-            && $task = new task($this->_ajaxformdata['id'])
+            && key_exists($this->_ajaxformdata['id'], $tasks)
         ) {
+            $task = new task();
+            $task->from_record($tasks[$this->_ajaxformdata['id']]);
             $configdata = (array) $task->get_config();
+
             $mform->setDefault('id', $task->get('id'));
             $mform->setDefault('contextid', $this->get_context_for_dynamic_submission()->id);
             foreach ($configdata as $field => $value) {

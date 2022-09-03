@@ -8,7 +8,7 @@
  */
 
 import Fragment from 'core/fragment';
-import Notification from 'core/notification';
+import Log from 'core/log';
 
 var contextid;
 
@@ -36,7 +36,7 @@ const handleChange = (e) => {
                 id: id,
                 option: option
             }
-        ).fail(Notification.exception);
+        ).catch(Log.debug);
         document.activeElement.blur();
     }
 };
