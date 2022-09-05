@@ -33,7 +33,14 @@
     <div class="block_deft_choice">
         <div class="deft-choice-prompt p-3">{{{ question }}}</div>
         <div class="deft-choice-selector form-inline" data-id="{{id}}">
-            {{{select}}}
+            <form>
+                <input type="hidden" name="id" value="{{ id }}"></input>
+                <select name="option" {{# disabled }} disabled {{/ disabled }}>
+                    {{# options }}
+                        <option value="{{ key }}" {{# selected}} selected {{/ selected }}>{{ value }}</option>
+                    {{/ options }}
+                </select>
+            </form>
         </div>
     </div>
     {{{ summary }}}

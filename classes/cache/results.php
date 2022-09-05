@@ -59,12 +59,20 @@ class results implements cache_data_source {
     /**
      * Loads the data for the key provided ready formatted for caching.
      *
-     * @param string|int $taskid The key to load.
+     * @param string|int $key The key to load.
      * @return mixed What ever data should be returned, or false if it can't be loaded.
      * @throws \coding_exception
      */
-    public function load_for_cache($taskid) {
+    public function load_for_cache($key) {
         global $DB;
+
+        $ids = explode('x', $key);
+        $taskid = array_shift($ids);
+        $userid = reset($ids);
+
+        if (!empty($userid)) {
+            return $DB->get_field('block_deft_response', 'response', ['task' => $taskid, 'userid' => $userid]);
+        }
 
         $results = $DB->get_records_sql(
             'SELECT response, COUNT(response) as count

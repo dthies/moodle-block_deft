@@ -32,7 +32,6 @@ use renderable;
 use renderer_base;
 use stdClass;
 use templatable;
-use block_deft\socket;
 use block_deft\task;
 
 require_once($CFG->dirroot . '/course/lib.php');
@@ -44,19 +43,15 @@ require_once($CFG->libdir . '/completionlib.php');
  * @copyright 2022 Daniel Thies <dethies@gmail.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class main implements renderable, templatable {
+class view implements renderable, templatable {
 
     /**
      * Constructor.
      *
      * @param int $context The context of the block.
-     * @param object $config block configuration
      */
-    public function __construct($context, $config) {
+    public function __construct($context) {
         $this->context = $context;
-        $this->config = $config;
-        $this->socket = new socket($context);
-        $this->view = new view($context);
     }
 
     /**
@@ -68,15 +63,35 @@ class main implements renderable, templatable {
     public function export_for_template(renderer_base $output) {
         global $DB, $USER;
 
-        comment::init();
+        $cache = cache::make('block_deft', 'tasks');
+        $tasks = $cache->get($this->context->instanceid);
 
-        $manageurl = new moodle_url('/blocks/deft/manage.php', ['id' => $this->context->instanceid]);
+        $tasklist = [];
+        foreach ($tasks as $record) {
+            switch ($record->type) {
+                case 'choice':
+                    $choice = new choice($this->context, $record);
+                    $record->choice = $choice->export_for_template($output);
+                    $record->html = $output->render_from_template('block_deft/choice', $record->choice);
+                    break;
+                case 'comments':
+                    $comments = new comments($this->context, $record);
+                    $record->comments = $comments->export_for_template($output);
+                    $record->html = $output->render_from_template('block_deft/comments', $record->comments);
+                    break;
+                case 'text':
+                    $text = new text($this->context, $record);
+                    $record->text = $text->export_for_template($output);
+                    $record->html = $output->render_from_template('block_deft/text', $record->text);
+                    break;
+            }
+            $tasklist[] = $record;
+        }
 
-        return $this->view->export_for_template($output) + [
-            'canuse' => has_capability('block/deft:manage', $this->context),
-            'manageurl' => $manageurl->out(true),
-            'throttle' => get_config('block_deft', 'throttle'),
-            'token' => $this->socket->get_token(),
+        return [
+            'contextid' => $this->context->id,
+            'uniqid' => uniqid(),
+            'tasks' => $tasklist,
         ];
     }
 }

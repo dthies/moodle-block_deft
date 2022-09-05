@@ -23,17 +23,11 @@
  */
 namespace block_deft\output;
 
-defined('MOODLE_INTERNAL') || die();
-
-use moodle_url;
+use cache;
 use renderable;
 use renderer_base;
 use stdClass;
 use templatable;
-use core_course\external\course_summary_exporter;
-
-require_once($CFG->dirroot . '/course/lib.php');
-require_once($CFG->libdir . '/completionlib.php');
 
 /**
  * Class containing data for deft choice block.
@@ -69,37 +63,27 @@ class choice extends text implements renderable, templatable {
             return '';
         }
 
-        $config = get_config('block_deft');
-
-        $form = new \block_deft\form\choice(null, null, 'post', '', ['onsubmit' => 'return false;'], true, [
-            'id' => $this->task->id,
-            'contextid' => $this->context->id,
-        ]);
-        $form->set_data_for_dynamic_submission();
-
         $summary = new summary($this->context, $this->task);
+        $cache = cache::make('block_deft', 'results');
+        $response = $cache->get($this->task->id . 'x' . $USER->id);
         $options = [];
-        $response = $DB->get_record('block_deft_response', [
-            'task' => $this->task->id,
-            'userid' => $USER->id,
-        ]);
         foreach ($this->config->option as $key => $option) {
             $options[] = [
-                'key' => $key + 1,
+                'key' => $key,
                 'value' => $option,
-                'selected' => !$response ?: $response->response == $this->config->option[$key],
+                'selected' => $response == $option,
             ];
         }
 
         return [
             'contextid' => $this->context->id,
             'disabled' => !empty($this->state->preventresponse),
+            'id' => $this->task->id,
             'name' => !empty($this->state->showtitle) ? $this->config->name : '',
             'question' => format_text($this->config->question, FORMAT_MOODLE, [
                 'blanktarget' => true,
                 'para' => true,
             ]),
-            'select' => $form->render(),
             'options' => $options,
             'summary' => $output->render($summary),
             'visible' => true,

@@ -27,7 +27,7 @@ defined('MOODLE_INTERNAL') || die();
 require_once($CFG->dirroot . '/comment/lib.php');
 require_once($CFG->dirroot . '/mod/lti/locallib.php');
 
-use block_deft\output\main;
+use block_deft\output\view;
 use block_deft\socket;
 use block_deft\task;
 
@@ -50,10 +50,10 @@ function block_deft_comment_validate($commentparam) {
     if ($commentparam->commentarea != 'task') {
         throw new comment_exception('invalidcommentarea');
     }
-    $cache = cache::make('block_deft', $tasks);
+    $cache = cache::make('block_deft', 'tasks');
     if (
-        (!$tasks = $cache->get($commentparam->context->istanceid))
-        (!$task = tasks[$commentparam->itemid])
+        (!$tasks = $cache->get($commentparam->context->instanceid))
+        || (!$task = $tasks[$commentparam->itemid])
         || $task->type != 'comments'
     ) {
         throw new comment_exception('invalidcommentitemid');
@@ -91,10 +91,10 @@ function block_deft_comment_display($comments, $args) {
     if ($args->commentarea != 'task') {
         throw new comment_exception('invalidcommentarea');
     }
-    $cache = cache::make('block_deft', $tasks);
+    $cache = cache::make('block_deft', 'tasks');
     if (
-        (!$tasks = $cache->get($commentparam->context->istanceid))
-        (!$task = $tasks[$commentparam->itemid])
+        (!$tasks = $cache->get($args->context->instanceid))
+        || (!$task = $tasks[$args->itemid])
         || $task->type != 'comments'
     ) {
         throw new comment_exception('invalidcommentitemid');
@@ -130,7 +130,10 @@ function block_deft_output_fragment_choose($args) {
     }
 
     $timenow = time();
-    if ($option == '') {
+    $cache = cache::make('block_deft', 'results');
+    if ($cache->get($id . 'x' . $USER->id) === $config->option[$option]) {
+        return '';
+    } else if ($option == '') {
         $DB->delete_records('block_deft_response', [
             'task' => $id,
             'userid' => $USER->id,
@@ -150,9 +153,11 @@ function block_deft_output_fragment_choose($args) {
     }
 
     // Clear the results cache.
-    $cache = cache::make('block_deft', 'results');
     $cache->delete($id);
+    $cache->delete($id . 'x' . $USER->id);
 
+    $cache->get($id);
+    $cache->get($id . 'x' . $USER->id);
     $socket = new socket($context);
     $socket->dispatch();
 
@@ -174,9 +179,9 @@ function block_deft_output_fragment_content($args) {
         return null;
     }
 
-    $instance = block_instance_by_id($context->instanceid);
+    $view = new view($context);
 
-    $data = $instance->export_for_template($OUTPUT);
+    $data = $view->export_for_template($OUTPUT);
 
     $jsondata = json_decode($args['jsondata']);
     if (!empty($jsondata->opencomments)) {
