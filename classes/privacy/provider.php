@@ -171,7 +171,7 @@ class provider implements
                     'task' => $task->get('id'),
                     'userid' => $user->id,
                 ], 'task', 'task, response, timemodified')) {
-                    foreach ($responses as $key => $response) {
+                    foreach ($responses as $response) {
                         $response->timemodified = \core_privacy\local\request\transform::datetime($response->timemodified);
                         writer::with_context($context)->export_data([], $response);
                     }

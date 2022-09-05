@@ -87,8 +87,7 @@ class restore_deft_block_structure_step extends restore_structure_step {
         $data = (object) $data;
         $data->userid = $this->get_mappingid('user', $data->userid);
         $data->task = $this->get_mappingid('task', $data->task);
-        $oldid = $data->id;
-        $taskid = $DB->insert_record('block_deft_response', $data);
+        $DB->insert_record('block_deft_response', $data);
     }
 
 

@@ -52,8 +52,6 @@ class status_task extends edit_task {
      * Form definition
      */
     public function definition() {
-        global $CFG, $USER;
-
         $mform = $this->_form;
 
         $mform->addElement('hidden', 'id');
@@ -90,14 +88,12 @@ class status_task extends edit_task {
     public function process_dynamic_submission() {
         if ($data = $this->get_data()) {
             unset($data->contextid);
-            $instance = $this->get_context_for_dynamic_submission()->instanceid;
             if (!empty($data->id)) {
                 $task = $this->get_task($data->id);
                 unset($data->id);
                 $task->set('statedata', json_encode($data));
                 $task->update();
             }
-
         }
         return $this->task_html();
     }

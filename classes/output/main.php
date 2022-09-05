@@ -66,8 +66,6 @@ class main implements renderable, templatable {
      * @return array
      */
     public function export_for_template(renderer_base $output) {
-        global $DB, $USER;
-
         comment::init();
 
         $manageurl = new moodle_url('/blocks/deft/manage.php', ['id' => $this->context->instanceid]);

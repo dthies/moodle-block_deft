@@ -15,6 +15,7 @@
 // along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
 use block_deft\output\main;
+use block_deft\task;
 
 /**
  * Block Deft is defined here.
@@ -109,18 +110,8 @@ class block_deft extends block_base {
      * @return \stdClass|array
      */
     public function export_for_template($output) {
-        $renderer = $this->page->get_renderer('block_deft');
         $main = new main($this->context, $this->config);
-        return $main->export_for_template($renderer);
-    }
-
-    /**
-     * Copy any block-specific data when copying to a new block instance.
-     * @param int $fromid the id number of the block instance to copy from
-     * @return boolean
-     */
-    public function instance_copy($fromid) {
-        return true;
+        return $main->export_for_template($output);
     }
 
     /**
@@ -128,21 +119,9 @@ class block_deft extends block_base {
      * @return boolean
      */
     public function instance_delete() {
-        global $DB;
-
-        $DB->delete_records_select(
-            'block_deft_response',
-            'task IN (SELECT id FROM {block_deft} WHERE instance = :instance)',
-            ['instance' => $this->context->instanceid]
-        );
-        $DB->delete_records('block_deft', ['instance' => $this->context->instanceid]);
-        return true;
-    }
-
-    /**
-     * Function that can be overridden to do extra cleanup before
-     * the database tables are deleted. (Called once per block, not per instance!)
-     */
-    public function before_delete() {
+        $tasks = task::get_records(['instance' => $this->context->instanceid]);
+        foreach ($tasks as $task) {
+            $task->delete();
+        }
     }
 }

@@ -37,7 +37,6 @@ class backup_deft_block_structure_step extends backup_block_structure_step {
      * @return backup_nested_element The structure wrapped in the block tag.
      */
     protected function define_structure() {
-        global $DB;
 
         // To know if we are including userinfo.
         $userinfo = $this->get_setting_value('users');

@@ -60,9 +60,14 @@ class socket {
     protected const ENDPOINT = 'https://deftly.us/admin/tool/deft/message.php';
 
     /**
-     * @var $context Block context
+     * @var $context Context associate with plugin instance
      */
     protected $context = null;
+
+    /**
+     * @var $int itemid Optional id to distinguish socket context
+     */
+    protected $itemid = null;
 
     /**
      * Constructor
@@ -72,6 +77,7 @@ class socket {
      */
     public function __construct (context $context, ?int $itemid = null) {
         $this->context = $context;
+        $this->itemid = $itemid;
         $this->validate();
     }
 
@@ -123,8 +129,6 @@ class socket {
      * Supply the token receievd to authenticate connection
      */
     public function get_token() {
-        global $DB;
-
         if (!get_config('block_deft', 'enableupdating')) {
             return;
         }

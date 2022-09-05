@@ -43,8 +43,6 @@ class status_choice extends status_task {
      * Form definition
      */
     public function definition() {
-        global $CFG, $USER;
-
         parent::definition();
 
         $mform = $this->_form;

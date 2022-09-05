@@ -109,7 +109,7 @@ function block_deft_comment_display($comments, $args) {
  * @return string
  */
 function block_deft_output_fragment_choose($args) {
-    global $CFG, $DB, $USER;
+    global $DB, $USER;
 
     $context = $args['context'];
     $id = $args['id'];
@@ -171,7 +171,7 @@ function block_deft_output_fragment_choose($args) {
  * @return string
  */
 function block_deft_output_fragment_content($args) {
-    global $CFG, $OUTPUT;
+    global $OUTPUT;
 
     $context = $args['context'];
 
@@ -204,8 +204,6 @@ function block_deft_output_fragment_content($args) {
  * @return string
  */
 function block_deft_output_fragment_test($args) {
-    global $CFG, $OUTPUT;
-
     $context = $args['context'];
 
     if (!is_siteadmin()) {

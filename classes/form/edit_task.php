@@ -51,8 +51,6 @@ class edit_task extends dynamic_form {
      * Form definition
      */
     public function definition() {
-        global $CFG, $USER;
-
         $mform = $this->_form;
 
         $mform->addElement('hidden', 'id');

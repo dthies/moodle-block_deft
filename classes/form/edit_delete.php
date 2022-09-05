@@ -43,8 +43,6 @@ class edit_delete extends edit_task {
      * Form definition
      */
     public function definition() {
-        global $CFG, $USER;
-
         $mform = $this->_form;
 
         $mform->addElement('hidden', 'id');
@@ -62,8 +60,6 @@ class edit_delete extends edit_task {
      * @return mixed
      */
     public function process_dynamic_submission() {
-        global $DB;
-
         if ($data = $this->get_data()) {
             if (!empty($data->id)) {
                 $task = $this->get_task($data->id);

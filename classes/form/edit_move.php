@@ -43,8 +43,6 @@ class edit_move extends edit_task {
      * Form definition
      */
     public function definition() {
-        global $CFG, $USER;
-
         $mform = $this->_form;
 
         $mform->addElement('hidden', 'id');
@@ -100,7 +98,6 @@ class edit_move extends edit_task {
 
         $mform = $this->_form;
 
-        $id = $mform->getElementValue('id');
         $instance = $this->get_context_for_dynamic_submission()->instanceid;
         $tasks = $this->get_records(['instance' => $instance], 'sortorder');
         foreach ($tasks as $task) {

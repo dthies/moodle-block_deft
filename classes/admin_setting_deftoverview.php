@@ -81,10 +81,9 @@ class admin_setting_deftoverview extends admin_setting {
      * @return string
      */
     public function output_html($data, $query='') {
-        global $CFG, $DB, $OUTPUT;
+        global $DB, $OUTPUT;
 
         $return = "";
-        $brtag = html_writer::empty_tag('br');
         $url = new moodle_url("/blocks/deft/toolconfigure.php");
 
         $ltitype = $DB->get_record('lti_types', ['tooldomain' => 'deftly.us']);

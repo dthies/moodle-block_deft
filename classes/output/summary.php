@@ -49,8 +49,6 @@ class summary extends text implements renderable, templatable {
      * @param object $task record
      */
     public function __construct($context, $task) {
-        global $DB;
-
         $cache = cache::make('block_deft', 'results');
 
         $this->task = $task;
@@ -67,8 +65,6 @@ class summary extends text implements renderable, templatable {
      * @return array
      */
     public function export_for_template(renderer_base $output) {
-        global $DB;
-
         if (!$this->state->showsummary) {
             return [];
         }

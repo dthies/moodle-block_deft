@@ -48,8 +48,6 @@ class edit_choice extends edit_task {
      * Form definition
      */
     public function definition() {
-        global $CFG, $USER;
-
         $mform = $this->_form;
         parent::definition();
 

@@ -63,8 +63,6 @@ class text implements renderable, templatable {
      * @return array
      */
     public function export_for_template(renderer_base $output) {
-        global $DB, $OUTPUT, $USER;
-
         if (empty($this->state->visible)) {
             return '';
         }
