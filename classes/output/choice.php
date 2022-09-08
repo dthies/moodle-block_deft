@@ -66,8 +66,11 @@ class choice extends text implements renderable, templatable {
         $summary = new summary($this->context, $this->task);
         $cache = cache::make('block_deft', 'results');
         $response = $cache->get($this->task->id . 'x' . $USER->id);
-        $options = [];
-        foreach ($this->config->option as $key => $option) {
+        $options = [[
+            'key' => '',
+            'value' => '',
+        ]];
+        foreach (array_filter($this->config->option) as $key => $option) {
             $options[] = [
                 'key' => $key,
                 'value' => $option,
@@ -79,13 +82,14 @@ class choice extends text implements renderable, templatable {
             'contextid' => $this->context->id,
             'disabled' => !empty($this->state->preventresponse),
             'id' => $this->task->id,
+            'key' => $key,
             'name' => !empty($this->state->showtitle) ? $this->config->name : '',
             'question' => format_text($this->config->question, FORMAT_MOODLE, [
                 'blanktarget' => true,
                 'para' => true,
             ]),
             'options' => $options,
-            'summary' => $output->render($summary),
+            'summary' => !empty($this->state) ? $output->render($summary) : null,
             'visible' => true,
         ];
     }

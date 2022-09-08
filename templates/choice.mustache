@@ -35,7 +35,7 @@
         <div class="deft-choice-selector form-inline" data-id="{{id}}">
             <form>
                 <input type="hidden" name="id" value="{{ id }}"></input>
-                <select name="option" {{# disabled }} disabled {{/ disabled }}>
+                <select name="option" {{# disabled }} disabled {{/ disabled }} data-intial-value="{{ key }}">
                     {{# options }}
                         <option value="{{ key }}" {{# selected}} selected {{/ selected }}>{{ value }}</option>
                     {{/ options }}

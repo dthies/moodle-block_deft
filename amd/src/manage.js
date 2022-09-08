@@ -21,11 +21,11 @@ var contextid;
  */
 const submitForm = (e) => {
     Log.debug('Form submitted');
-    Log.debug(e.detail);
     if (e.detail && e.detail.html) {
         Templates.replaceNodeContents(
             document.querySelector('.tasks'),
-            e.detail.html
+            e.detail.html,
+            ''
         );
     }
 };
