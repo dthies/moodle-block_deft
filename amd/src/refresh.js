@@ -91,9 +91,18 @@ export default {
             {
                 jsondata: JSON.stringify(data)
             }
-        ).done(
-            Templates.replaceNodeContents.bind(Templates, content)
-        ).catch(Log.debug);
+        ).done((html, js) => {
+            content.querySelectorAll('[data-summary]').forEach((summary) => {
+                const height = summary.offsetHeight,
+                    task = summary.getAttribute('data-summary');
+                setTimeout(() => {
+                    content.querySelectorAll('[data-summary="' + task + '"]').forEach((summary) => {
+                        summary.setAttribute('style', 'min-height: ' + height + 'px;');
+                    });
+                });
+            });
+            Templates.replaceNodeContents(content, html, js);
+        }).catch(Log.debug);
 
         this.throttled = false;
         this.lastupdate = Date.now();

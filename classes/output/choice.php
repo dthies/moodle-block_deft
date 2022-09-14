@@ -63,7 +63,9 @@ class choice extends text implements renderable, templatable {
             return '';
         }
 
-        $summary = new summary($this->context, $this->task);
+        if (!empty($this->state->showsummary)) {
+            $summary = new summary($this->context, $this->task);
+        }
         $cache = cache::make('block_deft', 'results');
         $response = $cache->get($this->task->id . 'x' . $USER->id);
         $options = [[
@@ -89,7 +91,7 @@ class choice extends text implements renderable, templatable {
                 'para' => true,
             ]),
             'options' => $options,
-            'summary' => !empty($this->state) ? $output->render($summary) : null,
+            'summary' => !empty($summary) ? $output->render($summary) : null,
             'visible' => true,
         ];
     }
