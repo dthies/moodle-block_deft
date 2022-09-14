@@ -54,7 +54,7 @@ class mobile {
      * @throws \moodle_exception
      */
     public static function mobile_content_view($args) {
-        global $OUTPUT, $DB, $CFG;
+        global $CFG, $DB, $PAGE;
 
         if ($args['contextlevel'] == 'course') {
             $course = get_course($args['instanceid']);
@@ -78,7 +78,8 @@ class mobile {
                 'option' => (int) ($option - 1),
             ]);
         }
-        $data = (object) $instance->export_for_template($OUTPUT);
+        $output = $PAGE->get_renderer('block_deft');
+        $data = (object) $instance->export_for_template($output);
         $responses = $DB->get_records('block_deft_response', [
             'userid' => $args['userid'],
         ], '', 'task, response, timemodified');
@@ -105,7 +106,7 @@ class mobile {
         $data->contextlevel = $args['contextlevel'];
         $data->instanceid = $args['instanceid'];
 
-        $html = $OUTPUT->render_from_template('block_deft/mobile_view', $data);
+        $html = $output->render_from_template('block_deft/mobile_view', $data);
         $js = 'var window=this;' . file_get_contents($CFG->dirroot . '/blocks/deft/amd/build/mobile.min.js');
 
         return [
@@ -131,7 +132,7 @@ class mobile {
      * @return string HTML
      */
     public static function mobile_comments_view($args): array {
-        global $CFG, $OUTPUT;
+        global $CFG, $PAGE;
 
         if ($args['contextlevel'] == 'course') {
             $course = get_course($args['instanceid']);
@@ -165,13 +166,14 @@ class mobile {
         ];
 
         $js = 'var window=this;' . file_get_contents($CFG->dirroot . '/blocks/deft/amd/build/mobile.min.js');
-        $instancedata = (object) $instance->export_for_template($OUTPUT);
+        $output = $PAGE->get_renderer('block_deft');
+        $instancedata = (object) $instance->export_for_template($output);
 
         return [
             'templates' => [
                 [
                     'id' => 'main',
-                    'html' => $OUTPUT->render_from_template('block_deft/mobile_comments', $data),
+                    'html' => $output->render_from_template('block_deft/mobile_comments', $data),
                 ],
             ],
             'javascript' => $js,
