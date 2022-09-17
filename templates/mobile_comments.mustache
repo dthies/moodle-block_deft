@@ -59,6 +59,9 @@
         </ion-button>
     </ion-item>
     {{# rawcomments }}
+        {{# date }}
+            <ion-item>{{ date }}</ion-item>
+        {{/ date }}
     <ion-item-sliding>
     {{# delete }}
         <ion-item-options side="end">
@@ -78,7 +81,7 @@
     </ion-item-options>
         <ion-item>
             <ion-label>
-                <h5>{{ fullname }}</h5>
+                <div>{{{ avatar }}} {{ fullname }}</div>
                 <div>{{{ content }}}</div>
             </ion-label>
         </ion-item>

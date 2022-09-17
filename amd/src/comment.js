@@ -34,7 +34,7 @@ export default {
                                 contextid: contextid,
                                 id: button.closest('[data-task]').getAttribute('data-task')
                             },
-                            modalConfig:{
+                            modalConfig: {
                                 title: getString('addcomment')
                             }
                         });
@@ -47,7 +47,7 @@ export default {
                                 contextid: contextid,
                                 id: button.closest('[data-task]').getAttribute('data-task')
                             },
-                            modalConfig:{
+                            modalConfig: {
                                 title: getString('confirm')
                             }
                         });
