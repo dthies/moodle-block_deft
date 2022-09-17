@@ -26,6 +26,11 @@ defined('MOODLE_INTERNAL') || die();
 
 // Added definition for keyset cache.
 $definitions = [
+    'comments' => [
+        'mode' => cache_store::MODE_APPLICATION,
+        'simplekeys' => true,
+        'ttl' => 3600,
+    ],
     'tasks' => [
         'datasource' => '\block_deft\cache\tasks',
         'mode' => cache_store::MODE_APPLICATION,

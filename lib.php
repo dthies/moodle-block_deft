@@ -179,20 +179,11 @@ function block_deft_output_fragment_content($args) {
         return null;
     }
 
-    $view = new view($context);
+    $jsondata = json_decode($args['jsondata']);
+
+    $view = new view($context, $jsondata);
 
     $data = $view->export_for_template($OUTPUT);
-
-    $jsondata = json_decode($args['jsondata']);
-    if (!empty($jsondata->opencomments)) {
-        foreach ($data['tasks'] as $task) {
-            if (in_array($task->id, $jsondata->opencomments)) {
-                $task->opencomments = 1;
-                $comments = new \block_deft\output\comments($context, $task);
-                $task->html = $OUTPUT->render($comments);
-            }
-        }
-    }
 
     return $OUTPUT->render_from_template('block_deft/view', $data);
 }

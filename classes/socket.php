@@ -163,7 +163,6 @@ class socket {
     public static function handle(\core\event\base $event) {
         $socket = new socket($event->get_context());
         $socket->dispatch();
-        throw new moodle_exception('event');
     }
 
     /**

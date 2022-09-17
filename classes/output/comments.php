@@ -43,8 +43,9 @@ class comments implements renderable, templatable {
      *
      * @param int $context The context of the block.
      * @param object $task record
+     * @param array $options Optional display data
      */
-    public function __construct($context, $task) {
+    public function __construct($context, $task, $options = null) {
         $this->context = $context;
         $this->task = $task;
         $this->config = json_decode($task->configdata);
@@ -57,13 +58,14 @@ class comments implements renderable, templatable {
         $args->itemid    = $task->id;
         $args->component = 'block_deft';
         $args->linktext  = empty($this->config->label) ? get_string('comments') : $this->config->label;
-        $args->notoggle  = !empty($this->state->expandcomments);
+        $args->notoggle  = true;
         $args->showcount  = true;
         $args->autostart = !empty($this->state->expandcomments) || !empty($task->opencomments);
         $args->displaycancel = false;
         $this->comment = new comment($args);
         $this->comment->set_view_permission(true);
         $this->comment->set_fullwidth();
+        $this->options = $options;
     }
 
     /**
@@ -79,10 +81,13 @@ class comments implements renderable, templatable {
 
         return [
             'name' => !empty($this->state->showtitle) ? $this->config->name : '',
+            'task' => $this->task->id,
             'count' => $this->comment->count(),
-            'label' => $this->config->label,
-            'comments' => !empty($this->comment) ? $this->comment->output(true) : null,
+            'label' => empty($this->config->label) ? get_string('comments') : $this->config->label,
+            'collapsible' => empty($this->state->expandcomments),
             'rawcomments' => !empty($this->comment) ? $this->comment->get_comments() : null,
+            'expandcomments' => !empty($this->state->expandcomments)
+                || in_array($this->task->id, $this->options->opencomments ?? []),
         ];
     }
 }

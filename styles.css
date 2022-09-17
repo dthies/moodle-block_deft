@@ -2,3 +2,8 @@
     height: inherit;
     width: inherit;
 }
+
+.block_deft_comments {
+    max-height: 600px;
+    overflow-y: auto;
+}

@@ -28,6 +28,7 @@ defined('MOODLE_INTERNAL') || die();
 
 require_once($CFG->dirroot . '/comment/lib.php');
 
+use cache;
 use context;
 use moodle_exception;
 use stdClass;
@@ -40,6 +41,52 @@ use stdClass;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class comment extends \comment {
+
+    /** @var int itemid is used to associate with commenting content */
+    private $itemid;
+
+    /** @var int The context id for comments */
+    private $contextid;
+
+    /**
+     * Construct function of comment class, initialise
+     * class members
+     *
+     * @param stdClass $options {
+     *            context => context context to use for the comment [required]
+     *            component => string which plugin will comment being added to [required]
+     *            itemid  => int the id of the associated item (forum post, glossary item etc) [required]
+     *            area    => string comment area
+     *            cm      => stdClass course module
+     *            course  => course course object
+     *            client_id => string an unique id to identify comment area
+     *            autostart => boolean automatically expend comments
+     *            showcount => boolean display the number of comments
+     *            displaycancel => boolean display cancel button
+     *            notoggle => boolean don't show/hide button
+     *            linktext => string title of show/hide button
+     * }
+     */
+    public function __construct(stdClass $options) {
+        // Set context id.
+        if (!empty($options->context)) {
+            $this->contextid = $options->context->id;
+        } else if (!empty($options->contextid)) {
+            $this->contextid = $options->contextid;
+        } else {
+            throw new \moodle_exception('invalidcontext');
+        }
+
+        // Set item id.
+        if (!empty($options->itemid)) {
+            $this->itemid = $options->itemid;
+        } else {
+            $this->itemid = 0;
+        }
+
+        parent::__construct($options);
+    }
+
     /**
      * Return matched comments
      *
@@ -48,11 +95,45 @@ class comment extends \comment {
      * @return array
      */
     public function get_comments($page = '', $sortdirection = 'DESC') {
+        global $USER;
+
+        $cache = cache::make('block_deft', 'comments');
+        $cached = $cache->get($this->contextid . 'i' . $this->itemid . 'u' . $USER->id);
+        if (!empty($cached) && $cache->get($this->itemid) <= $cached->timecreated) {
+            return $cached->comments;
+        }
         $comments = parent::get_comments();
+        $date = usergetmidnight(time());
         foreach ($comments as $c) {
-            $c->strftimeformat = get_string('strftimerecent', 'langconfig');
+            if ($date != usergetmidnight($c->timecreated)) {
+                $date = usergetmidnight($c->timecreated);
+                $c->date = userdate($date, get_string('strftimedate', 'langconfig'));
+            }
+            $c->strftimeformat = get_string('strftimetime', 'langconfig');
             $c->time = userdate($c->timecreated, $c->strftimeformat);
         }
+        $cache->set(
+            $this->contextid . 'i' . $this->itemid . 'u' . $USER->id,
+            (object) [
+                'timecreated' => time(),
+                'comments' => $comments,
+            ]
+        );
         return $comments;
+    }
+
+    /**
+     * Handle an event
+     *
+     * @param \core\event\base $event
+     */
+    public static function handle(\core\event\base $event) {
+        // Update the cache.
+        $eventdata = $event->get_data();
+        $cache = cache::make('block_deft', 'comments');
+        $cache->set($eventdata['other']['itemid'], time());
+
+        // Send message to update clients.
+        socket::handle($event);
     }
 }

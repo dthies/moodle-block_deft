@@ -38,7 +38,7 @@ require_once($CFG->dirroot . '/course/lib.php');
 require_once($CFG->libdir . '/completionlib.php');
 
 /**
- * Class containing data for deft choice block.
+ * Class containing data for Deft response block.
  *
  * @copyright 2022 Daniel Thies <dethies@gmail.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -48,10 +48,12 @@ class view implements renderable, templatable {
     /**
      * Constructor.
      *
-     * @param int $context The context of the block.
+     * @param int $context The context of the block
+     * @param array $options Optional display data
      */
-    public function __construct($context) {
+    public function __construct($context, $options = null) {
         $this->context = $context;
+        $this->options = $options;
     }
 
     /**
@@ -75,7 +77,7 @@ class view implements renderable, templatable {
                     $record->html = $output->render_from_template('block_deft/choice', $record->choice);
                     break;
                 case 'comments':
-                    $comments = new comments($this->context, $record);
+                    $comments = new comments($this->context, $record, $this->options);
                     $record->comments = $comments->export_for_template($output);
                     $record->html = $output->render_from_template('block_deft/comments', $record->comments);
                     break;

@@ -29,12 +29,12 @@ $observers = [
 
     [
         'eventname' => '\block_deft\event\comment_created',
-        'callback' => 'block_deft\socket::handle',
+        'callback' => 'block_deft\comment::handle',
         'internal' => true,
     ],
     [
         'eventname' => '\block_deft\event\comment_deleted',
-        'callback' => 'block_deft\socket::handle',
+        'callback' => 'block_deft\comment::handle',
         'internal' => true,
     ],
 ];

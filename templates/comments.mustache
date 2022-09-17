@@ -25,9 +25,41 @@
         "comments": ""
     }
 }}
-<div>
     <h5>{{ name }}</h5>
-    {{# comments }}
-        <div class="block_deft_comments p-2">{{{ comments }}}</div>
-    {{/ comments }}
-</div>
+    {{# expandcomments }}
+        <div>
+            {{ label }}
+            {{# collapsible }}
+            <a href="#" class="card-link float-right" data-action="collapse" title="{{# str }} collapse {{/ str }}"><i class="icon fa fa-chevron-down"></i></a>
+            {{/ collapsible }}
+            <a href="#" class="card-link float-right" data-action="addcomment" title="{{# str }} addcomment {{/ str }}"><i class="icon fa fa-plus"></i></a>
+        </div>
+        <div class="block_deft_comments p-2 expanded">
+            {{# rawcomments }}
+                {{# date }}
+                    <div class="block_deft_comment_date card bg-light mt-3">{{date}}</div>
+                {{/ date }}
+                <div class="block_deft_comment card position-relative border border-secondary m-2 p-1" data-comment="{{ id }}">
+                    <div class="card-content">
+                        <span class="picture float-left">{{{ avatar }}}</span>
+                        <div class="card-title">
+                            <span class="name">{{ fullname }}</span>
+                            <span class="time">{{ time }}</span>
+                            {{# delete }}
+                                <a href="#" class="card-link float-right" data-action="delete" title="{{# str }} delete {{/ str }}"><i class="icon fa fa-trash"></i></a>
+                            {{/ delete }}
+                        </div>
+                        <div class="card-text">
+                             {{{ content }}}
+                        </div>
+                    </div>
+                </div>
+            {{/ rawcomments }}
+        </div>
+    {{/ expandcomments }}
+    {{^ expandcomments }}
+        <div class="block_deft_comments p-2">
+            {{ label }} ({{count }})
+            <a href="#" class="card-link float-right" data-action="expand" title="{{# str }} expand {{/ str }}"><i class="icon fa fa-chevron-right"></i></a>
+        </div>
+    {{/ expandcomments }}

@@ -26,7 +26,6 @@ namespace block_deft\output;
 defined('MOODLE_INTERNAL') || die();
 
 use cache;
-use block_deft\comment;
 use moodle_url;
 use renderable;
 use renderer_base;
@@ -66,8 +65,6 @@ class main implements renderable, templatable {
      * @return array
      */
     public function export_for_template(renderer_base $output) {
-        comment::init();
-
         $manageurl = new moodle_url('/blocks/deft/manage.php', ['id' => $this->context->instanceid]);
 
         return $this->view->export_for_template($output) + [

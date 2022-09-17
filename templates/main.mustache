@@ -35,7 +35,8 @@
     </div>
 </div>
 {{#js}}
-    require(['block_deft/refresh'], function(Refresh) {
+    require(['block_deft/comment', 'block_deft/refresh'], function(Comment, Refresh) {
         Refresh.init({{ contextid }}, '#block-deft-{{uniqid}} [data-region="deft-view"]', '{{ token }}', {{ throttle }});
+        Comment.init({{ contextid }}, '#block-deft-{{uniqid}}', Refresh.refresh.bind(Refresh));
     });
 {{/js}}

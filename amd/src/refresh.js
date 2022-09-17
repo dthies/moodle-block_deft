@@ -18,6 +18,12 @@ export default {
 
     lastupdate: 0,
 
+    contextid: null,
+
+    token: null,
+
+    throttle: null,
+
     /**
      * Listen to WebSocket and refresh content
      *
@@ -27,21 +33,20 @@ export default {
      * @param {int} throttle Throttle dely in ms
      */
     init: function(contextid, selector, token, throttle) {
+        this.contextid = contextid;
+        this.selector = selector;
+        this.throttle = throttle;
         Socket.open(contextid, token).subscribe(() => {
-            this.refresh(contextid, selector, throttle);
+            this.refresh();
         });
     },
 
     /**
      * Refresh content
      *
-     * @param {int} contextid Context id of block
-     * @param {string} selector Content location to replace
-     * @param {int} throttle Throttle dely in ms
      */
-    refresh: function(contextid, selector, throttle) {
-        let content = document.querySelector(selector).parentNode,
-            comments = false,
+    refresh: function() {
+        let content = document.querySelector(this.selector).parentNode,
             component = content.closest('[data-component]')
                 && content.closest('[data-component]').getAttribute('data-component')
                 || 'block_deft',
@@ -49,36 +54,26 @@ export default {
         if (!content) {
             return;
         }
-        content.querySelectorAll('.block_deft_comments textarea').forEach((textarea) => {
-            if (
-                textarea.value != textarea.getAttribute('aria-label')
-                || !textarea.value
-            ) {
-                // User is writing a comment.
-                comments = true;
-            }
-        });
 
         if (
-            comments
-            || (this.lastupdate + throttle > Date.now())
-            || (document.activeElement.closest(selector) && document.activeElement.closest('select'))
+            (this.lastupdate + this.throttle > Date.now())
+            || (document.activeElement.closest(this.selector) && document.activeElement.closest('select'))
         ) {
             if (
                 !this.throttled
-                || (this.lastupdate + throttle < Date.now())
+                || (this.lastupdate + this.throttle < Date.now())
             ) {
                 setTimeout(() => {
-                    this.refresh(contextid, selector, throttle);
-                }, Math.max(this.lastupdate + throttle - Date.now(), 40));
+                    this.refresh();
+                }, Math.max(this.lastupdate + this.throttle - Date.now(), 40));
                 this.throttled = true;
             }
 
             return;
         }
 
-        document.querySelector(selector)
-            .querySelectorAll('a.comment-link[aria-expanded="true"]')
+        document.querySelector(this.selector)
+            .querySelectorAll('[data-type="comments"] .block_deft_comments.expanded')
             .forEach((opencomments) => {
                 data.opencomments = data.opencomments || [];
                 data.opencomments.push(opencomments.closest('[data-task]').getAttribute('data-task'));
@@ -87,11 +82,22 @@ export default {
         Fragment.loadFragment(
             component,
             'content',
-            contextid,
+            this.contextid,
             {
                 jsondata: JSON.stringify(data)
             }
         ).done((html, js) => {
+            content.querySelectorAll('.block_deft_comments').forEach((comments) => {
+                const position = comments.scrollTop,
+                    task = comments.closest('[data-task]').getAttribute('data-task');
+                setTimeout(() => {
+                    content.querySelectorAll('[data-task="' + task + '"]').forEach((task) => {
+                        task.querySelector('.block_deft_comments').scrollTo({
+                            top: position
+                        });
+                    });
+                });
+            });
             content.querySelectorAll('[data-summary]').forEach((summary) => {
                 const height = summary.offsetHeight,
                     task = summary.getAttribute('data-summary');
