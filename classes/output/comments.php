@@ -88,6 +88,7 @@ class comments implements renderable, templatable {
             'rawcomments' => !empty($this->comment) ? $this->comment->get_comments() : null,
             'expandcomments' => !empty($this->state->expandcomments)
                 || in_array($this->task->id, $this->options->opencomments ?? []),
+            'visible' => !empty($this->state->visible),
         ];
     }
 }
