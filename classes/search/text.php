@@ -24,6 +24,7 @@
 
 namespace block_deft\search;
 
+use context;
 use context_block;
 use core_search\document;
 use core_search\document_icon;
@@ -177,8 +178,9 @@ class text extends \core_search\base_block {
         global $DB;
 
         // Load block instance and find cmid if there is one.
-        $taskid = preg_replace('~^.*-~', '', $doc->get('id'));
-        $blockinstanceid = $DB->get_field('block_deft', 'instance', ['id' => $taskid]);
+        $contextid = preg_replace('~^.*-~', '', $doc->get('contextid'));
+        $context = context::instance_by_id($contextid);
+        $blockinstanceid = $context->instanceid;
         $instance = $this->get_block_instance($blockinstanceid);
         $courseid = $doc->get('courseid');
         $anchor = 'inst' . $blockinstanceid;
@@ -258,7 +260,6 @@ class text extends \core_search\base_block {
         // context, because those checks are included in the list of search contexts user can access
         // that is calculated in manager.php every time they do a query.
         $task = task::get_record(['id' => $id]);
-        $config = $task->get_config();
         $state = $task->get_state();
         $context = context_block::instance($blockinstanceid);
         if (

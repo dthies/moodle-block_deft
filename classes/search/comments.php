@@ -39,7 +39,7 @@ use block_deft\task;
  * @copyright 2022 Daniel Thies
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class comments extends \core_search\base_block {
+class comments extends text {
 
     /**
      * Gets recordset of all blocks of this type modified since given time within the given context.
@@ -74,7 +74,7 @@ class comments extends \core_search\base_block {
         // context. The query is based on the one from get_recordset_by_timestamp and applies the
         // same restrictions.
         return $DB->get_recordset_sql("
-                SELECT cmt.id, cmt.timecreated, cmt.content, bd.configdata, cmt.userid,
+                SELECT cmt.id, cmt.timecreated AS timemodified, cmt.content, bd.configdata, cmt.userid,
                        c.id AS courseid, x.id AS contextid
                   FROM {block_instances} bi
                        $contextjoin
@@ -123,94 +123,12 @@ class comments extends \core_search\base_block {
      * @return \core_search\document
      */
     public function get_document($record, $options = array()) {
-        // Create empty document.
-        $doc = \core_search\document_factory::instance($record->id,
-                $this->componentname, $this->areaname);
-
         // Get stdclass object with data from DB.
         $data = json_decode($record->configdata);
 
-        // Get content.
-        $content = content_to_text($record->content, FORMAT_MOODLE);
-        $doc->set('content', $content);
-
-        if (!empty($data->name)) {
-            // If there is a name, use it as title.
-            $doc->set('title', content_to_text($data->name, false));
-        } else {
-            // If there is no name, use the content text again.
-            $doc->set('title', shorten_text($content));
-        }
-
-        // Set standard fields.
-        $doc->set('contextid', $record->contextid);
-        $doc->set('type', \core_search\manager::TYPE_TEXT);
-        $doc->set('courseid', $record->courseid);
-        $doc->set('modified', $record->timecreated);
-        $doc->set('owneruserid', \core_search\manager::NO_OWNER_ID);
-
-        // Mark document new if appropriate.
-        if (isset($options['lastindexedtime']) &&
-                ($options['lastindexedtime'] < $record->timecreated)) {
-            // If the document was created after the last index time, it must be new.
-            $doc->set_is_new(true);
-        }
-
-        return $doc;
-    }
-
-    /**
-     * Returns restrictions on which block_instances rows to return. By default, excludes rows
-     * that have empty configdata.
-     *
-     * If no restriction is required, you could return ['', []].
-     *
-     * @return array 2-element array of SQL restriction and params for it
-     */
-    protected function get_indexing_restrictions() {
-        return ['', []];
-    }
-
-    /**
-     * Returns a url to the document, it might match self::get_context_url().
-     *
-     * @param \core_search\document $doc
-     * @return \moodle_url
-     */
-    public function get_doc_url(\core_search\document $doc) {
-        global $DB;
-
-        // Load block instance and find cmid if there is one.
-        $contextid = preg_replace('~^.*-~', '', $doc->get('contextid'));
-        $context = context::instance_by_id($contextid);
-        $blockinstanceid = $context->instanceid;
-        $instance = $this->get_block_instance($blockinstanceid);
-        $courseid = $doc->get('courseid');
-        $anchor = 'inst' . $blockinstanceid;
-
-        // Check if the block is at course or module level.
-        if ($instance->cmid) {
-            // No module-level page types are supported at present so the search system won't return
-            // them. But let's put some example code here to indicate how it could work.
-            debugging('Unexpected module-level page type for block ' . $blockinstanceid . ': ' .
-                    $instance->pagetypepattern, DEBUG_DEVELOPER);
-            $modinfo = get_fast_modinfo($courseid);
-            $cm = $modinfo->get_cm($instance->cmid);
-            return new \moodle_url($cm->url, null, $anchor);
-        } else {
-            // The block is at course level. Let's check the page type, although in practice we
-            // currently only support the course main page.
-            if ($instance->pagetypepattern === '*' || $instance->pagetypepattern === 'course-*' ||
-                    preg_match('~^course-view-(.*)$~', $instance->pagetypepattern)) {
-                return new \moodle_url('/course/view.php', ['id' => $courseid], $anchor);
-            } else if ($instance->pagetypepattern === 'site-index') {
-                return new \moodle_url('/', ['redirect' => 0], $anchor);
-            } else {
-                debugging('Unexpected page type for block ' . $blockinstanceid . ': ' .
-                        $instance->pagetypepattern, DEBUG_DEVELOPER);
-                return new \moodle_url('/course/view.php', ['id' => $courseid], $anchor);
-            }
-        }
+        $data->content = $record->content;
+        $record->configdata = json_encode($data);
+        return parent::get_document($record, $options);
     }
 
     /**
@@ -227,7 +145,10 @@ class comments extends \core_search\base_block {
      * @return string[] Array with 2 elements; extra joins for the query, and ORDER BY value
      */
     protected function get_contexts_to_reindex_extra_sql() {
-        return ['JOIN {block_deft} bd ON bd.instance = bi.id', 'MAX(bd.timemodified) DESC'];
+        return [
+            "JOIN {block_deft} bd ON bd.instance = bi.id
+             JOIN {comments} cmt ON cmt.itemid = bd.id AND cmt.commentarea = 'task' AND cmt.component = 'block_deft'",
+            'MAX(bd.timemodified, cmt.timecreated) DESC'];
     }
 
     /**
@@ -249,37 +170,7 @@ class comments extends \core_search\base_block {
             return manager::ACCESS_DELETED;
         }
         // Load block instance and find cmid if there is one.
-        $context = context::instance_by_id($comment->contextid);
-        $blockinstanceid = $context->instanceid;
-        $instance = $this->get_block_instance($blockinstanceid, IGNORE_MISSING);
-        if (!$instance) {
-            // This generally won't happen because if the block has been deleted then we won't have
-            // included its context in the search area list, but just in case.
-            return manager::ACCESS_DELETED;
-        }
-
-        // Check block has not been moved to an unsupported area since it was indexed. (At the
-        // moment, only blocks within site and course context are supported, also only certain
-        // page types).
-        if (!$instance->courseid ||
-                !self::is_supported_page_type_at_course_context($instance->pagetypepattern)) {
-            return manager::ACCESS_DELETED;
-        }
-
-        // Note we do not need to check if the block was hidden or if the user has access to the
-        // context, because those checks are included in the list of search contexts user can access
-        // that is calculated in manager.php every time they do a query.
-        $task = task::get_record(['id' => $comment->itemid]);
-        $config = $task->get_config();
-        $state = $task->get_state();
-        if (
-            empty($state->visible)
-            && !has_capability('block/deft:manage', $context)
-        ) {
-            return manager::ACCESS_DENIED;
-        }
-
-        return manager::ACCESS_GRANTED;
+        return parent::check_access($comment->itemid);
     }
 
     /**

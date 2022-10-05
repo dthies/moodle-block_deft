@@ -24,6 +24,7 @@
 
 namespace block_deft\search;
 
+use context;
 use context_block;
 use core_search\document;
 use core_search\document_icon;
@@ -119,40 +120,12 @@ class choice extends text {
      * @return \core_search\document
      */
     public function get_document($record, $options = array()) {
-        // Create empty document.
-        $doc = \core_search\document_factory::instance($record->id,
-                $this->componentname, $this->areaname);
-
         // Get stdclass object with data from DB.
         $data = json_decode($record->configdata);
 
-        // Get content.
-        $content = content_to_text($data->question, FORMAT_MOODLE);
-        $doc->set('content', $content);
-
-        if (!empty($data->name)) {
-            // If there is a name, use it as title.
-            $doc->set('title', content_to_text($data->name, false));
-        } else {
-            // If there is no name, use the content text again.
-            $doc->set('title', shorten_text($content));
-        }
-
-        // Set standard fields.
-        $doc->set('contextid', $record->contextid);
-        $doc->set('type', \core_search\manager::TYPE_TEXT);
-        $doc->set('courseid', $record->courseid);
-        $doc->set('modified', $record->timemodified);
-        $doc->set('owneruserid', \core_search\manager::NO_OWNER_ID);
-
-        // Mark document new if appropriate.
-        if (isset($options['lastindexedtime']) &&
-                ($options['lastindexedtime'] < $record->timecreated)) {
-            // If the document was created after the last index time, it must be new.
-            $doc->set_is_new(true);
-        }
-
-        return $doc;
+        $data->content = $data->question;
+        $record->configdata = json_encode($data);
+        return parent::get_document($record, $options);
     }
 
     /**
