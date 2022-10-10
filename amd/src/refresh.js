@@ -33,6 +33,9 @@ export default {
      * @param {int} throttle Throttle dely in ms
      */
     init: function(contextid, selector, token, throttle) {
+        if (!token) {
+            return;
+        }
         this.contextid = contextid;
         this.selector = selector;
         this.throttle = throttle;

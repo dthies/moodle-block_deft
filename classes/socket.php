@@ -141,6 +141,12 @@ class socket {
             return $cached->token;
         }
 
+        // Prevent other clients requesting token for a bit.
+        $cache->set($this->context->id, (object) [
+            'token' => '',
+            'expiry' => time() + 5,
+        ]);
+
         $response = $this->execute([
             'action' => 'token',
             'contextid' => $this->context->id,

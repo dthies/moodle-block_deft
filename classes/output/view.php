@@ -73,18 +73,15 @@ class view implements renderable, templatable {
             switch ($record->type) {
                 case 'choice':
                     $choice = new choice($this->context, $record);
-                    $record->choice = $choice->export_for_template($output);
-                    $record->html = $output->render_from_template('block_deft/choice', $record->choice);
+                    $record->html = $output->render($choice);
                     break;
                 case 'comments':
                     $comments = new comments($this->context, $record, $this->options);
-                    $record->comments = $comments->export_for_template($output);
-                    $record->html = $output->render_from_template('block_deft/comments', $record->comments);
+                    $record->html = $output->render($comments);
                     break;
                 case 'text':
                     $text = new text($this->context, $record);
-                    $record->text = $text->export_for_template($output);
-                    $record->html = $output->render_from_template('block_deft/text', $record->text);
+                    $record->html = $output->render($text);
                     break;
             }
             $tasklist[] = $record;
