@@ -31,7 +31,6 @@ require_once($CFG->dirroot . '/comment/lib.php');
 require_once($CFG->dirroot . '/lib/blocklib.php');
 
 use block_deft\task;
-use cache;
 use block_deft\comment;
 use stdClass;
 
@@ -64,50 +63,49 @@ class mobile {
         $instance = block_instance_by_id($args['blockid']);
 
         if (
-            ($option = $args['choice'] ?? null)
+            key_exists('choice', $args)
             && has_capability('block/deft:choose', $instance->context, $args['userid'])
-            && !$DB->get_record_select(
-                'block_deft_response',
-                'task = :task AND userid = :userid AND timemodified > :timemodified',
-                $args
+            && (
+                !$DB->get_record_select(
+                    'block_deft_response',
+                    'task = :task AND userid = :userid AND timemodified > :timemodified',
+                    $args
+                )
+                || (
+                    ($args['choice'] === '')
+                    && $DB->get_record_select(
+                        'block_deft_response',
+                        'task = :task AND userid = :userid AND timemodified = :timemodified',
+                        $args
+                    )
+                )
             )
         ) {
             block_deft_output_fragment_choose([
                 'context' => $instance->context,
                 'id' => $args['task'],
-                'option' => (int) ($option - 1),
+                'option' => $args['choice'],
             ]);
         }
         $output = $PAGE->get_renderer('block_deft');
         $data = (object) $instance->export_for_template($output);
-        $responses = $DB->get_records('block_deft_response', [
-            'userid' => $args['userid'],
-        ], '', 'task, response, timemodified');
         $choice = [];
-        $cache = cache::make('block_deft', 'results');
         foreach ($data->tasks as $task) {
-            $choice['choice' . $task->id] = 2;
             if ($task->type == 'choice') {
-                if (task::get_record(['id' => $task->id])->get_state()->showsummary) {
-                    $task->results = array_values($cache->get($task->id));
-                }
-                if (key_exists($task->id, $responses)) {
-                    $config = task::get_record(['id' => $task->id])->get_config();
-                    $selected = array_search($responses[$task->id]->response, $config->option);
-                    $task->timemodified = $responses[$task->id]->timemodified;
-                    if ($selected !== false) {
-                        $choice['choice' . $task->id] = (string) ($selected + 1);
-                    }
-                } else {
-                    $task->timemodified = 0;
-                }
+                $choice['choice' . $task->id] = (string) $task->choice['key'];
             }
         }
         $data->contextlevel = $args['contextlevel'];
         $data->instanceid = $args['instanceid'];
 
         $html = $output->render_from_template('block_deft/mobile_view', $data);
-        $js = 'var window=this;' . file_get_contents($CFG->dirroot . '/blocks/deft/amd/build/mobile.min.js');
+        if (get_config('block_deft', 'enableupdating')) {
+            $js = "(function(window){\n" .  file_get_contents(
+                $CFG->dirroot . '/blocks/deft/amd/build/mobile.min.js'
+            ) . "\n})(this);";
+        } else {
+            $js = '';
+        }
 
         return [
             'templates' => [
@@ -165,7 +163,13 @@ class mobile {
             'task' => $task->get('id'),
         ];
 
-        $js = 'var window=this;' . file_get_contents($CFG->dirroot . '/blocks/deft/amd/build/mobile.min.js');
+        if (get_config('block_deft', 'enableupdating')) {
+            $js = "(function(window){\n" .  file_get_contents(
+                $CFG->dirroot . '/blocks/deft/amd/build/mobile.min.js'
+            ) . "\n})(this);";
+        } else {
+            $js = '';
+        }
         $output = $PAGE->get_renderer('block_deft');
         $instancedata = (object) $instance->export_for_template($output);
 

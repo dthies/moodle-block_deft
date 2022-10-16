@@ -15,9 +15,20 @@ if (this.CONTENT_OTHERDATA) {
         ws.send(token);
     };
 
-    ws.addEventListener('message', function() {
+    ws.onclose = () => {
+        var id = setInterval(() => {
+            if (navigator.onLine) {
+                clearInterval(id);
+                this.refreshContent(false);
+            }
+        }, 5000);
+    };
+
+    ws.addEventListener('message', () => {
         setTimeout(function() {
-            this.refreshContent(false);
+            if (navigator.onLine) {
+                this.refreshContent(false);
+            }
         }.bind(this));
-    }.bind(this));
+    });
 }

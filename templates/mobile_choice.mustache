@@ -1,4 +1,5 @@
-{{!
+{{=<% %>=}}
+<%!
     This file is part of Moodle - http://moodle.org/
 
     Moodle is free software: you can redistribute it and/or modify
@@ -13,9 +14,10 @@
 
     You should have received a copy of the GNU General Public License
     along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
-}}
+%>
+<%!
 {{!
-    @template block_deft/choice
+    @template block_deft/mobile_choice
 
     This template renders the view for the choice task
 
@@ -36,43 +38,43 @@
         "contextid": 2
     }
 }}
-{{# visible }}
+%>
+<%# visible %>
 <div>
-    <h5>{{ name }}</h5>
+    <h5><% name %></h5>
     <div class="block_deft_choice">
-        <div class="deft-choice-prompt p-3">{{{ question }}}</div>
-        <div class="deft-choice-selector form-inline" data-id="{{id}}">
+        <div class="deft-choice-prompt p-3"><%{ question }%></div>
+        <div class="deft-choice-selector form-inline" data-id="<%id%>">
             <ion-list>
                 <ion-item>
-                    <ion-select id="deft-choice-select-{{ id }}"
-                        value="{{ selection }}"
-                        [(ngModel)]="CONTENT_OTHERDATA.choice{{ id }}"
+                    <ion-select id="deft-choice-select-<% id %>"
+                        value="<% selection %>"
+                        [(ngModel)]="CONTENT_OTHERDATA.choice<% id %>"
                         interface="action-sheet"
-                        {{# disabled }} disabled="true" {{/ disabled }}
-                        placeholder="{{# str }} select {{/ str }}"
-                        (ionChange)="updateContent({ task: '{{ id }}', blockid: '{{ instance }}',
-                            uniqid: '{{ uniqid }}',
-                            contextlevel: '{{ contextlevel }}',
-                            instanceid: '{{ instanceid }}',
-                            timemodified: '{{ timemodified }}',
-                            choice: CONTENT_OTHERDATA.choice{{ id }} })"
+                        <%# disabled %> disabled="true" <%/ disabled %>
+                        placeholder="{{ 'plugin.block_deft.select' | translate }}"
+                        (ionChange)="updateContent({ task: '<% id %>', blockid: '<% instance %>',
+                            uniqid: '<% uniqid %>',
+                            contextlevel: '<% contextlevel %>',
+                            instanceid: '<% instanceid %>',
+                            timemodified: '<% timemodified %>',
+                            choice: CONTENT_OTHERDATA.choice<% id %> })"
                     >
-                        <ion-select-option value="" ></ion-select-option>
-                        {{# options }}
-                        <ion-select-option value="{{ key }}">{{ value }}</ion-select-option>
-                        {{/ options }}
+                        <%# options %>
+                        <ion-select-option value="<% key %>"><% value %></ion-select-option>
+                        <%/ options %>
                     </ion-select>
                 </ion-item>
             </ion-list>
         </div>
     </div>
-    {{# summary }}
+    <%# summary %>
         <table class="table" style="width: 100%">
-            <tr><th>{{# str }} response, block_deft {{/ str }}</th><th>{{# str }} count, block_deft {{/ str }}</th></tr>
-        {{# results }}
-            <tr><td>{{ response }}</td><td style="text-align: center">{{count}}</td></tr>
-        {{/ results }}
+            <tr><th>{{ 'plugin.block_deft.response' | translate }}</th><th>{{ 'plugin.block_deft.count' | translate }}</th></tr>
+        <%# results %>
+            <tr><td><% response %></td><td style="text-align: center"><%count%></td></tr>
+        <%/ results %>
         </table>
-    {{/ summary }}
+    <%/ summary %>
 </div>
-{{/ visible }}
+<%/ visible %>

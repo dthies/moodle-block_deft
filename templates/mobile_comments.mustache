@@ -1,4 +1,5 @@
-{{!
+{{=<% %>=}}
+<%!
     This file is part of Moodle - http://moodle.org/
 
     Moodle is free software: you can redistribute it and/or modify
@@ -13,9 +14,10 @@
 
     You should have received a copy of the GNU General Public License
     along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
-}}
+%>
+<%!
 {{!
-    @template block_deft/text
+    @template block_deft/mobile_comments
 
     This template renders the view for comments
 
@@ -33,6 +35,7 @@
         "task": 13
     }
 }}
+%>
 <ion-list>
     <ion-item>
         <ion-textarea
@@ -48,43 +51,43 @@
             name="core_comment_add_comments"
             [params]="{comments: [{
                 contextlevel: 'block',
-                instanceid: {{ blockid }},
+                instanceid: <% blockid %>,
                 content: CONTENT_OTHERDATA.content,
-                itemid: {{ task }},
+                itemid: <% task %>,
                 component: 'block_deft',
                 area: 'task'
             }]}"
         >
-           {{# str }} post {{/ str }}
+           {{ 'plugin.block_deft.post' | translate }}
         </ion-button>
     </ion-item>
-    {{# rawcomments }}
-        {{# date }}
-            <ion-item>{{ date }}</ion-item>
-        {{/ date }}
+    <%# rawcomments %>
+        <%# date %>
+            <ion-item><% date %></ion-item>
+        <%/ date %>
     <ion-item-sliding>
-    {{# delete }}
+    <%# delete %>
         <ion-item-options side="end">
             <ion-item-option color="danger"
                 core-site-plugins-call-ws
                 name="core_comment_delete_comments"
-                [params]="{comments: [{{ id }}]}"
+                [params]="{comments: [<% id %>]}"
             >
-                {{# str }} delete {{/ str }}
+                {{ 'plugin.block_deft.delete' | translate }}
             </ion-item-option>
         </ion-item-options>
-    {{/ delete }}
+    <%/ delete %>
     <ion-item-options side="start">
         <ion-item-option color="info" expandable>
-            <div>{{ time }}</div>
+            <div><% time %></div>
         </ion-item-option>
     </ion-item-options>
         <ion-item>
             <ion-label>
-                <div>{{{ avatar }}} {{ fullname }}</div>
-                <div>{{{ content }}}</div>
+                <div><%{ avatar }%> <% fullname %></div>
+                <div><%{ content }%></div>
             </ion-label>
         </ion-item>
     </ion-item-sliding>
-    {{/ rawcomments }}
+    <%/ rawcomments %>
 </ion-list>

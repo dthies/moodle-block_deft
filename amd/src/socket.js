@@ -24,7 +24,12 @@ export default {
      * @chainable
      */
     open: function(contextid, token) {
-        websocket.onopen = () => websocket.send(token);
+        websocket.onopen = (e) => {
+            websocket.send(token);
+            listeners.forEach((callback) => {
+                callback(e);
+            });
+        };
 
         websocket.addEventListener('close', (e) => {
             Log.debug('Disconnected');

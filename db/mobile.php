@@ -40,6 +40,11 @@ $addons = [
         ],
         'lang' => [ // Language strings that are used in all the handlers.
             ['pluginname', 'block_deft'],
+            ['count', 'block_deft'],
+            ['delete', 'moodle'],
+            ['post', 'moodle'],
+            ['response', 'block_deft'],
+            ['select', 'moodle'],
         ],
     ],
 ];

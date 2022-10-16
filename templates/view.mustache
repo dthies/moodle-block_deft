@@ -29,7 +29,11 @@
      data-region="deft-view">
     <div data-region="deft-view-content">
         {{# tasks }}
-           <div data-task="{{ id }}" data-type="{{ type }}">{{{ html }}}</div>
+           <div data-task="{{ id }}" data-type="{{ type }}">
+              {{# choice }}{{> block_deft/choice }}{{/ choice }}
+              {{# comments }}{{> block_deft/comments }}{{/ comments }}
+              {{# text }}{{> block_deft/text }}{{/ text }}
+           <div>
         {{/ tasks }}
     </div>
 </div>

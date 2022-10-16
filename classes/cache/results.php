@@ -71,7 +71,7 @@ class results implements cache_data_source {
         $userid = reset($ids);
 
         if (!empty($userid)) {
-            return $DB->get_field('block_deft_response', 'response', ['task' => $taskid, 'userid' => $userid]);
+            return $DB->get_record('block_deft_response', ['task' => $taskid, 'userid' => $userid]);
         }
 
         $results = $DB->get_records_sql(

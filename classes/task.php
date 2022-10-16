@@ -126,4 +126,24 @@ class task extends persistent {
         $cache = cache::make('block_deft', 'tasks');
         $cache->delete($this->get('instance'));
     }
+
+    /**
+     * Get all tasks associated with block
+     *
+     * @param int $blockid Block instance id
+     * @return array Tasks for the block
+     */
+    public static function get_tasks(int $blockid) {
+        $cache = cache::make('block_deft', 'tasks');
+        $records = $cache->get($blockid);
+        $tasks = [];
+
+        foreach ($records as $record) {
+            $task = new self();
+            $task->from_record($record);
+            $tasks[] = $tasks;
+        }
+
+        return $tasks;
+    }
 }
