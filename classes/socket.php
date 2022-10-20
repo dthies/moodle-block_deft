@@ -78,7 +78,6 @@ class socket {
     public function __construct (context $context, ?int $itemid = null) {
         $this->context = $context;
         $this->itemid = $itemid;
-        $this->validate();
     }
 
     /**
@@ -106,6 +105,8 @@ class socket {
             return null;
         }
 
+        $this->validate();
+
         $requestparams = [
             'contextid' => $this->context->id,
             'component' => self::COMPONENT,
@@ -132,6 +133,8 @@ class socket {
         if (!get_config('block_deft', 'enableupdating')) {
             return;
         }
+
+        $this->validate();
 
         $cache = cache::make('block_deft', 'tokens');
 
@@ -166,15 +169,23 @@ class socket {
      *
      * @param \core\event\base $event
      */
-    public static function handle(\core\event\base $event) {
-        $socket = new socket($event->get_context());
-        $socket->dispatch();
+    public static function observe(\core\event\base $event) {
+        $class = get_called_class();
+        $socket = new $class($event->get_context());
+
+        try {
+            $socket->validate();
+            $socket->dispatch();
+        } catch (moodle_exception $e) {
+            return;
+        }
+
     }
 
     /**
      * Validate context and availabilty
      */
-    protected function validate() {
+    public function validate() {
         if (
             $this->context->contextlevel != CONTEXT_BLOCK
             && $this->context->contextlevel != CONTEXT_SYSTEM

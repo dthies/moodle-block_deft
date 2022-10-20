@@ -76,7 +76,7 @@ class choice extends text implements renderable, templatable {
             $options[] = [
                 'key' => $key,
                 'value' => $option,
-                'selected' => $response->response === $option,
+                'selected' => !empty($response) && $response->response === $option,
             ];
         }
 

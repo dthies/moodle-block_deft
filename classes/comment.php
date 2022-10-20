@@ -127,13 +127,13 @@ class comment extends \comment {
      *
      * @param \core\event\base $event
      */
-    public static function handle(\core\event\base $event) {
+    public static function observe(\core\event\base $event) {
         // Update the cache.
         $eventdata = $event->get_data();
         $cache = cache::make('block_deft', 'comments');
         $cache->set($eventdata['other']['itemid'], time());
 
         // Send message to update clients.
-        socket::handle($event);
+        socket::observe($event);
     }
 }
