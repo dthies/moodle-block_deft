@@ -14,7 +14,7 @@ import Notification from "core/notification";
 var websocket = new WebSocket('wss://deftly.us/ws'),
     listeners = [];
 
-export default {
+const Socket = class {
     /**
      * Listen to WebSocket and refresh content
      *
@@ -23,7 +23,7 @@ export default {
      * @returns {object}
      * @chainable
      */
-    open: function(contextid, token) {
+    constructor(contextid, token) {
         websocket.onopen = (e) => {
             websocket.send(token);
             listeners.forEach((callback) => {
@@ -51,7 +51,7 @@ export default {
         });
 
         return this;
-    },
+    }
 
     /**
      * Attempt reconnecting to service
@@ -59,14 +59,14 @@ export default {
      * @param {int} contextid Context id of block
      * @param {string} token Authentication token to connect service
      */
-    reconnect: function(contextid, token) {
+    reconnect(contextid, token) {
         Log.debug('Reconnecting');
         websocket = new WebSocket('wss://deftly.us/ws');
         this.open(contextid, token);
         listeners.forEach((callback) => {
             websocket.addEventListener('message', callback);
         });
-    },
+    }
 
     /**
      * Subscribe listener
@@ -75,10 +75,12 @@ export default {
      * @returns {object}
      * @chainable
      */
-    subscribe: function(callback) {
+    subscribe(callback) {
         websocket.addEventListener('message', callback);
         listeners.push(callback);
 
         return this;
     }
 };
+
+export default Socket;

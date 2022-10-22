@@ -39,7 +39,8 @@ export default {
         this.contextid = contextid;
         this.selector = selector;
         this.throttle = throttle;
-        Socket.open(contextid, token).subscribe(() => {
+        let socket = new Socket(contextid, token);
+        socket.subscribe(() => {
             this.refresh();
         });
     },
@@ -90,30 +91,55 @@ export default {
                 jsondata: JSON.stringify(data)
             }
         ).done((html, js) => {
-            content.querySelectorAll('.block_deft_comments').forEach((comments) => {
-                const position = comments.scrollTop,
-                    task = comments.closest('[data-task]').getAttribute('data-task');
-                setTimeout(() => {
-                    content.querySelectorAll('[data-task="' + task + '"]').forEach((task) => {
-                        task.querySelector('.block_deft_comments').scrollTo({
-                            top: position
-                        });
-                    });
-                });
-            });
-            content.querySelectorAll('[data-summary]').forEach((summary) => {
-                const height = summary.offsetHeight,
-                    task = summary.getAttribute('data-summary');
-                setTimeout(() => {
-                    content.querySelectorAll('[data-summary="' + task + '"]').forEach((summary) => {
-                        summary.setAttribute('style', 'min-height: ' + height + 'px;');
-                    });
-                });
-            });
-            Templates.replaceNodeContents(content, html, js);
+            this.replace(content, html, js);
         }).catch(Log.debug);
 
         this.throttled = false;
         this.lastupdate = Date.now();
+    },
+
+    /**
+     * Replace content
+     *
+     * @param {DOMNode} content
+     * @param {string} html New content
+     * @param {string} js Scripts to run after replacement
+     */
+    replace: function(content, html, js) {
+        let setScroll = () => {},
+            setHeight = () => {};
+        content.style.height = content.offsetHeight;
+        setTimeout(() => {
+            content.style.height = null;
+        });
+        content.querySelectorAll('.block_deft_comments').forEach((comments) => {
+            const position = comments.scrollTop,
+                task = comments.closest('[data-task]').getAttribute('data-task'),
+                recurse = setScroll;
+            Log.debug(position);
+            setScroll = () => {
+                content.querySelectorAll('[data-task="' + task + '"]').forEach((task) => {
+                    task.querySelector('.block_deft_comments').scrollTop = position;
+                    Log.debug(task.querySelector('.block_deft_comments'));
+                    Log.debug(position);
+                });
+                recurse();
+            };
+        });
+
+        content.querySelectorAll('[data-summary]').forEach((summary) => {
+            const height = summary.offsetHeight,
+                task = summary.getAttribute('data-summary'),
+                recurse = setHeight;
+            setHeight = () => {
+                content.querySelectorAll('[data-summary="' + task + '"]').forEach((summary) => {
+                    summary.setAttribute('style', 'min-height: ' + height + 'px;');
+                });
+                recurse();
+            };
+        });
+        Templates.replaceNodeContents(content, html, js);
+        setScroll();
+        setHeight();
     }
 };

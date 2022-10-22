@@ -58,6 +58,7 @@ if ($returnurl) {
 }
 $baseurl = new moodle_url('/blocks/deft/manage.php', $urlparams);
 $PAGE->set_url($baseurl);
+$PAGE->set_pagelayout('report');
 
 $strmanage = get_string('managetasks', 'block_deft');
 
