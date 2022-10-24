@@ -17,9 +17,9 @@ export default {
      *
      * @param {int} contextid Context id of block
      * @param {string} selector Content location to replace
-     * @param {function} update Callback to update content
+     * @param {object} refresh Interface to update content
      */
-    init: function(contextid, selector, update) {
+    init: function(contextid, selector, refresh) {
         document.querySelector(selector).addEventListener('click', (e) => {
             const button = e.target.closest('[data-type="comments"] [data-action]');
             if (button) {
@@ -54,11 +54,11 @@ export default {
                         break;
                     case 'collapse':
                         button.closest('[data-type]').querySelector('.block_deft_comments').classList.remove('expanded');
-                        update();
+                        refresh.update();
                         return;
                     case 'expand':
                         button.closest('[data-type]').querySelector('.block_deft_comments').classList.add('expanded');
-                        update();
+                        refresh.update();
                         return;
                 }
                 modalForm.show();

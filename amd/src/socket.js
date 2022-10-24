@@ -11,8 +11,6 @@ import Ajax from "core/ajax";
 import Log from "core/log";
 import Notification from "core/notification";
 
-var websocket = new WebSocket('wss://deftly.us/ws'),
-    listeners = [];
 
 const Socket = class {
     /**
@@ -24,14 +22,16 @@ const Socket = class {
      * @chainable
      */
     constructor(contextid, token) {
-        websocket.onopen = (e) => {
-            websocket.send(token);
-            listeners.forEach((callback) => {
+        this.websocket = new WebSocket('wss://deftly.us/ws');
+        this.listeners = [];
+        this.websocket.onopen = (e) => {
+            this.websocket.send(token);
+            this.listeners.forEach((callback) => {
                 callback(e);
             });
         };
 
-        websocket.addEventListener('close', (e) => {
+        this.websocket.addEventListener('close', (e) => {
             Log.debug('Disconnected');
             if (e.code == 1011) {
                 Log.debug('Authentication failed');
@@ -61,10 +61,10 @@ const Socket = class {
      */
     reconnect(contextid, token) {
         Log.debug('Reconnecting');
-        websocket = new WebSocket('wss://deftly.us/ws');
+        this.websocket = new WebSocket('wss://deftly.us/ws');
         this.open(contextid, token);
-        listeners.forEach((callback) => {
-            websocket.addEventListener('message', callback);
+        this.listeners.forEach((callback) => {
+            this.websocket.addEventListener('message', callback);
         });
     }
 
@@ -76,8 +76,8 @@ const Socket = class {
      * @chainable
      */
     subscribe(callback) {
-        websocket.addEventListener('message', callback);
-        listeners.push(callback);
+        this.websocket.addEventListener('message', callback);
+        this.listeners.push(callback);
 
         return this;
     }

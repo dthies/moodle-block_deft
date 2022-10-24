@@ -95,14 +95,23 @@ class comment extends \comment {
      * @return array
      */
     public function get_comments($page = '', $sortdirection = 'DESC') {
-        global $USER;
+        global $CFG, $USER;
 
         $cache = cache::make('block_deft', 'comments');
         $cached = $cache->get($this->contextid . 'i' . $this->itemid . 'u' . $USER->id);
         if (!empty($cached) && $cache->get($this->itemid) <= $cached->timecreated) {
             return $cached->comments;
         }
-        $comments = parent::get_comments();
+
+        // Load all pages.
+        $perpage = !empty($CFG->commentsperpage) ? $CFG->commentsperpage : 15;
+        $count = $this->count();
+        $pages = ceil($count / $perpage);
+        $comments = [];
+        for ($page = 0; $page < $pages; $page++) {
+            $comments = array_merge($comments, parent::get_comments($page));
+        }
+
         $date = usergetmidnight(time());
         foreach ($comments as $c) {
             if ($date != usergetmidnight($c->timecreated)) {

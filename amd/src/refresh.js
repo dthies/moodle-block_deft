@@ -12,17 +12,7 @@ import Log from "core/log";
 import Socket from "block_deft/socket";
 import Templates from "core/templates";
 
-export default {
-
-    throttled: false,
-
-    lastupdate: 0,
-
-    contextid: null,
-
-    token: null,
-
-    throttle: null,
+export default class {
 
     /**
      * Listen to WebSocket and refresh content
@@ -32,24 +22,26 @@ export default {
      * @param {string} token Authentication token to connect service
      * @param {int} throttle Throttle dely in ms
      */
-    init: function(contextid, selector, token, throttle) {
+    constructor(contextid, selector, token, throttle) {
         if (!token) {
             return;
         }
         this.contextid = contextid;
         this.selector = selector;
         this.throttle = throttle;
+        this.throttled = false;
+        this.lastupdate = 0;
         let socket = new Socket(contextid, token);
         socket.subscribe(() => {
-            this.refresh();
+            this.update();
         });
-    },
+    }
 
     /**
      * Refresh content
      *
      */
-    refresh: function() {
+    update() {
         let content = document.querySelector(this.selector).parentNode,
             component = content.closest('[data-component]')
                 && content.closest('[data-component]').getAttribute('data-component')
@@ -68,7 +60,7 @@ export default {
                 || (this.lastupdate + this.throttle < Date.now())
             ) {
                 setTimeout(() => {
-                    this.refresh();
+                    this.update();
                 }, Math.max(this.lastupdate + this.throttle - Date.now(), 40));
                 this.throttled = true;
             }
@@ -96,7 +88,7 @@ export default {
 
         this.throttled = false;
         this.lastupdate = Date.now();
-    },
+    }
 
     /**
      * Replace content
@@ -105,9 +97,13 @@ export default {
      * @param {string} html New content
      * @param {string} js Scripts to run after replacement
      */
-    replace: function(content, html, js) {
-        let setScroll = () => {},
-            setHeight = () => {};
+    replace(content, html, js) {
+        let setScroll = () => {
+                return true;
+            },
+            setHeight = () => {
+                return true;
+            };
         content.style.height = content.offsetHeight;
         setTimeout(() => {
             content.style.height = null;
@@ -142,4 +138,4 @@ export default {
         setScroll();
         setHeight();
     }
-};
+}

@@ -158,8 +158,11 @@ function block_deft_output_fragment_choose($args) {
 
     $cache->get($id);
     $cache->get($id . 'x' . $USER->id);
-    $socket = new socket($context);
-    $socket->dispatch();
+
+    if (!empty($task->get_state()->showsummary)) {
+        $socket = new socket($context);
+        $socket->dispatch();
+    }
 
     return 'change';
 }
