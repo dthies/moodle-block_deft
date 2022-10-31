@@ -75,7 +75,7 @@ class results implements cache_data_source {
         }
 
         $results = $DB->get_records_sql(
-            'SELECT response, COUNT(response) as count
+            'SELECT response, COUNT(response) as count, MAX(timemodified) AS timemodified
                FROM {block_deft_response}
               WHERE task = :task
            GROUP BY response',
@@ -97,7 +97,10 @@ class results implements cache_data_source {
             unset($results['']);
         }
 
-        return $results;
+        return [
+            'responses' => $results,
+            'timecreated' => time(),
+        ];
     }
 
     /**

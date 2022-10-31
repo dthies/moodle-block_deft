@@ -145,4 +145,21 @@ class comment extends \comment {
         // Send message to update clients.
         socket::observe($event);
     }
+
+    /**
+     * Return last modified time
+     *
+     * @return float
+     */
+    public function last_modified() {
+        global $CFG, $USER;
+
+        $cache = cache::make('block_deft', 'comments');
+        $cached = $cache->get($this->contextid . 'i' . $this->itemid . 'u' . $USER->id);
+        if (!empty($cached) && $cache->get($this->itemid) <= $cached->timecreated) {
+            return $cached->timecreated;
+        } else {
+            return time();
+        }
+    }
 }

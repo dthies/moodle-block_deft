@@ -72,15 +72,15 @@ class summary extends text implements renderable, templatable {
         if ($this->config->charttype) {
             $counts = new chart_series(
                 get_string('responses', 'block_deft'),
-                array_column($this->results, 'count')
+                array_column($this->results['responses'], 'count')
             );
             $chart = new chart_pie();
             $chart->set_doughnut(true);
             $chart->add_series($counts);
-            $chart->set_labels(array_column($this->results, 'response'));
+            $chart->set_labels(array_column($this->results['responses'], 'response'));
         } else {
             $chart = new chart_bar();
-            foreach ($this->results as $result) {
+            foreach ($this->results['responses'] as $result) {
                 $counts = new chart_series($result->response, [$result->count]);
                 $chart->add_series($counts);
             }
@@ -88,8 +88,24 @@ class summary extends text implements renderable, templatable {
 
         return [
             'chart' => $output->render_chart($chart, false),
-            'results' => $this->results,
+            'lastmodified' => $this->results['timecreated'],
+            'results' => $this->results['responses'],
             'task' => $this->task->id,
         ];
+    }
+
+    /**
+     * Return last modified time
+     *
+     * @return float
+     */
+    public function last_modified() {
+        $cache = cache::make('block_deft', 'results');
+        $cached = $cache->get($this->task->id);
+        if (!empty($cached) && $cached['timecreated']) {
+            return $cached['timecreated'];
+        } else {
+            return time();
+        }
     }
 }

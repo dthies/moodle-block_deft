@@ -67,6 +67,7 @@ class view implements renderable, templatable {
 
         $cache = cache::make('block_deft', 'tasks');
         $tasks = $cache->get($this->context->instanceid);
+        $lastmodified = 0;
 
         $tasklist = [];
         foreach ($tasks as $record) {
@@ -74,10 +75,14 @@ class view implements renderable, templatable {
                 case 'choice':
                     $choice = new choice($this->context, $record);
                     $record->choice = $choice->export_for_template($output);
+                    $lastmodified = max($lastmodified, $record->choice['lastmodified']);
                     break;
                 case 'comments':
                     $comments = new comments($this->context, $record, $this->options);
                     $record->comments = $comments->export_for_template($output);
+                    if (is_array($record->comments)) {
+                        $lastmodified = max($lastmodified, $record->comments['lastmodified']);
+                    }
                     break;
                 case 'text':
                     $text = new text($this->context, $record);
@@ -85,12 +90,14 @@ class view implements renderable, templatable {
                     break;
             }
             $tasklist[] = $record;
+            $lastmodified = max($lastmodified, $record->timemodified);
         }
 
         return [
             'contextid' => $this->context->id,
-            'uniqid' => uniqid(),
+            'lastmodified' => $lastmodified,
             'tasks' => $tasklist,
+            'uniqid' => uniqid(),
         ];
     }
 }

@@ -188,6 +188,9 @@ function block_deft_output_fragment_content($args) {
 
     $data = $view->export_for_template($OUTPUT);
 
+    if (!empty($jsondata->lastmodified) && ($jsondata->lastmodified >= $data['lastmodified'])) {
+        return '';
+    }
     return $OUTPUT->render_from_template('block_deft/view', $data);
 }
 

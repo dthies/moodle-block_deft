@@ -22,11 +22,22 @@ const Socket = class {
      * @chainable
      */
     constructor(contextid, token) {
-        this.websocket = new WebSocket('wss://deftly.us/ws');
         this.listeners = [];
+        this.connect(contextid, token);
+    }
+
+    /**
+     * Connect to service
+     *
+     * @param {int} contextid Context id of block
+     * @param {string} token Authentication token to connect service
+     */
+    connect(contextid, token) {
+        this.websocket = new WebSocket('wss://deftly.us/ws');
         this.websocket.onopen = (e) => {
             this.websocket.send(token);
             this.listeners.forEach((callback) => {
+                this.websocket.addEventListener('message', callback);
                 callback(e);
             });
         };
@@ -39,33 +50,20 @@ const Socket = class {
                     methodname: 'block_deft_renew_token',
                     args: {contextid: contextid},
                     done: (replacement) => {
-                        this.reconnect(contextid, replacement.token);
+                        Log.debug('Reconnecting');
+                        this.connect(contextid, replacement.token);
                     },
                     fail: Notification.exception
                 }]);
             } else {
                 setTimeout(() => {
-                    this.reconnect(contextid, token);
+                    Log.debug('Reconnecting');
+                    this.connect(contextid, token);
                 }, 5000);
             }
         });
 
         return this;
-    }
-
-    /**
-     * Attempt reconnecting to service
-     *
-     * @param {int} contextid Context id of block
-     * @param {string} token Authentication token to connect service
-     */
-    reconnect(contextid, token) {
-        Log.debug('Reconnecting');
-        this.websocket = new WebSocket('wss://deftly.us/ws');
-        this.open(contextid, token);
-        this.listeners.forEach((callback) => {
-            this.websocket.addEventListener('message', callback);
-        });
     }
 
     /**

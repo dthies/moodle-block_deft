@@ -75,6 +75,10 @@ export default class {
                 data.opencomments.push(opencomments.closest('[data-task]').getAttribute('data-task'));
             });
 
+        if (document.querySelector(this.selector).closest('[data-modified]')) {
+            data.lastmodified = document.querySelector(this.selector).closest('[data-modified]').getAttribute('data-modified');
+        }
+
         Fragment.loadFragment(
             component,
             'content',
@@ -83,7 +87,9 @@ export default class {
                 jsondata: JSON.stringify(data)
             }
         ).done((html, js) => {
-            this.replace(content, html, js);
+            if (html) {
+                this.replace(content, html, js);
+            }
         }).catch(Log.debug);
 
         this.throttled = false;

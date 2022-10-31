@@ -53,10 +53,12 @@ export default {
                         });
                         break;
                     case 'collapse':
+                        button.closest('[data-modified]').setAttribute('data-modified', 0);
                         button.closest('[data-type]').querySelector('.block_deft_comments').classList.remove('expanded');
                         refresh.update();
                         return;
                     case 'expand':
+                        button.closest('[data-modified]').setAttribute('data-modified', 0);
                         button.closest('[data-type]').querySelector('.block_deft_comments').classList.add('expanded');
                         refresh.update();
                         return;

@@ -85,6 +85,7 @@ class choice extends text implements renderable, templatable {
             'disabled' => !empty($this->state->preventresponse),
             'id' => $this->task->id,
             'key' => array_search($response->response ?? null, array_filter($this->config->option)),
+            'lastmodified' => max($response->timemodified ?? 0, empty($summary) ? 0 : $summary->last_modified()),
             'name' => !empty($this->state->showtitle) ? $this->config->name : '',
             'question' => format_text($this->config->question, FORMAT_MOODLE, [
                 'blanktarget' => true,
@@ -93,7 +94,6 @@ class choice extends text implements renderable, templatable {
             'options' => $options,
             'results' => !empty($summary) ? array_values($summary->export_for_template($output)['results']) : null,
             'summary' => !empty($summary) ? $output->render($summary) : null,
-            'timemodified' => $response->timemodified ?? 0,
             'visible' => true,
         ];
     }

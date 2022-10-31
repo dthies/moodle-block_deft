@@ -68,6 +68,7 @@ class text implements renderable, templatable {
         }
 
         return [
+            'lastmodified' => $this->task->timemodified,
             'name' => !empty($this->state->showtitle) ? $this->config->name : '',
             'content' => format_text($this->config->content, FORMAT_MOODLE, [
                 'blanktarget' => true,
