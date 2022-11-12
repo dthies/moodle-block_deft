@@ -90,8 +90,9 @@ class edit_task extends dynamic_form {
      * @return mixed
      */
     public function process_dynamic_submission() {
+        global $OUTPUT;
+
         if ($data = $this->get_data()) {
-            unset($data->contextid);
             $instance = $this->get_context_for_dynamic_submission()->instanceid;
             if (empty($data->id)) {
                 unset($data->id);
@@ -105,15 +106,48 @@ class edit_task extends dynamic_form {
                 ];
                 $task = $this->get_task(0, $record);
                 $task->create();
+                $formclass = "\\block_deft\\form\\status_$record->type";
+                $form = new $formclass(null, null, 'post', '', [], true, [
+                    'contextid' => $data->contextid,
+                    'id' => $task->get('id'),
+                ]);
+                $form->set_data_for_dynamic_submission([
+                    'contextid' => $data->contextid,
+                    'id' => $task->get('id'),
+                ]);
+                return [
+                    'canedit' => true,
+                    'contextid' => $data->contextid,
+                    'form' => $form->render(),
+                    'id' => $task->get('id'),
+                    'configdata' => $task->get_config(),
+                    'type' => $task->get('type'),
+                ];
             } else {
                 $task = $this->get_task($data->id);
                 unset($data->id);
                 $task->set('configdata', json_encode($data));
                 $task->update();
-            }
+                $returndata = [
+                    'html' => $OUTPUT->render_from_template('block_deft/taskinfo', [
+                        'canedit' => true,
+                        'form' => !empty($form) ? $form->render() : '',
+                        'contextid' => $data->contextid,
+                        'configdata' => $task->get_config(),
+                        'id' => $task->get('id'),
+                        'type' => $task->get('type'),
+                    ]),
+                    'contextid' => $data->contextid,
+                    'id' => $task->get('id'),
+                ];
 
+                // Update block display.
+                $socket = $this->get_socket($this->get_context_for_dynamic_submission());
+                $socket->dispatch();
+
+                return $returndata;
+            }
         }
-        return $this->task_html();
     }
 
     /**

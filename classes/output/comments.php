@@ -80,7 +80,7 @@ class comments implements renderable, templatable {
         }
 
         return [
-            'lastmodified' => !empty($this->comment) ? $this->comment->last_modified() : 0,
+            'lastmodified' => !empty($this->comment) ? $this->comment->last_modified() : $this->task->timemodified,
             'name' => !empty($this->state->showtitle) ? $this->config->name : '',
             'task' => $this->task->id,
             'count' => $this->comment->count(),

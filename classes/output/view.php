@@ -75,7 +75,9 @@ class view implements renderable, templatable {
                 case 'choice':
                     $choice = new choice($this->context, $record);
                     $record->choice = $choice->export_for_template($output);
-                    $lastmodified = max($lastmodified, $record->choice['lastmodified']);
+                    if (is_array($record->choice)) {
+                        $lastmodified = max($lastmodified, $record->choice['lastmodified']);
+                    }
                     break;
                 case 'comments':
                     $comments = new comments($this->context, $record, $this->options);

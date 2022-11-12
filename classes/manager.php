@@ -87,6 +87,16 @@ class manager implements renderable, templatable {
             $record = $task->to_record();
             $record->configdata = $task->get_config();
             $record->statedata = $task->get_state();
+            $formclass = "\\block_deft\\form\\status_$record->type";
+            $form = new $formclass(null, null, 'post', '', [], true, [
+                'contextid' => $this->context->id,
+                'id' => $record->id,
+            ]);
+            $form->set_data_for_dynamic_submission([
+                'contextid' => $this->context->id,
+                'id' => $record->id,
+            ] + (array) $record->statedata);
+            $record->form = $form->render();
             $tasklist[] = $record;
         }
 

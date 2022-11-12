@@ -84,7 +84,20 @@ class edit_move extends edit_task {
             $task->update();
         }
 
-        return $this->task_html();
+        $tasks = $this->get_records(
+            ['instance' => $instance],
+            'sortorder'
+        );
+
+        // Update block display.
+        $socket = $this->get_socket($this->get_context_for_dynamic_submission());
+        $socket->dispatch();
+
+        return [
+            'order' => array_map(function($task) {
+                return $task->get('id');
+            }, $tasks),
+        ];
     }
 
     /**

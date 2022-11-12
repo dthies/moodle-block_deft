@@ -63,17 +63,25 @@ class edit_delete extends edit_task {
         if ($data = $this->get_data()) {
             if (!empty($data->id)) {
                 $task = $this->get_task($data->id);
+                $state = $task->get_state();
                 $task->delete();
                 $tasks = task::get_records(['instance' => $this->get_context_for_dynamic_submission()->instanceid]);
                 foreach (array_values($tasks) as $sortorder => $task) {
                     $task->set('sortorder', $sortorder);
                     $task->update();
                 }
+
+                // Update block display.
+                if (!empty($state->visible)) {
+                    $socket = $this->get_socket($this->get_context_for_dynamic_submission());
+                    $socket->dispatch();
+                }
+
+                return [
+                    'id' => $data->id,
+                ];
             }
-
         }
-
-        return $this->task_html();
     }
 
     /**

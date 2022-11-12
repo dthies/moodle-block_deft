@@ -32,6 +32,9 @@
             <div class="text-danger bg-warning">{{# str }} enableservicemessage, block_deft {{/ str }}</div>
             <a href="{{ url }}" class="text-info">{{# str }} returntosettings, block_deft {{/ str }}</a>
         {{/ enableupdating }}
+        {{# registered }}
+            {{# testurl }}<a href="{{ testurl }}">{{# str }} testconnection, block_deft {{/ str }}</a>{{/ testurl }}
+        {{/ registered }}
         {{^ registered }}
             <div class="text-danger bg-warning">{{# str }} notregistered, block_deft {{/ str }}</div>
             <a href="{{ url }}" class="text-info">{{# str }} returntosettings, block_deft {{/ str }}</a>

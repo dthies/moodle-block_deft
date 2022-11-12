@@ -57,7 +57,7 @@ class add_comment extends dynamic_form {
         $mform->addElement('hidden', 'contextid', $this->get_context_for_dynamic_submission()->id);
         $mform->setType('contextid', PARAM_INT);
 
-        $mform->addElement('text', 'content', get_string('content', 'block_deft'));
+        $mform->addElement('textarea', 'content', get_string('content', 'block_deft'));
         $mform->setType('content', PARAM_TEXT);
         $mform->addRule('content', null, 'required', null, 'client');
         $mform->addRule('content', get_string('maximumchars', '', 255), 'maxlength', 255, 'client');

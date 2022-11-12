@@ -28,13 +28,16 @@ export default {
             methodname: 'block_deft_renew_token',
             args: {contextid: contextid},
             done: (token) => {
+                const socket = new Socket(contextid, token.token);
                 getString('authorizationreceived', 'block_deft').done((message) => {
                     Toast.add(message, {'type': 'info'});
                 });
-                Socket.open(contextid, token.token).subscribe(() => {
-                    getString('messagereceived', 'block_deft').done((message) => {
-                        Toast.add(message, {'type': 'success'});
-                    });
+                socket.subscribe((e) => {
+                    if (e.type === 'message') {
+                        getString('messagereceived', 'block_deft').done((message) => {
+                            Toast.add(message, {'type': 'success'});
+                        });
+                    }
                 });
 
                 setTimeout(() => {

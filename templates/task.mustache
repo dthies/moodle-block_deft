@@ -22,20 +22,24 @@
     Example context (json):
     {
         "contextid": 4,
-        "tasks": [
-            {
-                "id": 4,
-                "type": "text",
-                "configdata": {
-                    "name": "Welcome",
-                    "content": "hello"
-                }
-            }
-        ]
+        "id": "4",
+        "type": "text",
+        "configdata": {
+            "name": "Welcome",
+            "content": "hello"
+        }
     }
 }}
-<div class="row">
-    {{# tasks }}
-        {{> block_deft/task }}
-    {{/ tasks }}
+<div class="col-3 p-1">
+    <div class="card deft-task-{{ type }}" data-id="{{ id }}" data-type="{{ type }}">
+        <div class="card-body">
+            <div data-region="taskinfo">{{> block_deft/taskinfo }}</div>
+            <div data-region="status">{{{ form }}}</div>
+        </div>
+    </div>
 </div>
+{{# js }}
+    require(['block_deft/form'], function(Form) {
+        new Form({{ contextid }}, '{{ type }}', {{ id }});
+    });
+{{/ js }}

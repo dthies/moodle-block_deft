@@ -15,27 +15,29 @@
     along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 }}
 {{!
-    @template block_deft/tasks
+    @template block_deft/taskinfo
 
     This template renders the tasks manager for deft response block
 
     Example context (json):
     {
-        "contextid": 4,
-        "tasks": [
-            {
-                "id": 4,
-                "type": "text",
-                "configdata": {
-                    "name": "Welcome",
-                    "content": "hello"
-                }
-            }
-        ]
+        "type": "text",
+        "configdata": {
+            "name": "Welcome",
+            "content": "hello"
+        }
     }
 }}
-<div class="row">
-    {{# tasks }}
-        {{> block_deft/task }}
-    {{/ tasks }}
+<h5 class="card-title">{{configdata.name}}</h5>
+{{ type }}
+<div class="task-controls pb-3">
+    <form onsubmit="return false;">
+    <input type="hidden" name="id" value="{{ id }}" />
+    <input type="hidden" name="type" value="{{ type }}" />
+    {{# canedit }}
+    <button name="action" value="edit" title="{{# str }} edit {{/ str }}" class="icon fa fa-cog border-0"></button>
+    <button name="action" value="delete" title="{{# str }} delete {{/ str }}" class="icon fa fa-trash border-0"></button>
+    <button name="action" value="move" title="{{# str }} move {{/ str }}" class="icon fa fa-arrows border-0"></button>
+    {{/ canedit }}
+    </form>
 </div>

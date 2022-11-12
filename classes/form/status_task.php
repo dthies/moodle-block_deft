@@ -120,11 +120,7 @@ class status_task extends edit_task {
                     $mform->setDefault($field, $value);
                 }
             }
-
-            $mform->insertElementBefore(
-                $mform->createElement('static', 'name', get_string('taskname', 'block_deft'), s($this->configdata['name'])),
-                'visible'
-            );
+            $this->add_action_buttons(false);
         }
     }
 

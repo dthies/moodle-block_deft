@@ -20,13 +20,37 @@ var contextid;
  * @param {Event} e Event object
  */
 const submitForm = (e) => {
+    'use strict';
+
     Log.debug('Form submitted');
-    if (e.detail && e.detail.html) {
-        Templates.replaceNodeContents(
-            document.querySelector('.tasks'),
-            e.detail.html,
-            ''
-        );
+    if (e.detail && e.detail.order) {
+        e.detail.order.forEach((task) => {
+            document.querySelector('.tasks > div').appendChild(
+                document.querySelector('.tasks [data-id="' + task + '"]').parentNode
+            );
+        });
+        return;
+    }
+    if (e.detail && e.detail.id) {
+        if (document.querySelector('[data-id="' + e.detail.id + '"] [data-region="taskinfo"]')) {
+            if (e.detail.html) {
+                Templates.replaceNodeContents(
+                    document.querySelector('[data-id="' + e.detail.id + '"] [data-region="taskinfo"]'),
+                    e.detail.html,
+                    ''
+                );
+            } else {
+                document.querySelector('.tasks [data-id="' + e.detail.id + '"]').parentNode.remove(true);
+            }
+
+            return;
+        }
+        Templates.render('block_deft/task', e.detail).done((html, js)  => {
+            const node =  document.createElement('div');
+            node.innerHTML = html;
+            document.querySelector('.tasks > div').appendChild(node.firstChild);
+            Templates.runTemplateJS(js);
+        });
     }
 };
 
@@ -36,7 +60,9 @@ const submitForm = (e) => {
  * @param {Event} e Event object
  */
 const handleSubmit = (e) => {
-    if (e.target.matches('form')) {
+    'use strict';
+
+    if (e.target.matches('form') && !e.target.closest('[data-region="status"]')) {
         let formdata = new FormData(e.target),
             component = e.target.closest('[data-component]')
                 && e.target.closest('[data-component]').getAttribute('data-component')
@@ -57,6 +83,11 @@ const handleSubmit = (e) => {
             case 'move':
                 title = getString('move', 'core');
                 break;
+            case 'saveall':
+                document.querySelectorAll('[data-region="status"] form.modified input[type="submit"]').forEach((form) => {
+                    form.click();
+                });
+                return;
             case 'status':
                 title = getString('changestatus', 'block_deft');
                 break;
@@ -81,6 +112,20 @@ const handleSubmit = (e) => {
 };
 
 /**
+ * Handle form change
+ *
+ * @param {Event} e Event object
+ */
+const handleChange = (e) => {
+    'use strict';
+
+    let form = e.target.closest('[data-region="status"] form');
+    if (form) {
+        form.classList.add('modified');
+    }
+};
+
+/**
  * Initialize listeners
  *
  * @param {int} id Context id of block
@@ -92,4 +137,7 @@ export const init = (id) => {
 
     document.removeEventListener('submit', handleSubmit);
     document.addEventListener('submit', handleSubmit);
+
+    document.removeEventListener('change', handleChange);
+    document.addEventListener('change', handleChange);
 };

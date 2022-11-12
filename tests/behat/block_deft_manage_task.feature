@@ -47,7 +47,6 @@ Feature: The deft response block allows managers and teachers to interact with s
     | Name         | Welcome     |
     | Page content | Hello World |
     And I press "Save changes"
-    And I click on "button[name='action'][value='status']" "css_element"
     And I set the following fields to these values:
     | Visible         | 1 |
     | Show title      | 1 |

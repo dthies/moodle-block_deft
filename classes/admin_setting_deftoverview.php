@@ -106,6 +106,7 @@ class admin_setting_deftoverview extends admin_setting {
             )) ?? new stdClass();
             $response->enableupdating = true;
             $response->registered = !!$DB->get_field('lti_types', 'clientid', ['tooldomain' => 'deftly.us']);
+            $response->testurl = $url->out(true);
             $return .= $OUTPUT->render_from_template('block_deft/report', $response);
         } else {
             $return .= $OUTPUT->render_from_template('block_deft/activation', [

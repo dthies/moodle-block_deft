@@ -7,3 +7,23 @@
     max-height: 600px;
     overflow-y: auto;
 }
+
+[data-region="status"] div.col-form-label,
+[data-region="status"] div.col.d-flex.col-form-label {
+    display: none;
+    width: 100%;
+    min-width: 100%;
+    max-width: 100%;
+}
+
+[data-region="status"] div.form-group {
+    margin-bottom: 0;
+}
+
+[data-region="status"] form {
+    padding: 10px;
+}
+
+[data-region="status"] form.modified {
+    background: lightYellow;
+}

@@ -91,7 +91,7 @@ class mobile {
         $data = (object) $instance->export_for_template($output);
         $choice = [];
         foreach ($data->tasks as $task) {
-            if ($task->type == 'choice') {
+            if (!empty($task->choice)) {
                 $choice['choice' . $task->id] = (string) $task->choice['key'];
             }
         }
