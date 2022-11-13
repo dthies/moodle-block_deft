@@ -46,7 +46,7 @@ const submitForm = (e) => {
             return;
         }
         Templates.render('block_deft/task', e.detail).done((html, js) => {
-            const node =  document.createElement('div');
+            const node = document.createElement('div');
             node.innerHTML = html;
             document.querySelector('.tasks > div').appendChild(node.firstChild);
             Templates.runTemplateJS(js);
