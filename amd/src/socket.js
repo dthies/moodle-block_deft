@@ -18,8 +18,6 @@ const Socket = class {
      *
      * @param {int} contextid Context id of block
      * @param {string} token Authentication token to connect service
-     * @returns {object}
-     * @chainable
      */
     constructor(contextid, token) {
         this.listeners = [];
@@ -31,6 +29,8 @@ const Socket = class {
      *
      * @param {int} contextid Context id of block
      * @param {string} token Authentication token to connect service
+     * @returns {object}
+     * @chainable
      */
     connect(contextid, token) {
         this.websocket = new WebSocket('wss://deftly.us/ws');
