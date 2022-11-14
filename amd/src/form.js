@@ -15,7 +15,18 @@ export default class {
             dynamicForm.load({
                 contextid: contextid,
                 id: task
+            }).then(() => {
+                const form = document.querySelector('[data-id="' + task + '"] [data-region="status"] form'),
+                    data = new FormData(form),
+                    params = new URLSearchParams(data);
+                form.setAttribute('data-value', params.toString());
             });
+        });
+
+        document.querySelectorAll('[data-id="' + task + '"] [data-region="status"] form').forEach((form) => {
+            const data = new FormData(form),
+                params = new URLSearchParams(data);
+            form.setAttribute('data-value', params.toString());
         });
     }
 }

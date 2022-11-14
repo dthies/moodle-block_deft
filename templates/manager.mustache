@@ -28,7 +28,7 @@
 }}
 <div id="deft-manage-{{uniqid}}"
      data-region="deft-manage">
-    <div data-region="deft-manage-content container">
+    <div data-region="deft-manage-content container" class="pt-3">
         <div class="row">
             <div {{# blockpresent }} class = "col-12" {{/ blockpresent }}
                  {{^ blockpresent }} class="col-12 col-md-8 col-lg-9" {{/ blockpresent }}>
@@ -37,7 +37,7 @@
                      <button name="addtask" value="choice" class="btn btn-secondary">{{# str }} addchoice, block_deft {{/ str }}</button>
                      <button name="addtask" value="comments" class="btn btn-secondary">{{# str }} addcomments, block_deft {{/ str }}</button>
                      <button name="addtask" value="text" class="btn btn-secondary">{{# str }} addtext, block_deft {{/ str }}</button>
-                     <button name="action" value="saveall" class="btn btn-primary">{{# str }} saveallchanges, block_deft {{/ str }}</button>
+                     <button name="action" value="saveall" class="btn btn-primary float-right">{{# str }} saveallchanges, block_deft {{/ str }}</button>
                 </form>
                 {{/ canedit }}
                 <div class="container-fluid bg-gray tasks">

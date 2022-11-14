@@ -121,7 +121,13 @@ const handleChange = (e) => {
 
     let form = e.target.closest('[data-region="status"] form');
     if (form) {
-        form.classList.add('modified');
+        const data = new FormData(form),
+            params = new URLSearchParams(data);
+        if (form.getAttribute('data-value') === params.toString()) {
+           form.classList.remove('modified');
+        } else {
+           form.classList.add('modified');
+        }
     }
 };
 
