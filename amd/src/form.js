@@ -1,5 +1,6 @@
 import DynamicForm from 'core_form/dynamicform';
 import Log from 'core/log';
+import Notification from 'core/notification';
 
 export default class {
     constructor(contextid, type, task) {
@@ -20,7 +21,8 @@ export default class {
                     data = new FormData(form),
                     params = new URLSearchParams(data);
                 form.setAttribute('data-value', params.toString());
-            });
+                return true;
+            }).fail(Notification.exception);
         });
 
         document.querySelectorAll('[data-id="' + task + '"] [data-region="status"] form').forEach((form) => {
