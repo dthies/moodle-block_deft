@@ -24,15 +24,32 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-$functions = array(
+$functions = [
 
-    'block_deft_renew_token' => array(
+    'block_deft_renew_token' => [
         'classname'   => '\\block_deft\\external\\renew_token',
         'methodname'  => 'execute',
         'description' => 'Get new token to access message service',
         'type'        => 'read',
         'ajax'        => true,
         'services'    => array(MOODLE_OFFICIAL_MOBILE_SERVICE),
-    ),
-);
+    ],
 
+    'block_deft_send_signal' => [
+        'classname'   => '\\block_deft\\external\\send_signal',
+        'methodname'  => 'execute',
+        'description' => 'Send WebRTC signal to peer',
+        'type'        => 'write',
+        'ajax'        => true,
+        'services'    => array(MOODLE_OFFICIAL_MOBILE_SERVICE),
+    ],
+
+    'block_deft_venue_settings' => [
+        'classname'   => '\\block_deft\\external\\venue_settings',
+        'methodname'  => 'execute',
+        'description' => 'Modify WebRTC settigs',
+        'type'        => 'write',
+        'ajax'        => true,
+        'services'    => array(MOODLE_OFFICIAL_MOBILE_SERVICE),
+    ],
+];

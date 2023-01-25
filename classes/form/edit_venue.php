@@ -15,20 +15,42 @@
 // along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
 /**
- * Plugin version and other meta-data are defined here.
+ * Edit form for venue task
  *
  * @package     block_deft
  * @copyright   2022 Daniel Thies <dethies@gmail.com>
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-defined('MOODLE_INTERNAL') || die();
+namespace block_deft\form;
 
-$plugin->component = 'block_deft';
-$plugin->release = '1.1 Alpha';
-$plugin->version = 2022111412;
-$plugin->requires = 2021051700;
-$plugin->maturity = MATURITY_ALPHA;
-$plugin->dependencies = [
-    'mod_lti' => 2021051700,
-];
+use context;
+use context_user;
+use core_form\dynamic_form;
+use moodle_exception;
+use moodle_url;
+use block_deft\task;
+
+/**
+ * Edit form for venue task
+ *
+ * @package     block_deft
+ * @copyright   2022 Daniel Thies <dethies@gmail.com>
+ * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+class edit_venue extends edit_task {
+
+    /** @var {string} $type Type of task */
+    protected $type = 'venue';
+
+    /**
+     * Form definition
+     */
+    public function definition() {
+        $mform = $this->_form;
+        parent::definition();
+
+        $mform->addElement('textarea', 'content', get_string('content', 'page'));
+        $mform->setType('content', PARAM_CLEANHTML);
+    }
+}

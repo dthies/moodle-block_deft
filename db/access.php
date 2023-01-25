@@ -80,4 +80,15 @@ $capabilities = [
         ],
         'clonepermissionsfrom' => 'mod/choice:choose',
     ],
+
+    'block/deft:joinvenue' => [
+        'captype' => 'write',
+        'contextlevel' => CONTEXT_BLOCK,
+        'archetypes' => [
+            'student' => CAP_ALLOW,
+            'teacher' => CAP_ALLOW,
+            'editingteacher' => CAP_ALLOW
+        ],
+        'clonepermissionsfrom' => 'mod/chat:chat',
+    ],
 ];

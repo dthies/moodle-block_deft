@@ -23,6 +23,9 @@
  */
 namespace block_deft;
 
+use block_deft\event\task_created;
+use block_deft\event\task_deleted;
+use block_deft\event\task_updated;
 use cache;
 use core\persistent;
 use comment;
@@ -99,6 +102,14 @@ class task extends persistent {
      */
     public function before_update() {
         $this->clear_cache();
+
+        $params = [
+            'context' => context_block::instance($this->get('instance')),
+            'objectid' => $this->get('id'),
+        ];
+
+        $event = task_updated::create($params);
+        $event->trigger();
     }
 
     /**
@@ -113,10 +124,30 @@ class task extends persistent {
 
         $DB->delete_records('block_deft_response', ['task' => $id]);
 
+        $DB->delete_records_select(
+            'block_deft_signal',
+            'frompeer IN (SELECT id FROM {block_deft_peer} WHERE taskid = :taskid',
+            ['taskid' => $id]
+        );
+        $DB->delete_records_select(
+            'block_deft_signal',
+            'topeer IN (SELECT id FROM {block_deft_peer} WHERE taskid = :taskid',
+            ['taskid' => $id]
+        );
+        $DB->delete_records('block_deft_peer', ['taskid' => $id]);
+
         comment::delete_comments([
             'contextid' => $context->id,
             'itemid' => $id,
         ]);
+
+        $params = [
+            'context' => $context,
+            'objectid' => $this->get('id'),
+        ];
+
+        $event = task_deleted::create($params);
+        $event->trigger();
     }
 
     /**
@@ -145,5 +176,23 @@ class task extends persistent {
         }
 
         return $tasks;
+    }
+
+    /**
+     * Hook to execute after a create.
+     *
+     * This is only intended to be used by child classes, do not put any logic here!
+     *
+     * @return void
+     */
+    protected function after_create() {
+
+        $params = [
+            'context' => context_block::instance($this->get('instance')),
+            'objectid' => $this->get('id'),
+        ];
+
+        $event = task_created::create($params);
+        $event->trigger();
     }
 }

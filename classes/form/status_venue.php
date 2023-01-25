@@ -15,20 +15,21 @@
 // along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
 /**
- * Plugin version and other meta-data are defined here.
+ * Form for modifying venue task status
  *
  * @package     block_deft
  * @copyright   2022 Daniel Thies <dethies@gmail.com>
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-defined('MOODLE_INTERNAL') || die();
+namespace block_deft\form;
 
-$plugin->component = 'block_deft';
-$plugin->release = '1.1 Alpha';
-$plugin->version = 2022111412;
-$plugin->requires = 2021051700;
-$plugin->maturity = MATURITY_ALPHA;
-$plugin->dependencies = [
-    'mod_lti' => 2021051700,
-];
+/**
+ * Form for modifying venue task status
+ *
+ * @package     block_deft
+ * @copyright   2022 Daniel Thies <dethies@gmail.com>
+ * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+class status_venue extends status_task {
+}

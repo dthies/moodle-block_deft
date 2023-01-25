@@ -65,6 +65,11 @@ class socket {
     protected $context = null;
 
     /**
+     * @var $iceservers ICE server configuration supplied by service
+     */
+    protected $iceservers = null;
+
+    /**
      * @var $int itemid Optional id to distinguish socket context
      */
     protected $itemid = null;
@@ -141,6 +146,7 @@ class socket {
         $cached = $cache->get($this->context->id);
 
         if (!empty($cached) && $cached->expiry > time()) {
+            $this->iceservers = $cached->iceservers ?? '';
             return $cached->token;
         }
 
@@ -148,6 +154,7 @@ class socket {
         $cache->set($this->context->id, (object) [
             'token' => '',
             'expiry' => time() + 5,
+            'iceservers' => $cached->iceservers ?? '',
         ]);
 
         $response = $this->execute([
@@ -158,10 +165,22 @@ class socket {
         if (empty($response)) {
             return null;
         }
+        $this->iceservers = $response->iceservers;
 
         $cache->set($this->context->id, $response);
 
         return $response->token;
+    }
+
+    /**
+     * Return ICE servers
+     *
+     * @return array Server information
+     */
+    public function ice_servers() {
+        $this->get_token();
+
+        return $this->iceservers;
     }
 
     /**

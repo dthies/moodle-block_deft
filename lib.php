@@ -108,6 +108,44 @@ function block_deft_comment_display($comments, $args) {
  * @param array $args List of named arguments for the fragment loader.
  * @return string
  */
+function block_deft_output_fragment_venue($args) {
+    global $DB, $OUTPUT, $USER, $PAGE;
+
+    $context = $args['context'];
+    $peerid = $args['peerid'];
+    $peer = $DB->get_record('block_deft_peer', [
+        'id' => $peerid
+    ]);
+
+    if (!$user = core_user::get_user($peer->userid)) {
+        return '';
+    }
+    $url = new moodle_url('/user/view.php', [
+        'id' => $user->id,
+        'course' => $context->get_course_context->instance,
+    ]);
+    $user->fullname = fullname($user);
+    $userpicture = new user_picture($user);
+    $user->pictureurl = $userpicture->get_url($PAGE, $OUTPUT);
+    $user->avatar = $OUTPUT->user_picture($user, [
+        'class' => 'card-img-top',
+        'link' => false,
+        'size' => 256,
+    ]);
+    $user->profileurl = $url->out(false);
+
+    return $OUTPUT->render_from_template('block_deft/venue_user', [
+        'peerid' => $peerid,
+        'user' => $user,
+    ]);
+}
+
+/**
+ * Serve the comments as a fragment.
+ *
+ * @param array $args List of named arguments for the fragment loader.
+ * @return string
+ */
 function block_deft_output_fragment_choose($args) {
     global $DB, $USER;
 
@@ -163,6 +201,14 @@ function block_deft_output_fragment_choose($args) {
         $socket = new socket($context);
         $socket->dispatch();
     }
+
+    $params = [
+        'context' => $context,
+        'objectid' => $task->get('id'),
+    ];
+
+    $event = \block_deft\event\choice_submitted::create($params);
+    $event->trigger();
 
     return 'change';
 }
@@ -231,4 +277,16 @@ function block_deft_pre_user_delete($user) {
     $cache->delete_many($tasks);
 
     $DB->delete_records('block_deft_response', ['userid' => $user->id]);
+
+    $DB->delete_records_select(
+        'block_deft_signal',
+        'frompeer IN (SELECT id FROM {block_deft_peer} WHERE userid = :userid',
+        ['userid' => $user->id]
+    );
+    $DB->delete_records_select(
+        'block_deft_signal',
+        'topeer IN (SELECT id FROM {block_deft_peer} WHERE userid = :userid',
+        ['userid' => $user->id]
+    );
+    $DB->delete_records('block_deft_peer', ['userid' => $user->id]);
 }

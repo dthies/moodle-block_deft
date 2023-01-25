@@ -30,11 +30,11 @@
         }
     }
 }}
-<div class="col-3 p-1">
+<div class="col col-sm-6 col-md-6 col-lg-4 col-xl-3 p-1">
     <div class="card deft-task-{{ type }}" data-id="{{ id }}" data-type="{{ type }}">
         <div class="card-body">
             <div data-region="taskinfo">{{> block_deft/taskinfo }}</div>
-            <div data-region="status">{{{ form }}}</div>
+            <div data-region="status" class="container"><div class="row">{{{ form }}}</div></div>
         </div>
     </div>
 </div>
