@@ -62,7 +62,7 @@ $PAGE->navbar->add(get_string('venue', 'block_deft'), $baseurl);
 if (!empty($SESSION->deft_session)) {
     $peerid = $SESSION->deft_session->peerid;
     unset($SESSION->deft_session);
-    venue_manager::delete_peer($peerid);
+    venue_manager::close_peer($peerid);
 }
 
 $venue = new venue_manager($context, $task);
@@ -79,5 +79,5 @@ $params = [
     'objectid' => $taskid,
 ];
 
-$event = \block_deft\event\venue_viewed::create($params);
+$event = \block_deft\event\venue_started::create($params);
 $event->trigger();

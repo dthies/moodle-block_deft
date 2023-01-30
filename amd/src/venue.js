@@ -35,7 +35,6 @@ const handleClick = (e) => {
                     fail: Notification.exception,
                     methodname: 'block_deft_venue_settings'
                 }]);
-                window.close('block_deft_venue');
                 break;
             case 'join':
                 window.open(url, 'block_deft_venue', 'popup,height=400,width=600');

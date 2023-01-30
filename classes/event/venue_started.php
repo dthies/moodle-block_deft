@@ -19,14 +19,14 @@ namespace block_deft\event;
 use \core\event\base;
 
 /**
- * The venue viewed event
+ * The venue started event
  *
  * @package     block_deft
  * @category    event
  * @copyright   2022 Daniel Thies <dethies@gmail.com>
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class venue_viewed extends base {
+class venue_started extends base {
 
     /**
      * Set all required data properties:
@@ -57,7 +57,7 @@ class venue_viewed extends base {
      * @return string
      */
     public static function get_name() {
-        return get_string('eventvenueviewed', 'block_deft');
+        return get_string('eventvenuestarted', 'block_deft');
     }
 
     /**
@@ -84,7 +84,7 @@ class venue_viewed extends base {
      * @return string
      */
     public function get_description() {
-        return "The user with id '$this->userid' has viewed the venue in task with id '$this->objectid'.";
+        return "The user with id '$this->userid' has entered the venue in task with id '$this->objectid'.";
     }
 
 }

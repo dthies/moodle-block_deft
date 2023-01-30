@@ -87,10 +87,12 @@ class send_signal extends \external_api {
         }
 
         $messages = venue_manager::receive_signals($lastsignal);
+        $peers = venue_manager::peer_connections();
         $settings = venue_manager::settings();
 
         return [
             'messages' => $messages,
+            'peers' => $peers,
             'settings' => $settings,
         ];
     }
@@ -116,6 +118,9 @@ class send_signal extends \external_api {
                     'status' => new external_value(PARAM_BOOL, 'Whether connection should be closed'),
                     'mute' => new external_value(PARAM_BOOL, 'Whether audio should be muted'),
                 ]),
+            ),
+            'peers' => new external_multiple_structure(
+                new external_value(PARAM_INT, 'Currently available peer id'),
             ),
         ]);
     }

@@ -32,32 +32,43 @@
 }}
 
 <div id="block-deft-{{uniqid}}" class="block-deft block-cards" data-region="deft-venue">
-    {{# canuse }}<a href="{{ manageurl }}" class="btn btn-secondary">{{# str }} manage, block_deft {{/ str }}</a>{{/ canuse }}
-    <div class="container-fluid p-0" data-peerid="{{ peerid }}">
+    <div class="container-fluid"> 
         <div class="row">
-            {{# user }}
-                    <div class="card col-3 p-2">
-                    {{# picture }}
-                        <img src="{{ pictureurl }}" class="img-fluid rounded-circle">
-                    {{/ picture }}
-                    {{^ picture }}
-                        {{{ avatar }}}
-                    {{/ picture }}
+            <div class="col col-12 col-sm-6 col-md-4 col-lg-3"> 
+                <div class="container-fluid p-0" data-peerid="{{ peerid }}">
+                    <div class="row">
+                        {{# user }}
+                            <div class="card col col-12 text-center p-3">
+                                {{# picture }}
+                                    <img src="{{ pictureurl }}" class="card-img-top img-fluid rounded-circle">
+                                {{/ picture }}
+                                {{^ picture }}
+                                    {{{ avatar }}}
+                                {{/ picture }}
+                            </div>
+                            <div class="card col col-12">
+                                <div class="card-body">
+                                    <div class="card-head">
+                                        <h5 class="text-center">
+                                            {{ fullname }}
+                                        </h5>
+                                    </div>
+                                    <p class="text-center h3 p-1">
+                                        <a href="#" class="card-link m-0 p-2" data-action="mute" title="{{# str }} mute, block_deft {{/ str }}"><i class="icon fa fa-microphone bg-secondary rounded-circle p-2"></i></a><a href="#" class="card-link hidden m-0 p-2" data-action="unmute" title="{{# str }} unmute, block_deft {{/ str }}"><i class="icon fa fa-microphone-slash bg-warning rounded-circle p-2"></i></a>
+                                        <a href="#" class="card-link m-0 p-2" data-action="raisehand" title="{{# str }} raisehand, block_deft {{/ str }}"><i class="icon fa fa-hand-grab-o bg-secondary rounded-circle p-2"></i></a><a href="#" class="card-link hidden m-0 p-2" data-action="lowerhand" title="{{# str }} lowerhand, block_deft {{/ str }}"><i class="icon fa fa-hand-stop-o bg-warning rounded-circle p-2"></i></a>
+                                        <a href="#" class="card-link m-0 p-2" data-action="close" title="{{# str }} close, block_deft {{/ str }}"><i class="icon fa fa-sign-out bg-secondary rounded-circle p-2"></i></a>
+                                    </p>
+                                </div>
+                            </div>  
+                        {{/ user }}
                     </div>
-                    <div class="card col-9">
-        <h5 class="text-center">
-            {{ fullname }}
-        </h5>
-        <h3 class="text-center">
-            <a href="#" class="card-link m-0 p-2 bg-secondary rounded-circle" data-action="mute" title="{{# str }} mute, block_deft {{/ str }}"><i class="icon m-0 fa fa-microphone bg-secondary rounded-circle"></i></a><a href="#" class="card-link hidden m-0 p-2 bg-warning rounded-circle" data-action="unmute" title="{{# str }} unmute, block_deft {{/ str }}"><i class="icon fa fa-microphone-slash m-0"></i></a>
-            <a href="#" class="card-link m-0 p-2 bg-secondary rounded-circle" data-action="raisehand" title="{{# str }} raisehand, block_deft {{/ str }}"><i class="icon fa fa-hand-grab-o m-0"></i></a><a href="#" class="card-link hidden m-0 p-2 bg-warning rounded-circle" data-action="lowerhand" title="{{# str }} lowerhand, block_deft {{/ str }}"><i class="icon fa fa-hand-stop-o m-0"></i></a>
-        </h3>
-                    </div>
-            {{/ user }}
-        </div>
-    </div>
-    <div class="container-fluid">
-        <div id="deft_audio" class="row p-0">
+                </div>
+            </div>
+            <div class="col col-12 col-sm-6 col-md-8 col-lg-9"> 
+                <div class="container-fluid">
+                    <div id="deft_audio" class="row p-0"></div>
+                </div>
+            </div>
         </div>
     </div>
 </div>

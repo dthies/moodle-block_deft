@@ -66,7 +66,7 @@ class venue implements renderable, templatable {
         global $DB, $SESSION;
 
         if (empty($this->state->visible)) {
-            return '';
+            return [];
         }
 
         if (!empty($SESSION->deft_session)) {
@@ -78,7 +78,7 @@ class venue implements renderable, templatable {
 
         return [
             'active' => !empty($settings) && !$settings->status,
-            'lastmodified' => max($this->task->timemodified, $settings->lastmodified ?? 0),
+            'lastmodified' => max($this->task->timemodified, $settings->timemodified ?? 0),
             'mute' => !empty($settings->mute),
             'name' => !empty($this->state->showtitle) ? $this->config->name : '',
             'content' => format_text($this->config->content, FORMAT_MOODLE, [

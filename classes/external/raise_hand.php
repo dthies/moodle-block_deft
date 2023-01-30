@@ -27,50 +27,49 @@ use external_single_structure;
 use external_value;
 
 /**
- * External function for getting new token
+ * External function for logging hand raising events
  *
  * @package    block_deft
  * @copyright  2023 Daniel Thies <dethies@gmail.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class venue_settings extends \external_api {
+class raise_hand extends \external_api {
 
     /**
-     * Get parameter definition for send_signal.
+     * Get parameter definition for raise hand
      *
      * @return external_function_parameters
      */
     public static function execute_parameters(): external_function_parameters {
         return new external_function_parameters(
             [
-                'mute' => new external_value(PARAM_BOOL, 'Whether audio should be muted'),
-                'status' => new external_value(PARAM_BOOL, 'Whether the connection should be closed'),
-                'peerid' => new external_value(PARAM_INT, 'Some other peer to change', VALUE_DEFAULT, 0),
+                'status' => new external_value(PARAM_BOOL, 'Whether hand should be raised'),
             ]
         );
     }
 
     /**
-     * Change settings
+     * Log action
      *
-     * @param int $mute Whether to mute
-     * @param int $status Whether to close
-     * @param int $peerid The id of a user's peer changed by manager
+     * @param int $status Whether to raise hand
      * @return array Status indicator
      */
-    public static function execute($mute, $status, $peerid): array {
+    public static function execute($status): array {
         global $DB, $SESSION;
 
         $params = self::validate_parameters(self::execute_parameters(), [
-            'mute' => $mute,
             'status' => $status,
-            'peerid' => $peerid,
         ]);
 
+        if (empty($SESSION->deft_session)) {
+            return [
+                'status' => false,
+            ];
+        }
         $task = $DB->get_record_select(
             'block_deft',
             'id IN (SELECT taskid FROM {block_deft_peer} WHERE id = ?)',
-            [$peerid ?: $SESSION->deft_session->peerid]
+            [$SESSION->deft_session->peerid]
         );
 
         $context = context_block::instance($task->instance);
@@ -79,54 +78,15 @@ class venue_settings extends \external_api {
         require_login();
         require_capability('block/deft:joinvenue', $context);
 
-        if (!empty($peerid)) {
-            require_capability('block/deft:moderate', $context);
-            $relateduserid = $DB->get_field('block_deft_peer', 'userid', ['id' => $peerid]);
-        } else if (empty($SESSION->deft_session)) {
-            return [
-                'status' => false,
-            ];
-        } else {
-            $peerid = $SESSION->deft_session->peerid;
-        }
-
-        if ($record = $DB->get_record('block_deft_peer', [
-            'id' => $peerid,
-            'mute' => $mute,
-            'status' => $status,
-        ])) {
-            // No changes needed.
-            return [
-                'status' => false,
-            ];
-        }
-
-        $DB->update_record('block_deft_peer', [
-            'id' => $peerid,
-            'mute' => $mute,
-            'status' => $status,
-            'timemodified' => time(),
-        ]);
-
-        $cache = cache::make('block_deft', 'tasks');
-        $cache->delete($task->instance);
-
-        $socket = new socket($context);
-        $socket->dispatch();
-
         $params = [
             'context' => $context,
             'objectid' => $task->id,
         ];
 
         if ($status) {
-            $event = \block_deft\event\venue_ended::create($params);
+            $event = \block_deft\event\hand_raise_sent::create($params);
         } else {
-            $params['other'] = ['status' => $mute];
-            if (!empty($relateduserid)) {
-                $params['relateduserid'] = $relateduserid;
-            }
-            $event = \block_deft\event\mute_switched::create($params);
+            $event = \block_deft\event\hand_lower_sent::create($params);
         }
         $event->trigger();
 
@@ -136,7 +96,7 @@ class venue_settings extends \external_api {
     }
 
     /**
-     * Get return definition for send_signal
+     * Get return definition for hand_raise
      *
      * @return external_single_structure
      */

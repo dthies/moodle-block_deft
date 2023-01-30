@@ -43,7 +43,7 @@ export default {
 
         this.audioInput = navigator.mediaDevices.getUserMedia({
             audio: {
-                autoGainControl: false,
+                autoGainControl: true,
                 echoCancellation: true,
                 noiseSuppression: true,
                 sampleRate: 22050
@@ -56,11 +56,22 @@ export default {
                 const action = button.getAttribute('data-action');
                     peerid = button.closest('[data-peerid]').getAttribute('data-peerid');
                 e.stopPropagation();
+                e.preventDefault();
                 if (peerid == this.peerid) {
                     this.mute(action == 'mute');
                     Ajax.call([{
                         args: {
                             mute: action == 'mute',
+                            "status": false
+                        },
+                            fail: Notification.exception,
+                        methodname: 'block_deft_venue_settings'
+                    }]);
+                } else {
+                    Ajax.call([{
+                        args: {
+                            mute: true,
+                            peerid: peerid,
                             "status": false
                         },
                             fail: Notification.exception,
@@ -97,8 +108,10 @@ export default {
         });
 
         document.querySelectorAll('a[data-action="raisehand"], a[data-action="lowerhand"]').forEach(button => {
-            button.addEventListener('click', () => {
+            button.addEventListener('click', (e) => {
                 const action = button.getAttribute('data-action');
+                e.stopPropagation();
+                e.preventDefault();
                 document.querySelectorAll('a[data-action="raisehand"], a[data-action="lowerhand"]').forEach(button => {
                     if (button.getAttribute('data-action') == action) {
                         button.classList.add('hidden');
@@ -106,6 +119,13 @@ export default {
                         button.classList.remove('hidden');
                     }
                 });
+                Ajax.call([{
+                    args: {
+                        "status": action == 'raisehand'
+                    },
+                        fail: Notification.exception,
+                    methodname: 'block_deft_raise_hand'
+                }]);
                 this.dataChannels.forEach(dataChannel => {
                     if (dataChannel.readyState != 'open') {
                         return;
@@ -118,6 +138,16 @@ export default {
                 });
             });
         });
+
+        document.querySelectorAll('a[data-action="close"]').forEach(button => {
+            button.addEventListener('click', e => {
+                e.stopPropagation();
+                e.preventDefault();
+                button.firstChild.classList.add('bg-warning');
+                this.closeConnections();
+            });
+        });
+        window.onbeforeunload = this.closeConnections.bind(this);
 
         let socket = new Socket(contextid, token);
         socket.subscribe(() => {
@@ -159,7 +189,7 @@ export default {
      */
     sendSignals: function() {
 
-        if (this.throttled) {
+        if (this.throttled || !navigator.onLine) {
             return;
         }
 
@@ -212,6 +242,17 @@ export default {
                         this.queue.push(signal);
                     }
                 });
+                Log.debug(response.peers);
+
+                for (const key in this.peerConnections.keys()) {
+                    if (!response.peers.includes(key)) {
+                        const pc = this.peerConnections[key];
+                        Log.debug('Close ' + key);
+                        pc.close();
+                        this.peerConnections[key] = null;
+                    }
+                }
+
                 if (!this.processing && this.queue.length) {
                     this.processing = true;
                     this.processSignal();
@@ -234,6 +275,9 @@ export default {
         return pc.createOffer().then(offer => {
             return pc.setLocalDescription(offer).then(() => {
                 return this.sendSignal(peerid, 'audio-offer', offer);
+            }).catch(e => {
+                Log.debug(e);
+                this.processSignal();
             });
         });
     },
@@ -263,6 +307,13 @@ export default {
             pc.ondatachannel = (e) => {
                 this.dataChannels.push(e.channel);
                 e.channel.onmessage = this.handleMessage.bind(this, signal.frompeer);
+                e.channel.onopen = () => {
+                    if (document.querySelector('[data-peerid="' + this.peerid + '"] a.hidden[data-action="raisehand"]')) {
+                        window.setTimeout(() => {
+                            e.channel.send('{"raisehand": true}');
+                        }, 3000);
+                    }
+                };
             };
             return pc.setRemoteDescription(JSON.parse(signal.message)).then(() => {
                 Log.debug('Set Remote');
@@ -274,7 +325,7 @@ export default {
                     Log.debug('Create answer');
                     pc.createAnswer().then(answer => {
                         Log.debug('Answer created');
-                        if (pc.signalingState == 'stable') {
+                        if (!pc || pc.signalingState == 'stable') {
                             return;
                         }
                         pc.setLocalDescription(answer).then(() => {
@@ -295,6 +346,9 @@ export default {
         } else if (signal.type === 'audio-answer') {
             const pc = this.peerConnections[signal.frompeer];
                     Log.debug('Audio answer');
+            if (!pc) {
+                return this.processSignal();
+            }
             if (pc.signalingState == 'have-local-offer') {
                 return pc.setRemoteDescription(JSON.parse(signal.message)).then(() => {
                     Log.debug('Set Remote');
@@ -306,10 +360,13 @@ export default {
             }
         } else if (signal.type === 'new-ice-candidate') {
             const pc = this.peerConnections[signal.frompeer] || null;
-            if (pc) {
+            if (pc && pc.currentRemoteDescription) {
                 return pc.addIceCandidate(JSON.parse(signal.message)).then(() => {
                     this.processSignal();
-                }).catch(Notification.exception);
+                }).catch(e => {
+                    Log.debug(e);
+                    return this.processSignal();
+                });
             }
         }
         return this.processSignal();
@@ -328,7 +385,7 @@ export default {
 
         const node = document.createElement('div');
         node.setAttribute('data-peerid', peerid);
-        node.setAttribute('class', 'col-4 col-md-3 col-xl-2 m-2');
+        node.setAttribute('class', 'col col-12 col-md-6 col-lg-4 col-xl-3 m-2');
         window.setTimeout(() => {
             node.querySelectorAll('img.card-img-top').forEach(image => {
                 image.setAttribute('height', null);
@@ -397,19 +454,40 @@ export default {
      */
     handleStateChange(peerid) {
         const pc = this.peerConnections[peerid];
-        switch (pc.connectionState) {
-            case 'connected':
-                document.querySelectorAll('#deft_audio div[data-peerid="' + peerid + '"]').forEach(userinfo => {
+        document.querySelectorAll('#deft_audio div[data-peerid="' + peerid + '"]').forEach(userinfo => {
+            switch (pc.connectionState) {
+                case 'connected':
                     userinfo.classList.remove('hidden');
-                });
-                break;
-            case 'close':
-            case 'disconnected':
-            case 'failed':
-                document.querySelectorAll('#deft_audio div[data-peerid="' + peerid + '"]').forEach(userinfo => {
+                    break;
+                case 'close':
+                case 'failed':
+                    userinfo.remove();
+                    break;
+                case 'disconnected':
                     userinfo.classList.add('hidden');
-                });
-                break;
-        }
+                    break;
+            }
+        });
+    },
+
+    /**
+     * Shut down gracefully before closing
+     *
+     * @return Promise
+     */
+    closeConnections() {
+        Ajax.call([{
+            args: {
+                mute: false,
+                "status": true
+            },
+            fail: Notification.exception,
+            methodname: 'block_deft_venue_settings'
+        }]);
+        this.peerConnections.forEach(pc => {
+            pc.close();
+        });
+
+        window.beforeunload = null;
     }
 };

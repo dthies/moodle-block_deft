@@ -37,7 +37,7 @@ use user_picture;
 
 
 /**
- * Class managing meeting in Deft response block
+ * Class managing venue in Deft response block
  *
  * @copyright 2022 Daniel Thies <dethies@gmail.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -63,27 +63,47 @@ class venue_manager implements renderable, templatable {
                 'userid' => $USER->id,
                 'taskid' => $this->task->get('id'),
                 'timecreated' => time(),
+                'timemodified' => time(),
             ];
-            $sessionid = $DB->insert_record('block_deft_peer', $SESSION->deft_session);
-            $SESSION->deft_session->peerid = $sessionid;
+            $peerid = $DB->insert_record('block_deft_peer', [
+                'sessionid' => $DB->get_field('sessions', 'id', ['sid' => session_id()]),
+            ] + (array)$SESSION->deft_session);
+            $SESSION->deft_session->peerid = $peerid;
             $this->socket->dispatch();
         } else {
-            $sessionid = $SESSION->deft_session->peerid;
+            $peerid = $SESSION->deft_session->peerid;
         }
 
         $this->messages = $DB->get_records('block_deft_signal', [
-            'topeer' => $sessionid,
+            'topeer' => $peerid,
         ], 'id');
 
         $this->sessions = $DB->get_records_sql('
             SELECT p.id AS sessionid, u.*
                FROM {block_deft_peer} p
                JOIN {user} u ON u.id = p.userid
+               JOIN {sessions} ss ON p.sessionid = ss.id
               WHERE p.taskid = :taskid
                     AND p.status = 0', [
             'taskid' => $this->task->get('id'),
         ]);
-        unset($this->sessions[$sessionid]);
+        unset($this->sessions[$peerid]);
+    }
+
+    /**
+     * Find other peers which should be connected currently
+     *
+     * @return array
+     */
+    public static function peer_connections(): array {
+        global $DB, $SESSION;
+
+        return $DB->get_fieldset_select(
+            'block_deft_peer',
+            'id',
+            'status = 0 AND taskid IN (SELECT taskid FROM {block_deft_peer} WHERE id = ?)',
+            [$SESSION->deft_session->peerid]
+        );
     }
 
     /**
@@ -107,7 +127,7 @@ class venue_manager implements renderable, templatable {
             'size' => 256,
         ]);
         return [
-            'canmanage' => has_capability('block/deft:manage', $this->context),
+            'canmanage' => has_capability('block/deft:moderate', $this->context),
             'contextid' => $this->context->id,
             'iceservers' => json_encode($this->socket->ice_servers()),
             'throttle' => get_config('block_deft', 'throttle'),
@@ -160,9 +180,17 @@ class venue_manager implements renderable, templatable {
             'lastsignal' => $lastsignal,
         ]);
 
-        return $DB->get_records('block_deft_signal', [
-            'topeer' => $peerid,
-        ], 'id', 'id, frompeer, message, type');
+        return $DB->get_records_sql('
+            SELECT s.id, s.frompeer, s.message, s.type
+              FROM {block_deft_signal} s
+              JOIN {block_deft_peer} p ON p.id = s.frompeer
+              JOIN {sessions} ss ON p.sessionid = ss.id
+             WHERE s.topeer = :topeer AND p.status = 0
+          ORDER BY id',
+            [
+                'topeer' => $peerid,
+            ]
+        );
     }
 
     /**
@@ -187,15 +215,37 @@ class venue_manager implements renderable, templatable {
     }
 
     /**
-     * Delete pear records
+     * Handle a logout event
+     *
+     * @param \core\event\base $event
+     */
+    public static function logout(\core\event\base $event) {
+        global $SESSION;
+
+        if (!empty($SESSION->deft_session) && $record = $DB->get_record('block_deft_peer', [
+            'id' => $SESSION->deft->peerid,
+            'status' => 0,
+        ])) {
+            $eventdata = $event->get_data();
+            $record->status = 1;
+            $DB->update_record('block_deft_peer', $record);
+        }
+    }
+
+    /**
+     * Close peer and cleanup records
      *
      * @param int $peerid In of peer to remove
      */
-    public static function delete_peer(int $peerid) {
+    public static function close_peer(int $peerid) {
         global $DB;
 
         $DB->delete_records('block_deft_signal', ['topeer' => $peerid]);
         $DB->delete_records('block_deft_signal', ['frompeer' => $peerid]);
-        $DB->delete_records('block_deft_peer', ['id' => $peerid]);
+        $DB->update_record('block_deft_peer', [
+            'id' => $peerid,
+            'timemodified' => time(),
+            'status' => true,
+        ]);
     }
 }

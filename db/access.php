@@ -91,4 +91,13 @@ $capabilities = [
         ],
         'clonepermissionsfrom' => 'mod/chat:chat',
     ],
+
+    'block/deft:moderate' => [
+        'captype' => 'write',
+        'contextlevel' => CONTEXT_BLOCK,
+        'archetypes' => [
+            'teacher' => CAP_ALLOW,
+            'editingteacher' => CAP_ALLOW
+        ],
+    ],
 ];

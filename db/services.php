@@ -52,4 +52,13 @@ $functions = [
         'ajax'        => true,
         'services'    => array(MOODLE_OFFICIAL_MOBILE_SERVICE),
     ],
+
+    'block_deft_raise_hand' => [
+        'classname'   => '\\block_deft\\external\\raise_hand',
+        'methodname'  => 'execute',
+        'description' => 'Log hand raising action',
+        'type'        => 'write',
+        'ajax'        => true,
+        'services'    => array(MOODLE_OFFICIAL_MOBILE_SERVICE),
+    ],
 ];

@@ -132,6 +132,7 @@ function block_deft_output_fragment_venue($args) {
         'link' => false,
         'size' => 256,
     ]);
+    $user->manage = has_capability('block/deft:moderate', $context);
     $user->profileurl = $url->out(false);
 
     return $OUTPUT->render_from_template('block_deft/venue_user', [

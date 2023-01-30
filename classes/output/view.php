@@ -93,6 +93,7 @@ class view implements renderable, templatable {
                 case 'venue':
                     $venue = new venue($this->context, $record);
                     $record->venue = $venue->export_for_template($output);
+                    $lastmodified = max($lastmodified, $record->venue['lastmodified'] ?? 0);
                     break;
             }
             $tasklist[] = $record;
@@ -101,7 +102,7 @@ class view implements renderable, templatable {
 
         return [
             'contextid' => $this->context->id,
-            'lastmodified' => max($lastmodified, $SESSION->deft_session->lastmodified ?? 0),
+            'lastmodified' => $lastmodified,
             'tasks' => $tasklist,
             'uniqid' => uniqid(),
         ];

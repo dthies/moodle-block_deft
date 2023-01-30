@@ -34,7 +34,7 @@ function xmldb_block_deft_upgrade($oldversion) {
 
     $dbman = $DB->get_manager();
 
-    if ($oldversion < 2022111410) {
+    if ($oldversion < 2022111414) {
 
         // Define table block_deft_peer to be created.
         $table = new xmldb_table('block_deft_peer');
@@ -42,6 +42,7 @@ function xmldb_block_deft_upgrade($oldversion) {
         // Adding fields to table block_deft_peer.
         $table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE, null);
         $table->add_field('taskid', XMLDB_TYPE_INTEGER, '10', null, null, null, null);
+        $table->add_field('sessionid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
         $table->add_field('userid', XMLDB_TYPE_INTEGER, '10', null, null, null, null);
         $table->add_field('timecreated', XMLDB_TYPE_INTEGER, '20', null, XMLDB_NOTNULL, null, null);
         $table->add_field('timemodified', XMLDB_TYPE_INTEGER, '20', null, null, null, null);
@@ -52,6 +53,7 @@ function xmldb_block_deft_upgrade($oldversion) {
         $table->add_key('primary', XMLDB_KEY_PRIMARY, ['id']);
         $table->add_key('taskid', XMLDB_KEY_FOREIGN, ['taskid'], 'block_deft', ['id']);
         $table->add_key('userid', XMLDB_KEY_FOREIGN, ['userid'], 'user', ['id']);
+        $table->add_key('sessionid', XMLDB_KEY_FOREIGN, ['sessionid'], 'session', ['id']);
 
         // Conditionally launch create table for block_deft_peer.
         if (!$dbman->table_exists($table)) {
@@ -80,7 +82,7 @@ function xmldb_block_deft_upgrade($oldversion) {
         }
 
         // Deft savepoint reached.
-        upgrade_block_savepoint(true, 2022111410, 'deft');
+        upgrade_block_savepoint(true, 2022111414, 'deft');
     }
 
     return true;
