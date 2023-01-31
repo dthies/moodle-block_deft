@@ -46,7 +46,7 @@ export default {
                 autoGainControl: true,
                 echoCancellation: true,
                 noiseSuppression: true,
-                sampleRate: 22050
+                sampleRate: 8000
             },
             video: false
         });
@@ -93,12 +93,6 @@ export default {
             }),
                 dataChannel = pc.createDataChannel('Events');
             this.dataChannels.push(dataChannel);
-            this.audioInput.then(audioStream => {
-                audioStream.getAudioTracks().forEach(track => {
-                    pc.addTrack(track, audioStream);
-                });
-                return true;
-            }).catch(Notification.exception);
             dataChannel.onmessage = this.handleMessage.bind(this, peerid);
             pc.onnegotiationneeded = this.negotiate.bind(this, contextid, pc, peerid);
             pc.onicecandidate = this.handleICECandidate.bind(this, contextid, peerid);
@@ -239,10 +233,9 @@ export default {
                 response.messages.forEach((signal) => {
                     if (signal.id > this.lastSignal) {
                         this.lastSignal = signal.id;
-                        this.queue.push(signal);
+                        this.processSignal(signal);
                     }
                 });
-                Log.debug(response.peers);
 
                 for (const key in this.peerConnections.keys()) {
                     if (!response.peers.includes(key)) {
@@ -251,11 +244,6 @@ export default {
                         pc.close();
                         this.peerConnections[key] = null;
                     }
-                }
-
-                if (!this.processing && this.queue.length) {
-                    this.processing = true;
-                    this.processSignal();
                 }
             },
             fail: Notification.exception,
@@ -275,24 +263,17 @@ export default {
         return pc.createOffer().then(offer => {
             return pc.setLocalDescription(offer).then(() => {
                 return this.sendSignal(peerid, 'audio-offer', offer);
-            }).catch(e => {
-                Log.debug(e);
-                this.processSignal();
-            });
+            }).catch(Log.debug);
         });
     },
 
     /**
      * Recursively process queue
      *
-     * @return {Promise}
+     * @param {object} signal Signal received to process
      */
-    processSignal: function() {
-        const signal = this.queue.shift();
-        if (!signal) {
-            this.processing = false;
-            return Promise.resolve(true);
-        } else if (signal.type === 'audio-offer') {
+    processSignal: function(signal) {
+        if (signal.type === 'audio-offer') {
             const pc = this.peerConnections[signal.frompeer] || new RTCPeerConnection({
                  iceServers: this.iceServers
             });
@@ -315,61 +296,40 @@ export default {
                     }
                 };
             };
-            return pc.setRemoteDescription(JSON.parse(signal.message)).then(() => {
+            pc.setRemoteDescription(JSON.parse(signal.message)).then(() => {
                 Log.debug('Set Remote');
-                this.audioInput.then(audioStream => {
+                return this.audioInput.then(audioStream => {
                     Log.debug('audio stream');
-                    audioStream.getAudioTracks().forEach(track => {
-                        pc.addTransceiver(track, {streams: [audioStream]});
-                    });
+                    if (pc.getTransceivers().length < 2) {
+                        audioStream.getAudioTracks().forEach(track => {
+                            pc.addTransceiver(track, {streams: [audioStream]});
+                        });
+                    }
                     Log.debug('Create answer');
-                    pc.createAnswer().then(answer => {
+                    return pc.createAnswer().then(answer => {
                         Log.debug('Answer created');
                         if (!pc || pc.signalingState == 'stable') {
-                            return;
+                            return false;
                         }
-                        pc.setLocalDescription(answer).then(() => {
+                        return pc.setLocalDescription(answer).then(() => {
                             Log.debug('Set local');
-                            this.sendSignal(signal.frompeer, 'audio-answer', answer);
-                        }).catch(e => {
-                            Log.debug(e);
-                            this.processSignal();
-                        });
+                            return this.sendSignal(signal.frompeer, 'audio-answer', answer);
+                        }).catch(Log.debug);
                     }).catch(Notification.exception);
                 }).catch(Notification.exception);
-            }).catch(e => {
-                Log.debug(e);
-                this.processSignal();
-            }).then(() => {
-                this.processSignal();
-            }).catch(Notification.exception);
+            }).catch(Log.debug);
         } else if (signal.type === 'audio-answer') {
             const pc = this.peerConnections[signal.frompeer];
-                    Log.debug('Audio answer');
-            if (!pc) {
-                return this.processSignal();
-            }
-            if (pc.signalingState == 'have-local-offer') {
-                return pc.setRemoteDescription(JSON.parse(signal.message)).then(() => {
-                    Log.debug('Set Remote');
-                    return this.processSignal();
-                }).catch(e => {
-                    Log.debug(e);
-                    return this.processSignal();
-                });
+            Log.debug('Audio answer');
+            if (pc && pc.signalingState == 'have-local-offer') {
+                pc.setRemoteDescription(JSON.parse(signal.message));
             }
         } else if (signal.type === 'new-ice-candidate') {
             const pc = this.peerConnections[signal.frompeer] || null;
             if (pc && pc.currentRemoteDescription) {
-                return pc.addIceCandidate(JSON.parse(signal.message)).then(() => {
-                    this.processSignal();
-                }).catch(e => {
-                    Log.debug(e);
-                    return this.processSignal();
-                });
+                pc.addIceCandidate(JSON.parse(signal.message));
             }
         }
-        return this.processSignal();
     },
 
     /**
@@ -382,6 +342,8 @@ export default {
         if (!e || !e.streams || document.querySelector('#deft_audio div[data-peerid="' + peerid + '"]')) {
             return;
         }
+        Log.debug('Track');
+        Log.debug(e);
 
         const node = document.createElement('div');
         node.setAttribute('data-peerid', peerid);
@@ -472,8 +434,6 @@ export default {
 
     /**
      * Shut down gracefully before closing
-     *
-     * @return Promise
      */
     closeConnections() {
         Ajax.call([{
@@ -487,6 +447,14 @@ export default {
         this.peerConnections.forEach(pc => {
             pc.close();
         });
+
+        // Release microphone.
+        this.audioInput.then(audioStream => {
+            audioStream.getAudioTracks().forEach(track => {
+               track.stop();
+            });
+            return true;
+        }).catch(Notification.exception);
 
         window.beforeunload = null;
     }

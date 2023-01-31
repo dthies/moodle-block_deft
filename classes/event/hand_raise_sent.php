@@ -84,7 +84,7 @@ class hand_raise_sent extends base {
      * @return string
      */
     public function get_description() {
-        return "The user with id '$this->userid' has rasised hand in venue for task with id '$this->objectid'.";
+        return "The user with id '$this->userid' has raised hand in venue with task id '$this->objectid'.";
     }
 
 }
