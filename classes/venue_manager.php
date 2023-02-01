@@ -126,15 +126,29 @@ class venue_manager implements renderable, templatable {
             'link' => false,
             'size' => 256,
         ]);
+        $config = $this->task->get_config();
         return [
             'canmanage' => has_capability('block/deft:moderate', $this->context),
             'contextid' => $this->context->id,
             'iceservers' => json_encode($this->socket->ice_servers()),
+            'intro' => format_text(
+                file_rewrite_pluginfile_urls(
+                    $config->intro->text ?? '',
+                    'pluginfile.php',
+                    $this->context->id,
+                    'block_deft',
+                    'venue',
+                    $this->task->get('id')
+                ),
+                $config->intro->format ?? FORMAT_MOODLE,
+                ['context' => $this->context]
+            ),
             'throttle' => get_config('block_deft', 'throttle'),
             'peerid' => $SESSION->deft_session->peerid,
             'peers' => json_encode(array_keys($this->sessions)),
             'sessions' => array_values($this->sessions),
             'token' => $this->socket->get_token(),
+            'title' => format_string($this->task->get_config()->name),
             'uniqueid' => uniqid(),
             'url' => $url->out(true),
             'user' => $user,

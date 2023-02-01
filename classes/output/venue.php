@@ -76,9 +76,30 @@ class venue implements renderable, templatable {
             ]);
         }
 
+        $lastmodified = $DB->get_field_sql('
+            SELECT MAX(p.timemodified)
+              FROM {block_deft_peer} p
+             WHERE p.taskid = ?',
+            [$this->task->id]
+        );
+        $peers = $DB->get_records_sql('
+            SELECT p.id AS peerid, p.mute, u.*
+              FROM {block_deft_peer} p
+              JOIN {sessions} s ON p.sessionid = s.id
+              JOIN {user} u ON p.userid = u.id
+             WHERE p.status = 0
+                   AND p.taskid = ?',
+            [$this->task->id]
+        );
+        foreach ($peers as $peer) {
+            $peer->fullname = fullname($peer);
+        }
         return [
             'active' => !empty($settings) && !$settings->status,
-            'lastmodified' => max($this->task->timemodified, $settings->timemodified ?? 0),
+            'count' => count($peers),
+            'peers' => array_values($peers),
+            'lastmodified' => max($lastmodified, $this->task->timemodified, $settings->timemodified ?? 0),
+            'limit' => $this->config->limit ?? 0,
             'mute' => !empty($settings->mute),
             'name' => !empty($this->state->showtitle) ? $this->config->name : '',
             'content' => format_text($this->config->content, FORMAT_MOODLE, [

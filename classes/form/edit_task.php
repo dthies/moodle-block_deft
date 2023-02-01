@@ -142,8 +142,10 @@ class edit_task extends dynamic_form {
                 ];
 
                 // Update block display.
-                $socket = $this->get_socket($this->get_context_for_dynamic_submission());
-                $socket->dispatch();
+                if (!empty($task->get_state()->visible)) {
+                    $socket = $this->get_socket($this->get_context_for_dynamic_submission());
+                    $socket->dispatch();
+                }
 
                 return $returndata;
             }

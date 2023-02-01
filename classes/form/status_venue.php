@@ -32,4 +32,17 @@ namespace block_deft\form;
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class status_venue extends status_task {
+
+    /**
+     * Form definition
+     */
+    public function definition() {
+        parent::definition();
+
+        $mform = $this->_form;
+
+        $mform->addElement('advcheckbox', 'close', '', get_string('closevenue', 'block_deft'));
+        $mform->setType('close', PARAM_BOOL);
+        $mform->setDefault('close', get_config('block_deft', 'expandcomments'));
+    }
 }

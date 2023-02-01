@@ -24,8 +24,6 @@
 
 namespace block_deft\form;
 
-use context;
-use context_user;
 use core_form\dynamic_form;
 use moodle_exception;
 use moodle_url;
@@ -52,5 +50,151 @@ class edit_venue extends edit_task {
 
         $mform->addElement('textarea', 'content', get_string('content', 'page'));
         $mform->setType('content', PARAM_CLEANHTML);
+
+        $mform->addElement('editor', 'intro', get_string('description'), null, $this->options());
+
+        $mform->addElement('text', 'limit', get_string('limit', 'block_deft'));
+        $mform->setType('limit', PARAM_INT);
+
+    }
+
+    /**
+     * Load in existing data as form defaults
+     *
+     * Can be overridden to retrieve existing values from db by entity id and also
+     * to preprocess editor and filemanager elements
+     */
+    public function set_data_for_dynamic_submission(): void {
+        $mform = $this->_form;
+
+        if (
+            !empty((int) $this->_ajaxformdata['id'])
+            && $task = $this->get_task($this->_ajaxformdata['id'])
+        ) {
+            $configdata = $task->get_config();
+            $draftid = $data->intro->itemid ?? 0;
+            $format = $configdata->intro->format;
+            $intro = file_prepare_draft_area(
+                $draftid,
+                $this->get_context_for_dynamic_submission()->id,
+                'block_deft',
+                'venue',
+                $task->get('id'),
+                [
+                    'subdirs' => true,
+                ],
+                $configdata->intro->text
+            );
+            $configdata = (array) $configdata;
+            $configdata['intro'] = [
+                'text' => $intro,
+                'itemid' => $draftid,
+                'format' => $format,
+            ];
+
+            $mform->setDefault('id', $task->get('id'));
+            $mform->setDefault('contextid', $this->get_context_for_dynamic_submission()->id);
+            foreach ($configdata as $field => $value) {
+                if ($field !== 'jsondata') {
+                    $mform->setDefault($field, $value);
+                }
+            }
+        }
+    }
+
+    /**
+     * Get file options
+     *
+     * @return array
+     */
+    protected function options(): array {
+        global $CFG;
+
+        return [
+            'subdirs' => true,
+            'maxbytes' => $CFG->maxbytes,
+            'maxfiles' => EDITOR_UNLIMITED_FILES,
+            'context' => $this->get_context_for_dynamic_submission(),
+            'noclean' => false,
+            'trusttext' => false,
+            'enable_filemanagement' => true,
+        ];
+    }
+
+    /**
+     * Process the form submission, used if form was submitted via AJAX
+     *
+     * This method can return scalar values or arrays that can be json-encoded, they will be passed to the caller JS.
+     *
+     * @return mixed
+     */
+    public function process_dynamic_submission() {
+        global $OUTPUT;
+
+        if ($data = $this->get_data()) {
+            if (empty($data->id)) {
+                $returndata = parent::process_dynamic_submission();
+                $data->id = $returndata['id'];
+
+                $data->intro['text'] = file_save_draft_area_files(
+                    $data->intro['itemid'],
+                    $this->get_context_for_dynamic_submission()->id,
+                    'block_deft',
+                    'venue',
+                    $data->id,
+                    [
+                        'subdirs' => true,
+                    ],
+                    $data->intro['text']
+                );
+                $data->intro['itemid'] = $data->id;
+
+                $task = $this->get_task($data->id);
+                unset($data->id);
+                $task->set('configdata', json_encode($data));
+                $task->update();
+
+                $returndata['configdata'] = $task->get_config();
+                return $returndata;
+            } else {
+                $data->intro['text'] = file_save_draft_area_files(
+                    $data->intro['itemid'],
+                    $this->get_context_for_dynamic_submission()->id,
+                    'block_deft',
+                    'venue',
+                    $data->id,
+                    [
+                        'subdirs' => true,
+                    ],
+                    $data->intro['text']
+                );
+                $data->intro['itemid'] = $data->id;
+
+                $task = $this->get_task($data->id);
+                unset($data->id);
+                $task->set('configdata', json_encode($data));
+                $task->update();
+                $returndata = [
+                    'html' => $OUTPUT->render_from_template('block_deft/taskinfo', [
+                        'canedit' => true,
+                        'form' => !empty($form) ? $form->render() : '',
+                        'contextid' => $data->contextid,
+                        'configdata' => $task->get_config(),
+                        'id' => $task->get('id'),
+                        'type' => $task->get('type'),
+                    ]),
+                    'contextid' => $data->contextid,
+                    'id' => $task->get('id'),
+                ];
+
+                // Update block display.
+                if (!empty($task->get_state()->visible)) {
+                    $socket = $this->get_socket($this->get_context_for_dynamic_submission());
+                    $socket->dispatch();
+                }
+
+                return $returndata;
+            }
+        }
     }
 }

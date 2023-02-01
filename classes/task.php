@@ -126,12 +126,12 @@ class task extends persistent {
 
         $DB->delete_records_select(
             'block_deft_signal',
-            'frompeer IN (SELECT id FROM {block_deft_peer} WHERE taskid = :taskid',
+            'frompeer IN (SELECT id FROM {block_deft_peer} WHERE taskid = :taskid)',
             ['taskid' => $id]
         );
         $DB->delete_records_select(
             'block_deft_signal',
-            'topeer IN (SELECT id FROM {block_deft_peer} WHERE taskid = :taskid',
+            'topeer IN (SELECT id FROM {block_deft_peer} WHERE taskid = :taskid)',
             ['taskid' => $id]
         );
         $DB->delete_records('block_deft_peer', ['taskid' => $id]);

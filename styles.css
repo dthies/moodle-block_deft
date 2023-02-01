@@ -1,3 +1,11 @@
+.block_deft_venue .peers {
+    display: none;
+}
+
+.block_deft_venue .peer-container:hover .peers {
+    display: block;
+}
+
 #page-blocks-deft-venue span.userinitials {
     aspect-ratio: 1 / 1; /* stylelint-disable-line property-no-unknown */
     font-size: 32px;

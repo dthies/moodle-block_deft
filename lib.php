@@ -291,3 +291,74 @@ function block_deft_pre_user_delete($user) {
     );
     $DB->delete_records('block_deft_peer', ['userid' => $user->id]);
 }
+
+/**
+ * Plugin files for block deft
+ *
+ * @param stdClass $course course object
+ * @param stdClass $birecordorcm block instance record
+ * @param stdClass $context context object
+ * @param string $filearea file area
+ * @param array $args extra arguments
+ * @param bool $forcedownload whether or not force download
+ * @param array $options additional options affecting the file serving
+ * @return bool
+ * @todo MDL-36050 improve capability check on stick blocks, so we can check user capability before sending images.
+ */
+function block_deft_pluginfile($course, $birecordorcm, $context, $filearea, $args, $forcedownload, array $options=array()) {
+    global $DB, $CFG, $USER;
+
+    if ($context->contextlevel != CONTEXT_BLOCK) {
+        send_file_not_found();
+    }
+
+    // If block is in course context, then check if user has capability to access course.
+    if ($context->get_course_context(false)) {
+        require_course_login($course);
+    } else if ($CFG->forcelogin) {
+        require_login();
+    } else {
+        // Get parent context and see if user have proper permission.
+        $parentcontext = $context->get_parent_context();
+        if ($parentcontext->contextlevel === CONTEXT_COURSECAT) {
+            // Check if category is visible and user can view this category.
+            if (!core_course_category::get($parentcontext->instanceid, IGNORE_MISSING)) {
+                send_file_not_found();
+            }
+        } else if ($parentcontext->contextlevel === CONTEXT_USER && $parentcontext->instanceid != $USER->id) {
+            // The block is in the context of a user, it is only visible to the user who it belongs to.
+            send_file_not_found();
+        }
+        // At this point there is no way to check SYSTEM context, so ignoring it.
+    }
+
+    if ($filearea !== 'venue') {
+        send_file_not_found();
+    }
+
+    $fs = get_file_storage();
+
+    $taskid = array_shift($args);
+    $filename = array_pop($args);
+    $filepath = $args ? '/'.implode('/', $args).'/' : '/';
+
+    if (!$file = $fs->get_file($context->id, 'block_deft', 'venue', $taskid, $filepath, $filename) || $file->is_directory()) {
+        send_file_not_found();
+    }
+
+    if ($parentcontext = context::instance_by_id($birecordorcm->parentcontextid, IGNORE_MISSING)) {
+        if ($parentcontext->contextlevel == CONTEXT_USER) {
+            // Force download on all personal pages including /my/
+            // because we do not have reliable way to find out from where this is used.
+            $forcedownload = true;
+        }
+    } else {
+        // Weird, there should be parent context, better force dowload then.
+        $forcedownload = true;
+    }
+
+    // NOTE: it would be nice to have file revisions here, for now rely on standard file lifetime,
+    // do not lower it because the files are dispalyed very often.
+    \core\session\manager::write_close();
+    send_stored_file($file, null, 0, $forcedownload, $options);
+}

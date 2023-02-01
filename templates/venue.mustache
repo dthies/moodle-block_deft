@@ -27,7 +27,8 @@
 }}
     <h6>{{ name }}</h6>
         <div class="block_deft_venue p-3">{{{ content }}}
-             <a href="#" class="card-link m-0" data-action="join" title="{{# str }} join, block_deft {{/ str }}"><i class="icon fa fa-phone"></i></a>
+            <div class="peer-container">
+             <a href="#" class="card-link m-0" data-action="join" title="{{# str }} join, block_deft {{/ str }}"><i class="icon fa fa-sign-in"></i></a>
             {{# active }}
             <a href="#" class="card-link m-0" data-action="close" title="{{# str }} close, block_deft {{/ str }}"><i class="icon fa fa-sign-out"></i></a>
             {{^ mute }}
@@ -37,6 +38,18 @@
                 <a href="#" class="card-link m-0 p-0 bg-warning rounded-circle" data-action="unmute" title="{{# str }} unmute, block_deft {{/ str }}"><i class="icon fa fa-microphone-slash m-0"></i></a>
             {{/ mute }}
             {{/ active }}
+                    {{# count }}
+                {{# limit }} {{ count }} / {{ limit }} {{/ limit }}
+                {{^ limit }} {{ count }} {{/ limit }}
+                <div class="peers position-absolute bg-light p-3 border border-secondary">
+                     {{# peers }}
+                         <div class="peer">{{ fullname }}
+                             {{# mute }}<i class="icon fa fa-microphone-slash m-0"></i>{{/ mute }}
+                         </div>
+                     {{/ peers }}
+                </div>
+                     {{/ count }}
+            </div>
         </div>
 {{# js }}
     require(['block_deft/venue'], function(Venue) {
