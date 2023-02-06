@@ -56,6 +56,11 @@ class edit_venue extends edit_task {
         $mform->addElement('text', 'limit', get_string('limit', 'block_deft'));
         $mform->setType('limit', PARAM_INT);
 
+        $mform->addElement('select', 'windowoption', get_string('windowoption', 'block_deft'), [
+            'openinpopup' => get_string('openinpopup', 'block_deft'),
+            'openinwindow' => get_string('openinwindow', 'block_deft'),
+        ]);
+
     }
 
     /**

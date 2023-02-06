@@ -28,7 +28,7 @@
     <h6>{{ name }}</h6>
         <div class="block_deft_venue p-3">{{{ content }}}
             <div class="peer-container">
-             <a href="#" class="card-link m-0" data-action="join" title="{{# str }} join, block_deft {{/ str }}"><i class="icon fa fa-sign-in"></i></a>
+             <a href="#" class="card-link m-0" data-action="join" {{^ popup }} data-type="modal" data-contextid="{{ contextid }}" {{/ popup }} title="{{# str }} join, block_deft {{/ str }}"><i class="icon fa fa-sign-in"></i></a>
             {{# active }}
             <a href="#" class="card-link m-0" data-action="close" title="{{# str }} close, block_deft {{/ str }}"><i class="icon fa fa-sign-out"></i></a>
             {{^ mute }}

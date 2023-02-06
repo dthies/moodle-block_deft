@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
 /**
- * Edit form base for choice task
+ * Edit form for choice task
  *
  * @package     block_deft
  * @copyright   2022 Daniel Thies <dethies@gmail.com>
@@ -24,15 +24,13 @@
 
 namespace block_deft\form;
 
-use context;
-use context_user;
 use core_form\dynamic_form;
 use moodle_exception;
 use moodle_url;
 use block_deft\task;
 
 /**
- * Edit form base for choice task
+ * Edit form for choice task
  *
  * @package     block_deft
  * @copyright   2022 Daniel Thies <dethies@gmail.com>

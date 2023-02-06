@@ -1,0 +1,43 @@
+{{!
+    This file is part of Moodle - http://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+}}
+{{!
+    @template block_deft/mobile_venue
+
+    This template renders the view for the venue task
+
+    Example context (json):
+    {
+        "name": "Welcome",
+        "content": "hello"
+    }
+}}
+<div>
+    <h5>{{ name }}</h5>
+    {{# content }}
+        <div class="block_deft_venue p-3">{{{ content }}}</div>
+             <ion-button href="{{ url }}" data-open-in="browser" target="_blank" class="card-link m-0" data-action="join" title="{{# str }} join, block_deft {{/ str }}"><i class="icon fa fa-sign-in"></i>join</ion-button>
+            {{# active }}
+            <ion-button href="#" class="card-link m-0" data-action="close" title="{{# str }} close, block_deft {{/ str }}">{{# str }} close, block_deft {{/ str }}</ion-button>
+            {{^ mute }}
+                <ion-button href="#" class="card-link m-0" data-action="mute" title="{{# str }} mute, block_deft {{/ str }}">{{# str }} mute, block_deft {{/ str }}</ion-button>
+            {{/ mute }}
+            {{# mute }}
+                <ion-button href="#" class="card-link m-0 p-0 bg-warning rounded-circle" data-action="unmute" title="{{# str }} unmute, block_deft {{/ str }}">{{# str }} unmute, block_deft {{/ str }}</ion-button>
+            {{/ mute }}
+            {{/ active }}
+    {{/ content }}
+</div>

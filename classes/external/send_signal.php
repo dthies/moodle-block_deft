@@ -92,6 +92,7 @@ class send_signal extends \external_api {
 
         return [
             'messages' => $messages,
+            'peerid' => $SESSION->deft_session->peerid,
             'peers' => $peers,
             'settings' => $settings,
         ];
@@ -112,15 +113,16 @@ class send_signal extends \external_api {
                     'type' => new external_value(PARAM_TEXT, 'Message type'),
                 ]),
             ),
-            'settings' => new external_multiple_structure(
-                new external_single_structure([
-                    'id' => new external_value(PARAM_INT, 'Message id if successful'),
-                    'status' => new external_value(PARAM_BOOL, 'Whether connection should be closed'),
-                    'mute' => new external_value(PARAM_BOOL, 'Whether audio should be muted'),
-                ]),
-            ),
+            'peerid' => new external_value(PARAM_INT, 'Current peerid'),
             'peers' => new external_multiple_structure(
                 new external_value(PARAM_INT, 'Currently available peer id'),
+            ),
+            'settings' => new external_multiple_structure(
+                new external_single_structure([
+                    'id' => new external_value(PARAM_INT, 'Current peer id'),
+                    'mute' => new external_value(PARAM_BOOL, 'Whether audio should be muted'),
+                    'status' => new external_value(PARAM_BOOL, 'Whether connection should be closed'),
+                ]),
             ),
         ]);
     }

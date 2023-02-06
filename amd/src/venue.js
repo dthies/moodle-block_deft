@@ -8,9 +8,13 @@
  */
 
 import Ajax from 'core/ajax';
-import Log from 'core/log';
 import Config from 'core/config';
+import Fragment from 'core/fragment';
+import {get_string as getString} from 'core/str';
+import ModalEvents from 'core/modal_events';
+import ModalFactory from 'core/modal_factory';
 import Notification from 'core/notification';
+import Templates from 'core/templates';
 
 /**
  * Handle button click
@@ -37,7 +41,51 @@ const handleClick = (e) => {
                 }]);
                 break;
             case 'join':
-                window.open(url, 'block_deft_venue', 'popup,height=400,width=600');
+                if (button.getAttribute('data-type') === 'modal') {
+                    const contextid = button.getAttribute('data-contextid');
+                    document.querySelectorAll('.venue_manager').forEach(container => {
+                        container.innerHTML = '';
+                    });
+                    ModalFactory.create({
+                        large: true,
+                        type: ModalFactory.types.SAVE_CANCEL,
+                        title: getString('venue', 'block_deft'),
+                        body: '<div class="venue_manager"></div>',
+                    }).then(function(modal) {
+                        modal.setSaveButtonText(getString('hide'));
+                        modal.setButtonText('cancel', getString('close', 'block_deft'));
+                        const root = modal.getRoot();
+                        root.on(ModalEvents.cancel, function() {
+                            Ajax.call([{
+                                args: {
+                                    mute: false,
+                                    "status": true
+                                },
+                                fail: Notification.exception,
+                                methodname: 'block_deft_venue_settings'
+                            }]);
+                            Templates.replaceNodeContents(root[0], '', '');
+                        });
+                        Fragment.loadFragment(
+                            'block_deft',
+                            'venue_manager',
+                            contextid,
+                            {
+                                taskid: task
+                            }
+                        ).done((html, js) => {
+                            Templates.replaceNodeContents(root[0].querySelector('.venue_manager'), html, js);
+                        })
+                            .catch(Notification.exception);
+                        modal.show();
+                        root.on('venueclosed', () => {
+                            modal.hide();
+                            Templates.replaceNodeContents(root[0], '', '');
+                        });
+                    });
+                } else {
+                    window.open(url, 'block_deft_venue', 'popup,height=400,width=600');
+                }
                 break;
             case 'mute':
                 Ajax.call([{
@@ -64,14 +112,12 @@ const handleClick = (e) => {
         }
         e.stopPropagation();
         e.preventDefault();
-        Log.debug(e);
         document.activeElement.blur();
     }
 };
 
 /**
  * Initialize listeners
- *
  */
 export const init = () => {
     'use strict';

@@ -67,6 +67,12 @@ class venue_settings extends \external_api {
             'peerid' => $peerid,
         ]);
 
+        if (empty($SESSION->deft_session)) {
+            return [
+                'status' => false,
+            ];
+        }
+
         $task = $DB->get_record_select(
             'block_deft',
             'id IN (SELECT taskid FROM {block_deft_peer} WHERE id = ?)',
@@ -79,13 +85,9 @@ class venue_settings extends \external_api {
         require_login();
         require_capability('block/deft:joinvenue', $context);
 
-        if (!empty($peerid)) {
+        if (!empty($peerid) && $peerid != $SESSION->deft_session->peerid) {
             require_capability('block/deft:moderate', $context);
             $relateduserid = $DB->get_field('block_deft_peer', 'userid', ['id' => $peerid]);
-        } else if (empty($SESSION->deft_session)) {
-            return [
-                'status' => false,
-            ];
         } else {
             $peerid = $SESSION->deft_session->peerid;
         }

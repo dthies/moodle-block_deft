@@ -6,6 +6,7 @@
     display: block;
 }
 
+[data-region="deft-venue"] span.userinitials,
 #page-blocks-deft-venue span.userinitials {
     aspect-ratio: 1 / 1; /* stylelint-disable-line property-no-unknown */
     font-size: 32px;

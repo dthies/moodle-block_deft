@@ -32,17 +32,23 @@
 }}
 
 <div id="block-deft-{{uniqid}}" class="block-deft block-cards" data-region="deft-venue">
-    <div class="container-fluid"> 
+    <div class="container-fluid">
         <div class="row">
+            {{^ peerid }}
             <div class="card col col-12 text-center p-3">
                 <div class="card-body">
+                {{# str }} venueclosed, block_deft {{/ str }}
+                </div>
+            </div>
+            {{/ peerid }}
+            {{# peerid }}
+            <div class="card col col-12 text-center p-3">
                     <h3 class="card-title">{{ title }}</h3>
                     <div class="card-text">{{{ intro }}}</div>
-                </div>
             </div>
         </div>
         <div class="row">
-            <div class="col col-12 col-sm-6 col-md-4 col-lg-3"> 
+            <div class="col col-12 col-sm-6 col-md-4 col-lg-3">
                 <div class="container-fluid p-0" data-peerid="{{ peerid }}">
                     <div class="row">
                         {{# user }}
@@ -61,27 +67,28 @@
                                             {{ fullname }}
                                         </h5>
                                     </div>
-                                    <p class="text-center h3 p-1">
-                                        <a href="#" class="card-link m-0 p-2" data-action="mute" title="{{# str }} mute, block_deft {{/ str }}"><i class="icon fa fa-microphone bg-secondary rounded-circle p-2"></i></a><a href="#" class="card-link hidden m-0 p-2" data-action="unmute" title="{{# str }} unmute, block_deft {{/ str }}"><i class="icon fa fa-microphone-slash bg-warning rounded-circle p-2"></i></a>
+                                <p class="text-center h3 p-1">
+                                    <a href="#" class="card-link m-0 p-2" data-action="mute" title="{{# str }} mute, block_deft {{/ str }}"><i class="icon fa fa-microphone bg-secondary rounded-circle p-2"></i></a><a href="#" class="card-link hidden m-0 p-2" data-action="unmute" title="{{# str }} unmute, block_deft {{/ str }}"><i class="icon fa fa-microphone-slash bg-warning rounded-circle p-2"></i></a>
                                         <a href="#" class="card-link m-0 p-2" data-action="raisehand" title="{{# str }} raisehand, block_deft {{/ str }}"><i class="icon fa fa-hand-grab-o bg-secondary rounded-circle p-2"></i></a><a href="#" class="card-link hidden m-0 p-2" data-action="lowerhand" title="{{# str }} lowerhand, block_deft {{/ str }}"><i class="icon fa fa-hand-stop-o bg-warning rounded-circle p-2"></i></a>
                                         <a href="#" class="card-link m-0 p-2" data-action="close" title="{{# str }} close, block_deft {{/ str }}"><i class="icon fa fa-sign-out bg-secondary rounded-circle p-2"></i></a>
                                     </p>
                                 </div>
-                            </div>  
+                            </div>
                         {{/ user }}
                     </div>
                 </div>
             </div>
-            <div class="col col-12 col-sm-6 col-md-8 col-lg-9"> 
+            <div class="col col-12 col-sm-6 col-md-8 col-lg-9">
                 <div class="container-fluid">
                     <div id="deft_audio" class="row p-0"></div>
                 </div>
             </div>
+            {{/ peerid }}
         </div>
     </div>
 </div>
 {{#js}}
     require(['block_deft/venue_manager', 'core/adapter'], function(VenueManager) {
-        VenueManager.init({{ contextid }}, '{{ token }}', {{ peers }}, {{ peerid }}, {{{ iceservers }}});
+        new VenueManager({{ contextid }}, '{{ token }}', {{ peers }}, {{ peerid }}, {{{ iceservers }}});
     });
 {{/js}}

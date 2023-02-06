@@ -28,6 +28,7 @@ require_once($CFG->dirroot . '/comment/lib.php');
 require_once($CFG->dirroot . '/mod/lti/locallib.php');
 
 use block_deft\output\view;
+use block_deft\venue_manager;
 use block_deft\socket;
 use block_deft\task;
 
@@ -103,7 +104,7 @@ function block_deft_comment_display($comments, $args) {
 }
 
 /**
- * Serve the comments as a fragment.
+ * Provide venue user information
  *
  * @param array $args List of named arguments for the fragment loader.
  * @return string
@@ -338,11 +339,11 @@ function block_deft_pluginfile($course, $birecordorcm, $context, $filearea, $arg
 
     $fs = get_file_storage();
 
-    $taskid = array_shift($args);
     $filename = array_pop($args);
+    $taskid = array_shift($args);
     $filepath = $args ? '/'.implode('/', $args).'/' : '/';
 
-    if (!$file = $fs->get_file($context->id, 'block_deft', 'venue', $taskid, $filepath, $filename) || $file->is_directory()) {
+    if ((!$file = $fs->get_file($context->id, 'block_deft', 'venue', $taskid, $filepath, $filename)) || $file->is_directory()) {
         send_file_not_found();
     }
 
@@ -361,4 +362,43 @@ function block_deft_pluginfile($course, $birecordorcm, $context, $filearea, $arg
     // do not lower it because the files are dispalyed very often.
     \core\session\manager::write_close();
     send_stored_file($file, null, 0, $forcedownload, $options);
+}
+
+/**
+ * Provide venue manager for modal
+ *
+ * @param array $args List of named arguments for the fragment loader.
+ * @return string
+ */
+function block_deft_output_fragment_venue_manager($args) {
+    global $PAGE, $SESSION;
+
+    $context = $args['context'];
+
+    if ($context->contextlevel != CONTEXT_BLOCK) {
+        return null;
+    }
+
+    $jsondata = json_decode($args['jsondata']);
+    $taskid = $args['taskid'];
+
+    $task = task::get_record(['id' => $taskid]);
+    if (!empty($SESSION->deft_session)) {
+        $peerid = $SESSION->deft_session->peerid;
+        unset($SESSION->deft_session);
+        venue_manager::close_peer($peerid);
+    }
+
+    $venue = new venue_manager($context, $task);
+    $output = $PAGE->get_renderer('block_deft');
+
+    $params = [
+        'context' => $context,
+        'objectid' => $taskid,
+    ];
+
+    $event = \block_deft\event\venue_started::create($params);
+    $event->trigger();
+
+    return $output->render($venue);
 }

@@ -94,9 +94,11 @@ class venue implements renderable, templatable {
         foreach ($peers as $peer) {
             $peer->fullname = fullname($peer);
         }
+        $url = new moodle_url('/blocks/deft/venue.php', ['task' => $this->task->id]);
         return [
             'active' => !empty($settings) && !$settings->status,
             'count' => count($peers),
+            'contextid' => $this->context->id,
             'peers' => array_values($peers),
             'lastmodified' => max($lastmodified, $this->task->timemodified, $settings->timemodified ?? 0),
             'limit' => $this->config->limit ?? 0,
@@ -107,6 +109,7 @@ class venue implements renderable, templatable {
                 'para' => true,
             ]),
             'peerid' => $settings->peerid ?? 0,
+            'popup' => !isset($this->config->windowoption) || $this->config->windowoption != 'openinwindow', 'url' => $url->out(),
         ];
     }
 }

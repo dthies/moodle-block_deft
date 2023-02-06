@@ -45,4 +45,45 @@ class status_venue extends status_task {
         $mform->setType('close', PARAM_BOOL);
         $mform->setDefault('close', get_config('block_deft', 'expandcomments'));
     }
+
+    /**
+     * Process the form submission, used if form was submitted via AJAX
+     *
+     * This method can return scalar values or arrays that can be json-encoded, they will be passed to the caller JS.
+     *
+     * @return mixed
+     */
+    public function process_dynamic_submission() {
+        global $DB;
+        if (($data = $this->get_data()) && !empty($data->close) && !empty($data->id)) {
+            $peers = $DB->get_records_menu(
+                'block_deft_peer',
+                [
+                    'status' => 0,
+                    'taskid' => $data->id,
+                ],
+                '',
+                'id, userid'
+            );
+            $context = $this->get_context_for_dynamic_submission();
+            $peers = array_filter($peers, function($userid) use ($context) {
+                return !has_capability('block/deft:moderate', $context, $userid);
+            });
+            if (!empty($peers)) {
+                list($sql, $params) = $DB->get_in_or_equal(array_keys($peers));
+                $DB->set_field_select('block_deft_peer', 'status', 1, "id $sql", $params);
+                $params = [
+                    'context' => $context,
+                    'objectid' => $data->id,
+                ];
+                foreach ($peers as $peerid => $userid) {
+                    $params['userid'] = $userid;
+                    $params['objectid'] = $peerid;
+                    $event = \block_deft\event\venue_ended::create($params);
+                    $event->trigger();
+                }
+            }
+        }
+        return parent::process_dynamic_submission();
+    }
 }

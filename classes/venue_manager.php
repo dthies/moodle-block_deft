@@ -57,7 +57,9 @@ class venue_manager implements renderable, templatable {
         $this->task = $task;
         $this->socket = new socket($context);
 
-        if (empty($SESSION->deft_session)) {
+        if (!empty($SESSION->deft_session)) {
+            $peerid = $SESSION->deft_session->peerid;
+        } else if ($this->can_access()) {
             $SESSION->deft_session = (object) [
                 'lastmodified' => time(),
                 'userid' => $USER->id,
@@ -71,7 +73,7 @@ class venue_manager implements renderable, templatable {
             $SESSION->deft_session->peerid = $peerid;
             $this->socket->dispatch();
         } else {
-            $peerid = $SESSION->deft_session->peerid;
+            return;
         }
 
         $this->messages = $DB->get_records('block_deft_signal', [
@@ -114,6 +116,10 @@ class venue_manager implements renderable, templatable {
      */
     public function export_for_template(renderer_base $output) {
         global $PAGE, $SESSION, $USER;
+
+        if (empty($SESSION->deft_session)) {
+            return [];
+        }
 
         $url = new moodle_url('/blocks/deft/venue.php', ['id' => $this->task->get('id')]);
 
@@ -261,5 +267,28 @@ class venue_manager implements renderable, templatable {
             'timemodified' => time(),
             'status' => true,
         ]);
+    }
+
+    /**
+     * Check whether current user can access venue
+     *
+     * @return boolean
+     */
+    public function can_access() {
+        global $DB;
+        if (has_capability('block/deft:moderate', $this->context)) {
+            return true;
+        } else if (!empty($this->task->get_state()->close)) {
+            return false;
+        } else if (empty($this->task->get_config()->limit)) {
+            return true;
+        }
+
+        return $this->task->get_config()->limit > count($DB->get_fieldset_select(
+            'block_deft_peer',
+            'id',
+            'status = 0 AND taskid = ?',
+            [$this->task->get('id')]
+        ));
     }
 }

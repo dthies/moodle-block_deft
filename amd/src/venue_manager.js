@@ -13,19 +13,7 @@ import Notification from "core/notification";
 import Log from "core/log";
 import Socket from "block_deft/socket";
 
-export default {
-
-    lastSignal: 0,
-
-    lastUpdate: 0,
-
-    dataChannels: [],
-
-    peerConnections: [],
-
-    queue: [],
-
-    queueout: [],
+export default class {
 
     /**
      * Listen for comment actions
@@ -36,10 +24,15 @@ export default {
      * @param {int} peerid My peer id
      * @param {array} iceServers ICE server array to configure peers
      */
-    init: function(contextid, token, peers, peerid, iceServers) {
+    constructor (contextid, token, peers, peerid, iceServers) {
         this.contextid = contextid;
         this.peerid = peerid;
         this.iceServers = iceServers;
+        this.lastSignal = 0;
+        this.lastUpdate = 0;
+        this.dataChannels = [];
+        this.peerConnections = [];
+        this.queueout = [];
 
         this.audioInput = navigator.mediaDevices.getUserMedia({
             audio: {
@@ -58,7 +51,6 @@ export default {
                 e.stopPropagation();
                 e.preventDefault();
                 if (peerid == this.peerid) {
-                    this.mute(action == 'mute');
                     Ajax.call([{
                         args: {
                             mute: action == 'mute',
@@ -147,7 +139,7 @@ export default {
         socket.subscribe(() => {
             this.sendSignals();
         });
-    },
+    }
 
     /**
      * Handle ICE candidate event
@@ -156,11 +148,11 @@ export default {
      * @param {int} peerid Recipient id
      * @param {event} e ICE candidate event
      */
-    handleICECandidate: function(contextid, peerid, e) {
+    handleICECandidate(contextid, peerid, e) {
         if (e.candidate) {
             this.sendSignal(peerid, 'new-ice-candidate', e.candidate);
         }
-    },
+    }
 
     /**
      * Queue signal to peer
@@ -169,19 +161,19 @@ export default {
      * @param {string} type Signal type
      * @param {object} message Signal content
      */
-    sendSignal: function(peerid, type, message) {
+    sendSignal(peerid, type, message) {
         this.queueout.push({
             message: JSON.stringify(message),
             peerid: peerid,
             type: type
         });
         this.sendSignals();
-    },
+    }
 
     /**
      * Transfer signals with signal server
      */
-    sendSignals: function() {
+    sendSignals() {
 
         if (this.throttled || !navigator.onLine) {
             return;
@@ -211,9 +203,32 @@ export default {
             },
             contextid: this.contextid,
             done: response => {
+                if (response.peerid != this.peerid) {
+                    return;
+                }
                 response.settings.forEach(peer => {
                     if (peer.id == Number(this.peerid)) {
                         if (peer.status) {
+                            // Release microphone.
+                            this.audioInput.then(audioStream => {
+                                audioStream.getAudioTracks().forEach(track => {
+                                   track.stop();
+                                });
+                                return true;
+                            }).catch(Notification.exception);
+
+                            // Close connections.
+                            this.peerConnections.forEach(pc => {
+                                pc.close();
+                            });
+
+                            document.querySelectorAll(
+                                '[data-region="deft-venue"] [data-peerid="' + this.peerid + '"]'
+                            ).forEach(venue => {
+                                const e = new Event('venueclosed', {bubbles: true});
+                                venue.dispatchEvent(e);
+                            });
+
                             window.close();
                             return;
                         }
@@ -240,16 +255,14 @@ export default {
                 for (const key in this.peerConnections.keys()) {
                     if (!response.peers.includes(key)) {
                         const pc = this.peerConnections[key];
-                        Log.debug('Close ' + key);
                         pc.close();
-                        this.peerConnections[key] = null;
                     }
                 }
             },
             fail: Notification.exception,
             methodname: 'block_deft_send_signal'
         }]);
-    },
+    }
 
     /**
      * Handle negtiation needed event
@@ -259,20 +272,20 @@ export default {
      * @param {int} peerid Id of peer
      * @return {Promise}
      */
-    negotiate: function(contextid, pc, peerid) {
+    negotiate(contextid, pc, peerid) {
         return pc.createOffer().then(offer => {
             return pc.setLocalDescription(offer).then(() => {
                 return this.sendSignal(peerid, 'audio-offer', offer);
             }).catch(Log.debug);
         });
-    },
+    }
 
     /**
-     * Recursively process queue
+     * Process a signal
      *
      * @param {object} signal Signal received to process
      */
-    processSignal: function(signal) {
+    processSignal(signal) {
         if (signal.type === 'audio-offer') {
             const pc = this.peerConnections[signal.frompeer] || new RTCPeerConnection({
                  iceServers: this.iceServers
@@ -330,7 +343,7 @@ export default {
                 pc.addIceCandidate(JSON.parse(signal.message));
             }
         }
-    },
+    }
 
     /**
      * Handle track event
@@ -338,8 +351,11 @@ export default {
      * @param {int} peerid Id of peer
      * @param {event} e Track event
      */
-    handleTrackEvent: function(peerid, e) {
-        if (!e || !e.streams || document.querySelector('#deft_audio div[data-peerid="' + peerid + '"]')) {
+    handleTrackEvent(peerid, e) {
+        if (
+            !e || !e.streams || !document.querySelector('#deft_audio')
+            || document.querySelector('#deft_audio div[data-peerid="' + peerid + '"]')
+        ) {
             return;
         }
         Log.debug('Track');
@@ -367,14 +383,14 @@ export default {
             const player = node.querySelector('audio');
             player.srcObject = e.streams[0];
         }).catch(Notification.exception);
-    },
+    }
 
     /**
      * Change mute status
      *
      * @param {bool} state State to be set
      */
-    mute: function(state) {
+    mute(state) {
         this.audioInput.then(audioStream => {
             audioStream.getAudioTracks().forEach(track => {
                 if (track.enabled == state) {
@@ -383,7 +399,7 @@ export default {
             });
             return true;
         }).catch(Notification.exception);
-    },
+    }
 
     /**
      * Raise or lower peers hand
@@ -391,7 +407,7 @@ export default {
      * @param {int} peerid Peer id
      * @param {event} e Message event
      */
-    handleMessage: function(peerid, e) {
+    handleMessage(peerid, e) {
         const message = JSON.parse(e.data);
         document.querySelectorAll('[data-peerid="' + peerid + '"] [data-action="raisehand"]').forEach(button => {
             if (message.raisehand) {
@@ -407,7 +423,7 @@ export default {
                 button.classList.add('hidden');
             }
         });
-    },
+    }
 
     /**
      * Adjust visiblity when state changes
@@ -430,7 +446,7 @@ export default {
                     break;
             }
         });
-    },
+    }
 
     /**
      * Shut down gracefully before closing
@@ -444,9 +460,6 @@ export default {
             fail: Notification.exception,
             methodname: 'block_deft_venue_settings'
         }]);
-        this.peerConnections.forEach(pc => {
-            pc.close();
-        });
 
         // Release microphone.
         this.audioInput.then(audioStream => {
@@ -456,6 +469,16 @@ export default {
             return true;
         }).catch(Notification.exception);
 
+        // Close connections.
+        this.peerConnections.forEach(pc => {
+            pc.close();
+        });
+
+        document.querySelectorAll('.deft-venue [data-peerid="' + this.peerid + '"]').forEach(venue => {
+            const event = new Event('venueclosed');
+            venue.despatchEvent(event);
+        });
+
         window.beforeunload = null;
     }
-};
+}
