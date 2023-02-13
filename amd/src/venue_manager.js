@@ -9,9 +9,12 @@
 
 import Ajax from "core/ajax";
 import Fragment from 'core/fragment';
+import {get_string as getString} from 'core/str';
+import ModalEvents from 'core/modal_events';
 import Notification from "core/notification";
 import Log from "core/log";
 import Socket from "block_deft/socket";
+import "core/adapter";
 
 export default class {
 
@@ -34,6 +37,32 @@ export default class {
         this.peerConnections = [];
         this.queueout = [];
 
+        if (!window.RTCPeerConnection) {
+            document.querySelectorAll('.venue_manager').forEach((venue) => {
+                const e = new Event('venueclosed', {bubbles: true});
+                venue.dispatchEvent(e);
+            });
+            Notification.alert(
+                getString('unsupportedbrowser', 'block_deft'),
+                getString('unsupportedbrowsermessage', 'block_deft')
+            ).then(notice => {
+                const root = notice.getRoot();
+                root.on(ModalEvents.cancel, () => {
+                    Ajax.call([{
+                        args: {
+                            mute: false,
+                            "status": true
+                        },
+                        fail: Notification.exception,
+                        methodname: 'block_deft_venue_settings'
+                    }])[0].then(() => {
+                        window.close();
+                    });
+                });
+            });
+
+            return;
+        }
         this.audioInput = navigator.mediaDevices.getUserMedia({
             audio: {
                 autoGainControl: true,
@@ -42,43 +71,25 @@ export default class {
                 sampleRate: 8000
             },
             video: false
+        }).catch((e) => {
+            Log.debug(e);
+
+            Ajax.call([{
+                args: {
+                    mute: true,
+                    "status": false
+                },
+                fail: Notification.exception,
+                methodname: 'block_deft_venue_settings'
+            }]);
+
+            return false;
         });
-        document.querySelector('body').addEventListener('click', e => {
-            const button = e.target.closest('a[data-action="mute"], a[data-action="unmute"]');
-            if (button) {
-                const action = button.getAttribute('data-action');
-                    peerid = button.closest('[data-peerid]').getAttribute('data-peerid');
-                e.stopPropagation();
-                e.preventDefault();
-                if (peerid == this.peerid) {
-                    Ajax.call([{
-                        args: {
-                            mute: action == 'mute',
-                            "status": false
-                        },
-                            fail: Notification.exception,
-                        methodname: 'block_deft_venue_settings'
-                    }]);
-                } else {
-                    Ajax.call([{
-                        args: {
-                            mute: true,
-                            peerid: peerid,
-                            "status": false
-                        },
-                            fail: Notification.exception,
-                        methodname: 'block_deft_venue_settings'
-                    }]);
-                }
-                button.closest('[data-peerid]').querySelectorAll('[data-action="mute"], [data-action="unmute"]').forEach(option => {
-                    if (option.getAttribute('data-action') == action) {
-                        option.classList.add('hidden');
-                    } else {
-                        option.classList.remove('hidden');
-                    }
-                });
-            }
-        });
+        this.audioInput.then(this.monitorVolume.bind(this));
+
+        document.querySelector('body').removeEventListener('click', this.handleMuteButtons);
+        document.querySelector('body').addEventListener('click', this.handleMuteButtons);
+
         peers.forEach(peerid => {
             const pc = new RTCPeerConnection({
                  iceServers: iceServers
@@ -93,50 +104,16 @@ export default class {
             this.peerConnections[peerid] = pc;
         });
 
-        document.querySelectorAll('a[data-action="raisehand"], a[data-action="lowerhand"]').forEach(button => {
-            button.addEventListener('click', (e) => {
-                const action = button.getAttribute('data-action');
-                e.stopPropagation();
-                e.preventDefault();
-                document.querySelectorAll('a[data-action="raisehand"], a[data-action="lowerhand"]').forEach(button => {
-                    if (button.getAttribute('data-action') == action) {
-                        button.classList.add('hidden');
-                    } else {
-                        button.classList.remove('hidden');
-                    }
-                });
-                Ajax.call([{
-                    args: {
-                        "status": action == 'raisehand'
-                    },
-                        fail: Notification.exception,
-                    methodname: 'block_deft_raise_hand'
-                }]);
-                this.dataChannels.forEach(dataChannel => {
-                    if (dataChannel.readyState != 'open') {
-                        return;
-                    }
-                    if (action == 'raisehand') {
-                        dataChannel.send('{"raisehand": true}');
-                    } else {
-                        dataChannel.send('{"raisehand": false}');
-                    }
-                });
-            });
-        });
+        document.querySelector('body').removeEventListener('click', this.handleRaiseHand.bind(this));
+        document.querySelector('body').addEventListener('click', this.handleRaiseHand.bind(this));
 
-        document.querySelectorAll('a[data-action="close"]').forEach(button => {
-            button.addEventListener('click', e => {
-                e.stopPropagation();
-                e.preventDefault();
-                button.firstChild.classList.add('bg-warning');
-                this.closeConnections();
-            });
-        });
+        document.querySelector('body').removeEventListener('click', this.closeConnections.bind(this));
+        document.querySelector('body').addEventListener('click', this.closeConnections.bind(this));
+
         window.onbeforeunload = this.closeConnections.bind(this);
 
-        let socket = new Socket(contextid, token);
-        socket.subscribe(() => {
+        this.socket = new Socket(contextid, token);
+        this.socket.subscribe(() => {
             this.sendSignals();
         });
     }
@@ -203,18 +180,18 @@ export default class {
             },
             contextid: this.contextid,
             done: response => {
-                if (response.peerid != this.peerid) {
-                    return;
-                }
                 response.settings.forEach(peer => {
                     if (peer.id == Number(this.peerid)) {
                         if (peer.status) {
                             // Release microphone.
+                            clearInterval(this.meterId);
                             this.audioInput.then(audioStream => {
-                                audioStream.getAudioTracks().forEach(track => {
-                                   track.stop();
-                                });
-                                return true;
+                                if (audioStream) {
+                                    audioStream.getAudioTracks().forEach(track => {
+                                        track.stop();
+                                    });
+                                }
+                                return audioStream;
                             }).catch(Notification.exception);
 
                             // Close connections.
@@ -228,6 +205,8 @@ export default class {
                                 const e = new Event('venueclosed', {bubbles: true});
                                 venue.dispatchEvent(e);
                             });
+
+                            this.socket.disconnect();
 
                             window.close();
                             return;
@@ -265,7 +244,7 @@ export default class {
     }
 
     /**
-     * Handle negtiation needed event
+     * Handle negotiation needed event
      *
      * @param {int} contextid Block conntextid
      * @param {RTCPeerConnection} pc Connection
@@ -312,11 +291,13 @@ export default class {
             pc.setRemoteDescription(JSON.parse(signal.message)).then(() => {
                 Log.debug('Set Remote');
                 return this.audioInput.then(audioStream => {
-                    Log.debug('audio stream');
-                    if (pc.getTransceivers().length < 2) {
-                        audioStream.getAudioTracks().forEach(track => {
-                            pc.addTransceiver(track, {streams: [audioStream]});
-                        });
+                    if (audioStream) {
+                        Log.debug('audio stream');
+                        if (pc.getTransceivers().length < 2) {
+                            audioStream.getAudioTracks().forEach(track => {
+                                pc.addTransceiver(track, {streams: [audioStream]});
+                            });
+                        }
                     }
                     Log.debug('Create answer');
                     return pc.createAnswer().then(answer => {
@@ -358,12 +339,14 @@ export default class {
         ) {
             return;
         }
-        Log.debug('Track');
-        Log.debug(e);
 
         const node = document.createElement('div');
         node.setAttribute('data-peerid', peerid);
-        node.setAttribute('class', 'col col-12 col-md-6 col-lg-4 col-xl-3 m-2');
+        if (document.querySelector('body#page-blocks-deft-venue')) {
+            node.setAttribute('class', 'col col-12 col-md-6 col-lg-4 col-xl-3 m-2');
+        } else {
+            node.setAttribute('class', 'col col-12 m-2');
+        }
         window.setTimeout(() => {
             node.querySelectorAll('img.card-img-top').forEach(image => {
                 image.setAttribute('height', null);
@@ -392,6 +375,9 @@ export default class {
      */
     mute(state) {
         this.audioInput.then(audioStream => {
+            if (!audioStream) {
+                return this.audioInput;
+            }
             audioStream.getAudioTracks().forEach(track => {
                 if (track.enabled == state) {
                     track.enabled = !state;
@@ -409,20 +395,29 @@ export default class {
      */
     handleMessage(peerid, e) {
         const message = JSON.parse(e.data);
-        document.querySelectorAll('[data-peerid="' + peerid + '"] [data-action="raisehand"]').forEach(button => {
-            if (message.raisehand) {
-                button.classList.add('hidden');
-            } else {
-                button.classList.remove('hidden');
-            }
-        });
-        document.querySelectorAll('[data-peerid="' + peerid + '"] [data-action="lowerhand"]').forEach(button => {
-            if (message.raisehand) {
-                button.classList.remove('hidden');
-            } else {
-                button.classList.add('hidden');
-            }
-        });
+        if (message.hasOwnProperty('raisehand')) {
+            document.querySelectorAll('[data-peerid="' + peerid + '"] [data-action="raisehand"]').forEach(button => {
+                if (message.raisehand) {
+                    button.classList.add('hidden');
+                } else {
+                    button.classList.remove('hidden');
+                }
+            });
+            document.querySelectorAll('[data-peerid="' + peerid + '"] [data-action="lowerhand"]').forEach(button => {
+                if (message.raisehand) {
+                    button.classList.remove('hidden');
+                } else {
+                    button.classList.add('hidden');
+                }
+            });
+        }
+        if (message.hasOwnProperty('volume')) {
+            document.querySelectorAll('.volume_indicator[data-peerid="' + peerid + '"]').forEach(indicator => {
+                indicator.querySelector('.low').style.opacity = message.volume.low;
+                indicator.querySelector('.mid').style.opacity = message.volume.mid;
+                indicator.querySelector('.high').style.opacity = message.volume.high;
+            });
+        }
     }
 
     /**
@@ -450,8 +445,22 @@ export default class {
 
     /**
      * Shut down gracefully before closing
+     *
+     * @param {Event} e Button click
      */
-    closeConnections() {
+    closeConnections(e) {
+        if (e && e.type == 'click') {
+            const button = e.target.closest('[data-region="deft-venue"] a[data-action="close"]');
+            if (button) {
+                e.stopPropagation();
+                e.preventDefault();
+            } else {
+                return;
+            }
+        }
+        document.querySelectorAll('[data-region="deft-venue"] a[data-action="close"] i').forEach(button => {
+            button.classList.add('bg-warning');
+        });
         Ajax.call([{
             args: {
                 mute: false,
@@ -462,10 +471,13 @@ export default class {
         }]);
 
         // Release microphone.
+        clearInterval(this.meterId);
         this.audioInput.then(audioStream => {
-            audioStream.getAudioTracks().forEach(track => {
-               track.stop();
-            });
+            if (audioStream) {
+                audioStream.getAudioTracks().forEach(track => {
+                    track.stop();
+                });
+            }
             return true;
         }).catch(Notification.exception);
 
@@ -480,5 +492,155 @@ export default class {
         });
 
         window.beforeunload = null;
+    }
+
+    /**
+     * Handle click for mute
+     *
+     * @param {Event} e Button click
+     */
+    handleMuteButtons(e) {
+        const button = e.target.closest(
+            'a[data-action="mute"], a[data-action="unmute"]'
+        );
+        if (button) {
+            const action = button.getAttribute('data-action'),
+                peerid = button.closest('[data-peerid]').getAttribute('data-peerid');
+            e.stopPropagation();
+            e.preventDefault();
+            if (!button.closest('#deft_audio')) {
+                Ajax.call([{
+                    args: {
+                        mute: action == 'mute',
+                        "status": false
+                    },
+                        fail: Notification.exception,
+                    methodname: 'block_deft_venue_settings'
+                }]);
+            } else {
+                Ajax.call([{
+                    args: {
+                        mute: true,
+                        peerid: peerid,
+                        "status": false
+                    },
+                        fail: Notification.exception,
+                    methodname: 'block_deft_venue_settings'
+                }]);
+            }
+            button.closest('[data-peerid]').querySelectorAll('[data-action="mute"], [data-action="unmute"]').forEach(option => {
+                if (option.getAttribute('data-action') == action) {
+                    option.classList.add('hidden');
+                } else {
+                    option.classList.remove('hidden');
+                }
+            });
+        }
+    }
+
+    /**
+     * Handle hand raise buttons
+     *
+     * @param {Event} e Click event
+     */
+    handleRaiseHand(e) {
+        const button = e.target.closest(
+            'a[data-action="raisehand"], a[data-action="lowerhand"]'
+        );
+        if (button) {
+            const action = button.getAttribute('data-action');
+            e.stopPropagation();
+            e.preventDefault();
+            document.querySelectorAll('a[data-action="raisehand"], a[data-action="lowerhand"]').forEach(button => {
+                if (button.getAttribute('data-action') == action) {
+                    button.classList.add('hidden');
+                } else {
+                    button.classList.remove('hidden');
+                }
+            });
+            Ajax.call([{
+                args: {
+                    "status": action == 'raisehand'
+                },
+                    fail: Notification.exception,
+                methodname: 'block_deft_raise_hand'
+            }]);
+            this.dataChannels.forEach(dataChannel => {
+                if (dataChannel.readyState != 'open') {
+                    return;
+                }
+                if (action == 'raisehand') {
+                    dataChannel.send('{"raisehand": true}');
+                } else {
+                    dataChannel.send('{"raisehand": false}');
+                }
+            });
+        }
+    }
+
+    /**
+     * Process audio to provide visual feedback
+     *
+     * @param {MediaStream} audioStream Audio from user's microphone
+     * @returns {MediaStream}
+     */
+    monitorVolume(audioStream) {
+        if (audioStream) {
+            const audioContext = new AudioContext(),
+                source = audioContext.createMediaStreamSource(audioStream),
+                analyser = new AnalyserNode(audioContext, {
+                    maxDecibels: -50,
+                    minDecibels: -90,
+                    fftSize: 2048,
+                    smoothingTimeConstant: .3
+                }),
+                bufferLength = analyser.frequencyBinCount,
+                data = new Uint8Array(bufferLength);
+            source.connect(analyser);
+            this.meterId = setInterval(() => {
+                analyser.getByteFrequencyData(data);
+                const volume = {
+                    low: Math.min(1, data.slice(0, 16).reduce((a, b) => a + b, 0) / 2000),
+                    mid: Math.min(1, data.slice(17, 31).reduce((a, b) => a + b, 0) / 1000),
+                    high: Math.min(1, data.slice(32).reduce((a, b) => a + b, 0) / 4000)
+                },
+                    message = JSON.stringify({volume: volume}),
+                    peers = [];
+                document.querySelectorAll('.volume_indicator[data-peerid="' + this.peerid + '"]').forEach(indicator => {
+                    indicator.querySelectorAll('.low').forEach(low => {
+                        low.style.opacity = volume.low;
+                    });
+                    indicator.querySelectorAll('.mid').forEach(mid => {
+                        mid.style.opacity = volume.mid;
+                    });
+                    indicator.querySelectorAll('.high').forEach(high => {
+                        high.style.opacity = volume.high;
+                    });
+                });
+                this.dataChannels.forEach(dataChannel => {
+                    if (dataChannel.readyState == 'open') {
+                        dataChannel.send(message);
+                    }
+                });
+                document.querySelectorAll('#deft_audio > div').forEach(peer => {
+                    peers.push(peer);
+                });
+                peers.sort((a, b) => {
+                    let volume = 0;
+                    a.querySelectorAll('.high, .mid, .low').forEach(indicator => {
+                        volume += -indicator.style.opacity;
+                    });
+                    b.querySelectorAll('.high, .mid, .low').forEach(indicator => {
+                        volume += indicator.style.opacity;
+                    });
+                    return volume;
+                });
+                peers.forEach(peer => {
+                    document.querySelector('#deft_audio').appendChild(peer);
+                });
+            }, 100);
+        }
+
+        return audioStream;
     }
 }

@@ -92,7 +92,6 @@ class send_signal extends \external_api {
 
         return [
             'messages' => $messages,
-            'peerid' => $SESSION->deft_session->peerid,
             'peers' => $peers,
             'settings' => $settings,
         ];
@@ -113,7 +112,6 @@ class send_signal extends \external_api {
                     'type' => new external_value(PARAM_TEXT, 'Message type'),
                 ]),
             ),
-            'peerid' => new external_value(PARAM_INT, 'Current peerid'),
             'peers' => new external_multiple_structure(
                 new external_value(PARAM_INT, 'Currently available peer id'),
             ),

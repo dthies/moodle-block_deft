@@ -23,8 +23,10 @@
     {
         "contextid": 2,
         "iceservers": "[]",
+        "intro": "Hello world",
         "peerid": 109,
         "peers": "[105, 106]",
+        "title": "Venue",
         "token": "dladfjlakerlaa3j4lr",
         "throttle": 100,
         "uniqueid": "eworio"
@@ -48,7 +50,7 @@
             </div>
         </div>
         <div class="row">
-            <div class="col col-12 col-sm-6 col-md-4 col-lg-3">
+            <div class="col col-12 col-sm-6 {{# popup }} col-md-4 col-lg-3 {{/ popup }}">
                 <div class="container-fluid p-0" data-peerid="{{ peerid }}">
                     <div class="row">
                         {{# user }}
@@ -67,18 +69,21 @@
                                             {{ fullname }}
                                         </h5>
                                     </div>
-                                <p class="text-center h3 p-1">
-                                    <a href="#" class="card-link m-0 p-2" data-action="mute" title="{{# str }} mute, block_deft {{/ str }}"><i class="icon fa fa-microphone bg-secondary rounded-circle p-2"></i></a><a href="#" class="card-link hidden m-0 p-2" data-action="unmute" title="{{# str }} unmute, block_deft {{/ str }}"><i class="icon fa fa-microphone-slash bg-warning rounded-circle p-2"></i></a>
-                                        <a href="#" class="card-link m-0 p-2" data-action="raisehand" title="{{# str }} raisehand, block_deft {{/ str }}"><i class="icon fa fa-hand-grab-o bg-secondary rounded-circle p-2"></i></a><a href="#" class="card-link hidden m-0 p-2" data-action="lowerhand" title="{{# str }} lowerhand, block_deft {{/ str }}"><i class="icon fa fa-hand-stop-o bg-warning rounded-circle p-2"></i></a>
-                                        <a href="#" class="card-link m-0 p-2" data-action="close" title="{{# str }} close, block_deft {{/ str }}"><i class="icon fa fa-sign-out bg-secondary rounded-circle p-2"></i></a>
+                                </div>
+                                <div class="card-footer">
+                                    <p class="text-center h3 p-0">
+                                        <a href="#" class="card-link m-0 p-1" data-action="mute" title="{{# str }} mute, block_deft {{/ str }}"><i class="icon fa fa-microphone bg-secondary rounded-circle m-0 p-2"></i></a><a href="#" class="card-link hidden m-0 p-1" data-action="unmute" title="{{# str }} unmute, block_deft {{/ str }}"><i class="icon fa fa-microphone-slash bg-warning rounded-circle m-0 p-2"></i></a>
+                                        <a href="#" class="card-link m-0 p-1" data-action="raisehand" title="{{# str }} raisehand, block_deft {{/ str }}"><i class="icon fa fa-hand-grab-o bg-secondary rounded-circle m-0 p-2"></i></a><a href="#" class="card-link hidden m-0 p-1" data-action="lowerhand" title="{{# str }} lowerhand, block_deft {{/ str }}"><i class="icon fa fa-hand-stop-o bg-warning rounded-circle m-0 p-2"></i></a>
+                                        <a href="#" class="card-link m-0 p-1" data-action="close" title="{{# str }} close, block_deft {{/ str }}"><i class="icon fa fa-sign-out bg-secondary rounded-circle m-0 p-2"></i></a>
                                     </p>
+                                    {{> block_deft/volume_indicator }}
                                 </div>
                             </div>
                         {{/ user }}
                     </div>
                 </div>
             </div>
-            <div class="col col-12 col-sm-6 col-md-8 col-lg-9">
+            <div class="col col-12 col-sm-6 {{# popup }} col-md-8 col-lg-9 {{/ popup }}">
                 <div class="container-fluid">
                     <div id="deft_audio" class="row p-0"></div>
                 </div>

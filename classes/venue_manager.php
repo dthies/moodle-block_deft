@@ -152,6 +152,7 @@ class venue_manager implements renderable, templatable {
             'throttle' => get_config('block_deft', 'throttle'),
             'peerid' => $SESSION->deft_session->peerid,
             'peers' => json_encode(array_keys($this->sessions)),
+            'popup' => !isset($this->task->get_config()->windowoption) || $this->task->get_config()->windowoption != 'openinwindow',
             'sessions' => array_values($this->sessions),
             'token' => $this->socket->get_token(),
             'title' => format_string($this->task->get_config()->name),

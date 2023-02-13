@@ -109,7 +109,8 @@ class venue implements renderable, templatable {
                 'para' => true,
             ]),
             'peerid' => $settings->peerid ?? 0,
-            'popup' => !isset($this->config->windowoption) || $this->config->windowoption != 'openinwindow', 'url' => $url->out(),
+            'popup' => !isset($this->config->windowoption) || $this->config->windowoption != 'openinwindow',
+            'url' => $url->out(),
         ];
     }
 }
