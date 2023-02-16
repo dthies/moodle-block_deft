@@ -2,7 +2,7 @@
  * Handle events for venue task
  *
  * @package    block_deft
- * @module     block_deft/choose
+ * @module     block_deft/venue
  * @copyright  2022 Daniel Thies <dethies@gmail.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -16,6 +16,8 @@ import ModalFactory from 'core/modal_factory';
 import Notification from 'core/notification';
 import Templates from 'core/templates';
 
+let venue = null;
+
 /**
  * Handle button click
  *
@@ -24,7 +26,7 @@ import Templates from 'core/templates';
 const handleClick = (e) => {
     'use strict';
 
-    let button = e.target.closest('.block_deft_venue a[data-action]');
+    let button = e.target.closest('.block_deft_venue button[data-action]');
     if (button) {
         let task = button.closest('[data-task]').getAttribute('data-task'),
             url = new URL(Config.wwwroot + '/blocks/deft/venue.php');
@@ -52,9 +54,11 @@ const handleClick = (e) => {
                         title: getString('venue', 'block_deft'),
                         body: '<div class="venue_manager"></div>',
                     }).then(function(modal) {
-                        modal.setSaveButtonText(getString('hide'));
-                        modal.setButtonText('cancel', getString('close', 'block_deft'));
                         const root = modal.getRoot();
+                        venue = modal;
+                        modal.setSaveButtonText(getString('hide'));
+                        modal.setButtonText('cancel', getString('leave', 'block_deft'));
+                        document.querySelector('body').classList.add('block_deft_venue_page');
                         root.on(ModalEvents.cancel, function() {
                             Ajax.call([{
                                 args: {
@@ -81,9 +85,11 @@ const handleClick = (e) => {
                         root.on('venueclosed', () => {
                             modal.hide();
                             Templates.replaceNodeContents(root[0], '', '');
+                            document.querySelector('body').classList.remove('block_deft_venue_page');
                         });
                     });
                 } else {
+                    document.querySelector('body').classList.remove('block_deft_venue_page');
                     window.open(url, 'block_deft_venue', 'popup,height=400,width=600');
                 }
                 break;
@@ -96,6 +102,9 @@ const handleClick = (e) => {
                     fail: Notification.exception,
                     methodname: 'block_deft_venue_settings'
                 }]);
+                break;
+            case 'show':
+                venue.show();
                 break;
             case 'unmute':
                 Ajax.call([{

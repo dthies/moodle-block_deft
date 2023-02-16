@@ -26,15 +26,23 @@ export default class {
      * @param {array} peers
      * @param {int} peerid My peer id
      * @param {array} iceServers ICE server array to configure peers
+     * @param {bool} autogaincontrol
+     * @param {bool} echocancellation
+     * @param {bool} noisesuppression
+     * @param {int} samplerate
      */
-    constructor (contextid, token, peers, peerid, iceServers) {
+    constructor (contextid, token, peers, peerid, iceServers, autogaincontrol, echocancellation, noisesuppression, samplerate) {
         this.contextid = contextid;
         this.peerid = peerid;
         this.iceServers = iceServers;
+        this.autogaincontrol = autogaincontrol;
+        this.echocancellation = echocancellation;
+        this.noisesuppression = noisesuppression;
+        this.samplerate = samplerate;
         this.lastSignal = 0;
         this.lastUpdate = 0;
         this.dataChannels = [];
-        this.peerConnections = [];
+        this.peerConnections = {};
         this.queueout = [];
 
         if (!window.RTCPeerConnection) {
@@ -65,10 +73,10 @@ export default class {
         }
         this.audioInput = navigator.mediaDevices.getUserMedia({
             audio: {
-                autoGainControl: true,
-                echoCancellation: true,
-                noiseSuppression: true,
-                sampleRate: 8000
+                autoGainControl: autogaincontrol,
+                echoCancellation: echocancellation,
+                noiseSuppression: noisesuppression,
+                sampleRate: samplerate
             },
             video: false
         }).catch((e) => {
@@ -87,8 +95,8 @@ export default class {
         });
         this.audioInput.then(this.monitorVolume.bind(this));
 
-        document.querySelector('body').removeEventListener('click', this.handleMuteButtons);
-        document.querySelector('body').addEventListener('click', this.handleMuteButtons);
+        document.querySelector('body').removeEventListener('click', this.handleMuteButtons.bind(this));
+        document.querySelector('body').addEventListener('click', this.handleMuteButtons.bind(this));
 
         peers.forEach(peerid => {
             const pc = new RTCPeerConnection({
@@ -101,7 +109,7 @@ export default class {
             pc.onicecandidate = this.handleICECandidate.bind(this, contextid, peerid);
             pc.ontrack = this.handleTrackEvent.bind(this, peerid);
             pc.onconnectionstatechange = this.handleStateChange.bind(this, peerid);
-            this.peerConnections[peerid] = pc;
+            this.peerConnections[String(peerid)] = pc;
         });
 
         document.querySelector('body').removeEventListener('click', this.handleRaiseHand.bind(this));
@@ -195,7 +203,7 @@ export default class {
                             }).catch(Notification.exception);
 
                             // Close connections.
-                            this.peerConnections.forEach(pc => {
+                            Object.values(this.peerConnections).forEach(pc => {
                                 pc.close();
                             });
 
@@ -224,6 +232,9 @@ export default class {
                         }
                     });
                 });
+                if (!response.peers.includes(Number(this.peerid))) {
+                    return;
+                }
                 response.messages.forEach((signal) => {
                     if (signal.id > this.lastSignal) {
                         this.lastSignal = signal.id;
@@ -231,8 +242,8 @@ export default class {
                     }
                 });
 
-                for (const key in this.peerConnections.keys()) {
-                    if (!response.peers.includes(key)) {
+                for (const key in Object.keys(this.peerConnections)) {
+                    if (!response.peers.includes(Number(key)) && this.peerConnections[key]) {
                         const pc = this.peerConnections[key];
                         pc.close();
                     }
@@ -266,11 +277,11 @@ export default class {
      */
     processSignal(signal) {
         if (signal.type === 'audio-offer') {
-            const pc = this.peerConnections[signal.frompeer] || new RTCPeerConnection({
+            const pc = this.peerConnections[String(signal.frompeer)] || new RTCPeerConnection({
                  iceServers: this.iceServers
             });
-            if (!this.peerConnections[signal.frompeer]) {
-                this.peerConnections[signal.frompeer] = pc;
+            if (!this.peerConnections[String(signal.frompeer)]) {
+                this.peerConnections[String(signal.frompeer)] = pc;
             }
             Log.debug('Received offer');
             pc.onnegotiationneeded = this.negotiate.bind(this, this.contextid, pc, signal.frompeer);
@@ -278,14 +289,17 @@ export default class {
             pc.ontrack = this.handleTrackEvent.bind(this, signal.frompeer);
             pc.onconnectionstatechange = this.handleStateChange.bind(this, signal.frompeer);
             pc.ondatachannel = (e) => {
+                this.peerAudioPlayer(signal.frompeer);
                 this.dataChannels.push(e.channel);
                 e.channel.onmessage = this.handleMessage.bind(this, signal.frompeer);
                 e.channel.onopen = () => {
-                    if (document.querySelector('[data-peerid="' + this.peerid + '"] a.hidden[data-action="raisehand"]')) {
-                        window.setTimeout(() => {
-                            e.channel.send('{"raisehand": true}');
-                        }, 3000);
-                    }
+                    window.setTimeout(() => {
+                        e.channel.send(JSON.stringify({
+                            "raisehand": !!document.querySelector(
+                                '[data-peerid="' + this.peerid + '"] a.hidden[data-action="raisehand"]'
+                            )
+                        }));
+                    }, 3000);
                 };
             };
             pc.setRemoteDescription(JSON.parse(signal.message)).then(() => {
@@ -313,13 +327,13 @@ export default class {
                 }).catch(Notification.exception);
             }).catch(Log.debug);
         } else if (signal.type === 'audio-answer') {
-            const pc = this.peerConnections[signal.frompeer];
+            const pc = this.peerConnections[String(signal.frompeer)];
             Log.debug('Audio answer');
             if (pc && pc.signalingState == 'have-local-offer') {
                 pc.setRemoteDescription(JSON.parse(signal.message));
             }
         } else if (signal.type === 'new-ice-candidate') {
-            const pc = this.peerConnections[signal.frompeer] || null;
+            const pc = this.peerConnections[String(signal.frompeer)] || null;
             if (pc && pc.currentRemoteDescription) {
                 pc.addIceCandidate(JSON.parse(signal.message));
             }
@@ -335,37 +349,16 @@ export default class {
     handleTrackEvent(peerid, e) {
         if (
             !e || !e.streams || !document.querySelector('#deft_audio')
-            || document.querySelector('#deft_audio div[data-peerid="' + peerid + '"]')
         ) {
             return;
         }
 
-        const node = document.createElement('div');
-        node.setAttribute('data-peerid', peerid);
-        if (document.querySelector('body#page-blocks-deft-venue')) {
-            node.setAttribute('class', 'col col-12 col-md-6 col-lg-4 col-xl-3 m-2');
-        } else {
-            node.setAttribute('class', 'col col-12 m-2');
-        }
-        window.setTimeout(() => {
-            node.querySelectorAll('img.card-img-top').forEach(image => {
-                image.setAttribute('height', null);
-                image.setAttribute('width', null);
-            });
-        });
-        document.querySelector('#deft_audio').appendChild(node);
-        Fragment.loadFragment(
-            'block_deft',
-            'venue',
-            this.contextid,
-            {
-                peerid: peerid
+        this.peerAudioPlayer(peerid).then((player) => {
+            if (!player.srcObject) {
+                player.srcObject = e.streams[0];
             }
-        ).done((userinfo) => {
-            node.innerHTML = userinfo;
-            const player = node.querySelector('audio');
-            player.srcObject = e.streams[0];
-        }).catch(Notification.exception);
+            return;
+        });
     }
 
     /**
@@ -388,7 +381,7 @@ export default class {
     }
 
     /**
-     * Raise or lower peers hand
+     * Raise or lower another peers hand
      *
      * @param {int} peerid Peer id
      * @param {event} e Message event
@@ -418,6 +411,7 @@ export default class {
                 indicator.querySelector('.high').style.opacity = message.volume.high;
             });
         }
+        this.peerAudioPlayer(peerid);
     }
 
     /**
@@ -426,7 +420,7 @@ export default class {
      * @param {int} peerid Peer id
      */
     handleStateChange(peerid) {
-        const pc = this.peerConnections[peerid];
+        const pc = this.peerConnections[String(peerid)];
         document.querySelectorAll('#deft_audio div[data-peerid="' + peerid + '"]').forEach(userinfo => {
             switch (pc.connectionState) {
                 case 'connected':
@@ -459,8 +453,9 @@ export default class {
             }
         }
         document.querySelectorAll('[data-region="deft-venue"] a[data-action="close"] i').forEach(button => {
-            button.classList.add('bg-warning');
+            button.classList.add('bg-danger');
         });
+        document.querySelector('body').classList.remove('block_deft_raisehand');
         Ajax.call([{
             args: {
                 mute: false,
@@ -482,13 +477,13 @@ export default class {
         }).catch(Notification.exception);
 
         // Close connections.
-        this.peerConnections.forEach(pc => {
+        Object.values(this.peerConnections).forEach(pc => {
             pc.close();
         });
 
         document.querySelectorAll('.deft-venue [data-peerid="' + this.peerid + '"]').forEach(venue => {
             const event = new Event('venueclosed');
-            venue.despatchEvent(event);
+            venue.dispatchEvent(event);
         });
 
         window.beforeunload = null;
@@ -509,14 +504,44 @@ export default class {
             e.stopPropagation();
             e.preventDefault();
             if (!button.closest('#deft_audio')) {
-                Ajax.call([{
-                    args: {
-                        mute: action == 'mute',
-                        "status": false
-                    },
-                        fail: Notification.exception,
-                    methodname: 'block_deft_venue_settings'
-                }]);
+                this.audioInput.then(audioStream => {
+                    if (audioStream) {
+                        Ajax.call([{
+                            args: {
+                                mute: action == 'mute',
+                                "status": false
+                            },
+                                fail: Notification.exception,
+                            methodname: 'block_deft_venue_settings'
+                        }]);
+                    } else if (action == 'unmute') {
+                        this.audioInput = navigator.mediaDevices.getUserMedia({
+                            audio: {
+                                autoGainControl: this.autogaincontrol,
+                                echoCancellation: this.echocancellation,
+                                noiseSuppression: this.noisesuppression,
+                                sampleRate: this.samplerate
+                            },
+                            video: false
+                        }).then(audioStream => {
+
+                            Ajax.call([{
+                                args: {
+                                    mute: false,
+                                    "status": false
+                                },
+                                fail: Notification.exception,
+                                methodname: 'block_deft_venue_settings'
+                            }]);
+
+                            this.monitorVolume(audioStream);
+
+                            return audioStream;
+                        }).catch((e) => {
+                            Log.debug(e);
+                        });
+                    }
+                });
             } else {
                 Ajax.call([{
                     args: {
@@ -545,12 +570,17 @@ export default class {
      */
     handleRaiseHand(e) {
         const button = e.target.closest(
-            'a[data-action="raisehand"], a[data-action="lowerhand"]'
+            '[data-action="raisehand"], [data-action="lowerhand"]'
         );
-        if (button) {
+        if (button && !button.closest('#deft_audio')) {
             const action = button.getAttribute('data-action');
             e.stopPropagation();
             e.preventDefault();
+            if (action == 'raisehand') {
+                document.querySelector('body').classList.add('block_deft_raisehand');
+            } else {
+                document.querySelector('body').classList.remove('block_deft_raisehand');
+            }
             document.querySelectorAll('a[data-action="raisehand"], a[data-action="lowerhand"]').forEach(button => {
                 if (button.getAttribute('data-action') == action) {
                     button.classList.add('hidden');
@@ -597,6 +627,7 @@ export default class {
                 bufferLength = analyser.frequencyBinCount,
                 data = new Uint8Array(bufferLength);
             source.connect(analyser);
+            clearInterval(this.meterId);
             this.meterId = setInterval(() => {
                 analyser.getByteFrequencyData(data);
                 const volume = {
@@ -638,9 +669,51 @@ export default class {
                 peers.forEach(peer => {
                     document.querySelector('#deft_audio').appendChild(peer);
                 });
-            }, 100);
+            }, 500);
         }
 
         return audioStream;
+    }
+
+    /**
+     * Return audio player for peer
+     *
+     * @param {int} peerid Peer id
+     * @returns {Promise} Resolve to audio player node
+     */
+    peerAudioPlayer(peerid) {
+        const usernode = document.querySelector('#deft_audio div[data-peerid="' + peerid + '"] audio');
+        if (usernode) {
+            return Promise.resolve(usernode);
+        } else {
+            const node = document.createElement('div');
+            node.setAttribute('data-peerid', peerid);
+            if (document.querySelector('body#page-blocks-deft-venue')) {
+                node.setAttribute('class', 'col col-12 col-md-6 col-lg-4 col-xl-3 m-2');
+            } else {
+                node.setAttribute('class', 'col col-12 m-2');
+            }
+            window.setTimeout(() => {
+                node.querySelectorAll('img.card-img-top').forEach(image => {
+                    image.setAttribute('height', null);
+                    image.setAttribute('width', null);
+                });
+            });
+            return Fragment.loadFragment(
+                'block_deft',
+                'venue',
+                this.contextid,
+                {
+                    peerid: peerid
+                }
+            ).done((userinfo) => {
+                if (!document.querySelector('#deft_audio div[data-peerid="' + peerid + '"] audio')) {
+                    document.querySelector('#deft_audio').appendChild(node);
+                    node.innerHTML = userinfo;
+                }
+            }).then(() => {
+                return document.querySelector('#deft_audio div[data-peerid="' + peerid + '"] audio');
+            }).catch(Notification.exception);
+        }
     }
 }

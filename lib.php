@@ -26,6 +26,7 @@ defined('MOODLE_INTERNAL') || die();
 
 require_once($CFG->dirroot . '/comment/lib.php');
 require_once($CFG->dirroot . '/mod/lti/locallib.php');
+require_once($CFG->dirroot . '/lib/accesslib.php');
 
 use block_deft\output\view;
 use block_deft\venue_manager;
@@ -379,6 +380,8 @@ function block_deft_output_fragment_venue_manager($args) {
         return null;
     }
 
+    require_capability('block/deft:joinvenue', $context);
+
     $jsondata = json_decode($args['jsondata']);
     $taskid = $args['taskid'];
 
@@ -401,4 +404,28 @@ function block_deft_output_fragment_venue_manager($args) {
     $event->trigger();
 
     return $output->render($venue);
+}
+
+/**
+ * Given an array with a file path, it returns the itemid and the filepath for the defined filearea.
+ *
+ * @param  string $filearea The filearea.
+ * @param  array  $args The path (the part after the filearea and before the filename).
+ * @return array The itemid and the filepath inside the $args path, for the defined filearea.
+ */
+function block_deft_get_path_from_pluginfile(string $filearea, array $args) : array {
+    // This block stores files in venues that are identified by a task id.
+    $taskid = array_shift($args);
+
+    // Get the filepath.
+    if (empty($args)) {
+        $filepath = '/';
+    } else {
+        $filepath = '/' . implode('/', $args) . '/';
+    }
+
+    return [
+        'itemid' => $taskid,
+        'filepath' => $filepath,
+    ];
 }

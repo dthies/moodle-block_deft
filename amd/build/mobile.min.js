@@ -2,7 +2,7 @@
  * Open and maintain a WebSocket to recieve messages from server.
  *
  * @package    block_deft
- * @module     block_deft/socket
+ * @module     block_deft/mobile
  * @copyright  2022 Daniel Thies <dethies@gmail.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */

@@ -137,69 +137,30 @@ class edit_venue extends edit_task {
         global $OUTPUT;
 
         if ($data = $this->get_data()) {
+            $returndata = parent::process_dynamic_submission();
             if (empty($data->id)) {
-                $returndata = parent::process_dynamic_submission();
                 $data->id = $returndata['id'];
-
-                $data->intro['text'] = file_save_draft_area_files(
-                    $data->intro['itemid'],
-                    $this->get_context_for_dynamic_submission()->id,
-                    'block_deft',
-                    'venue',
-                    $data->id,
-                    [
-                        'subdirs' => true,
-                    ],
-                    $data->intro['text']
-                );
-                $data->intro['itemid'] = $data->id;
-
-                $task = $this->get_task($data->id);
-                unset($data->id);
-                $task->set('configdata', json_encode($data));
-                $task->update();
-
-                $returndata['configdata'] = $task->get_config();
-                return $returndata;
-            } else {
-                $data->intro['text'] = file_save_draft_area_files(
-                    $data->intro['itemid'],
-                    $this->get_context_for_dynamic_submission()->id,
-                    'block_deft',
-                    'venue',
-                    $data->id,
-                    [
-                        'subdirs' => true,
-                    ],
-                    $data->intro['text']
-                );
-                $data->intro['itemid'] = $data->id;
-
-                $task = $this->get_task($data->id);
-                unset($data->id);
-                $task->set('configdata', json_encode($data));
-                $task->update();
-                $returndata = [
-                    'html' => $OUTPUT->render_from_template('block_deft/taskinfo', [
-                        'canedit' => true,
-                        'form' => !empty($form) ? $form->render() : '',
-                        'contextid' => $data->contextid,
-                        'configdata' => $task->get_config(),
-                        'id' => $task->get('id'),
-                        'type' => $task->get('type'),
-                    ]),
-                    'contextid' => $data->contextid,
-                    'id' => $task->get('id'),
-                ];
-
-                // Update block display.
-                if (!empty($task->get_state()->visible)) {
-                    $socket = $this->get_socket($this->get_context_for_dynamic_submission());
-                    $socket->dispatch();
-                }
-
-                return $returndata;
             }
+
+            $data->intro['text'] = file_save_draft_area_files(
+                $data->intro['itemid'],
+                $this->get_context_for_dynamic_submission()->id,
+                'block_deft',
+                'venue',
+                $data->id,
+                [
+                    'subdirs' => true,
+                ],
+                $data->intro['text']
+            );
+            $data->intro['itemid'] = $data->id;
+
+            $task = $this->get_task($data->id);
+            unset($data->id);
+            $task->set('configdata', json_encode($data));
+            $task->update();
+
+            return $returndata;
         }
     }
 }

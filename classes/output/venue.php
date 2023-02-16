@@ -97,6 +97,7 @@ class venue implements renderable, templatable {
         $url = new moodle_url('/blocks/deft/venue.php', ['task' => $this->task->id]);
         return [
             'active' => !empty($settings) && !$settings->status,
+            'canjoin' => has_capability('block/deft:joinvenue', $this->context),
             'count' => count($peers),
             'contextid' => $this->context->id,
             'peers' => array_values($peers),

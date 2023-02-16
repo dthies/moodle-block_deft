@@ -28,26 +28,38 @@
     <h6>{{ name }}</h6>
         <div class="block_deft_venue p-3">{{{ content }}}
             <div class="peer-container">
-             <a href="#" class="card-link m-0" data-action="join" {{^ popup }} data-type="modal" data-contextid="{{ contextid }}" {{/ popup }} title="{{# str }} join, block_deft {{/ str }}"><i class="icon fa fa-sign-in"></i></a>
+            {{^ active }}
+             <button class="btn btn-primary m-1 w-100" {{^ canjoin }} disabled="disabled" {{/ canjoin }} data-action="join" {{^ popup }} data-type="modal" data-contextid="{{ contextid }}" {{/ popup }} title="{{# str }} join, block_deft {{/ str }}"><i class="icon fa fa-sign-in"></i> {{# str }} join, block_deft {{/ str }}</button>
+            {{/ active }}
+            {{# canjoin }}
             {{# active }}
-            <a href="#" class="card-link m-0" data-action="close" title="{{# str }} close, block_deft {{/ str }}"><i class="icon fa fa-sign-out"></i></a>
+             <button class="btn btn-info m-1" data-action="join" {{^ popup }} data-type="modal" data-contextid="{{ contextid }}" {{/ popup }} title="{{# str }} rejoin, block_deft {{/ str }}"><i class="icon fa fa-sign-in"></i> {{# str }} rejoin, block_deft {{/ str }}</button>
+            <button class="btn btn-danger m-1" type="button" data-action="close" title="{{# str }} leave, block_deft {{/ str }}"><i class="icon fa fa-sign-out"></i>{{# str }} leave, block_deft {{/ str }}</button>
+             {{^ popup }}
+                 <button class="btn btn-secondary m-1" data-action="show" title="{{# str }} show, core {{/ str }}"><i class="icon fa fa-eye"></i> {{# str }} show, core {{/ str }}</button>
+                 <button class="card-link btn btn-secondary m-1" data-action="raisehand" title="{{# str }} raisehand, block_deft {{/ str }}"><i class="icon fa fa-hand-grab-o"></i> {{# str }} raisehand, block_deft {{/ str }}</button>
+                 <button class="btn btn-success m-1 hidden" data-action="lowerhand" title="{{# str }} lowerhand, block_deft {{/ str }}"><i class="icon fa fa-hand-stop-o"></i> {{# str }} lowerhand, block_deft {{/ str }}</button>
+             {{/ popup }}
             {{^ mute }}
-                <a href="#" class="card-link m-0" data-action="mute" title="{{# str }} mute, block_deft {{/ str }}"><i class="icon fa fa-microphone"></i></a>
+                <button class="card-link btn btn-secondary m-1" data-action="mute" title="{{# str }} mute, block_deft {{/ str }}"><i class="icon fa fa-microphone"></i> {{# str }} mute, block_deft {{/ str }}</button>
             {{/ mute }}
             {{# mute }}
-                <a href="#" class="card-link m-0 p-0 bg-warning rounded-circle" data-action="unmute" title="{{# str }} unmute, block_deft {{/ str }}"><i class="icon fa fa-microphone-slash m-0"></i></a>
+                <button class="card-link btn btn-warning m-1 bg-warning" data-action="unmute" title="{{# str }} unmute, block_deft {{/ str }}"><i class="icon fa fa-microphone-slash m-0"></i> {{# str }} unmute, block_deft {{/ str }}</button>
             {{/ mute }}
             {{/ active }}
+            {{/ canjoin }}
                     {{# count }}
-                {{# limit }} {{ count }} / {{ limit }} {{/ limit }}
-                {{^ limit }} {{ count }} {{/ limit }}
-                <div class="peers position-absolute bg-light p-3 border border-secondary">
-                     {{# peers }}
-                         <div class="peer">{{ fullname }}
-                             {{# mute }}<i class="icon fa fa-microphone-slash m-0"></i>{{/ mute }}
-                         </div>
-                     {{/ peers }}
-                </div>
+                        <span class="float-right p-1">
+                        {{# limit }} {{# str }} guests, block_deft, {{ count }} / {{ limit }}{{/ str }}{{/ limit }}
+                        {{^ limit }} {{# str }} guests, block_deft, {{ count }} {{/ str }}{{/ limit }}
+                        </span>
+                        <div class="peers position-absolute bg-light p-3 border border-secondary">
+                             {{# peers }}
+                                 <div class="peer">{{ fullname }}
+                                     {{# mute }}<i class="icon fa fa-microphone-slash m-0"></i>{{/ mute }}
+                                 </div>
+                             {{/ peers }}
+                        </div>
                      {{/ count }}
             </div>
         </div>

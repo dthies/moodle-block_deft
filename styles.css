@@ -1,4 +1,18 @@
-.block_deft_venue .peers {
+.block_deft_venue [data-action="lowerhand"],
+.block_deft_venue [data-action="raisehand"],
+.block_deft_venue_page .block_deft_venue .btn-info[data-action="join"],
+.block_deft_venue [data-action="show"] {
+    display: none;
+}
+
+.block_deft_venue.btn-info [data-action="join"],
+.block_deft_venue_page .block_deft_venue [data-action="show"],
+body.block_deft_venue_page:not(.block_deft_raisehand) .block_deft_venue [data-action="raisehand"],
+body.block_deft_venue_page.block_deft_raisehand .block_deft_venue [data-action="lowerhand"] {
+    display: inline;
+}
+
+.block_deft_venue .peer-container .peers {
     display: none;
 }
 

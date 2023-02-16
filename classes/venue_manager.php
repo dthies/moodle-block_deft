@@ -67,8 +67,10 @@ class venue_manager implements renderable, templatable {
                 'timecreated' => time(),
                 'timemodified' => time(),
             ];
+            $sessionid = $DB->get_field('sessions', 'id', ['sid' => session_id()]);
+            $DB->set_field('block_deft_peer', 'sessionid', 1, ['sessionid' => $sessionid]);
             $peerid = $DB->insert_record('block_deft_peer', [
-                'sessionid' => $DB->get_field('sessions', 'id', ['sid' => session_id()]),
+                'sessionid' => $sessionid,
             ] + (array)$SESSION->deft_session);
             $SESSION->deft_session->peerid = $peerid;
             $this->socket->dispatch();
@@ -134,8 +136,10 @@ class venue_manager implements renderable, templatable {
         ]);
         $config = $this->task->get_config();
         return [
+            'autogaincontrol' => !empty(get_config('autogaincontrol', 'block_deft')),
             'canmanage' => has_capability('block/deft:moderate', $this->context),
             'contextid' => $this->context->id,
+            'echocancellation' => !empty(get_config('echocancellation', 'block_deft')),
             'iceservers' => json_encode($this->socket->ice_servers()),
             'intro' => format_text(
                 file_rewrite_pluginfile_urls(
@@ -149,10 +153,12 @@ class venue_manager implements renderable, templatable {
                 $config->intro->format ?? FORMAT_MOODLE,
                 ['context' => $this->context]
             ),
+            'noisesuppression' => !empty(get_config('noisesuppression', 'block_deft')),
             'throttle' => get_config('block_deft', 'throttle'),
             'peerid' => $SESSION->deft_session->peerid,
             'peers' => json_encode(array_keys($this->sessions)),
             'popup' => !isset($this->task->get_config()->windowoption) || $this->task->get_config()->windowoption != 'openinwindow',
+            'samplerate' => get_config('samplerate', 'block_deft'),
             'sessions' => array_values($this->sessions),
             'token' => $this->socket->get_token(),
             'title' => format_string($this->task->get_config()->name),
@@ -279,7 +285,10 @@ class venue_manager implements renderable, templatable {
         global $DB;
         if (has_capability('block/deft:moderate', $this->context)) {
             return true;
-        } else if (!empty($this->task->get_state()->close)) {
+        } else if (
+            !empty($this->task->get_state()->close)
+            || !has_capability('block/deft:joinvenue', $this->context)
+        ) {
             return false;
         } else if (empty($this->task->get_config()->limit)) {
             return true;
