@@ -28,7 +28,6 @@ use block_deft\event\task_deleted;
 use block_deft\event\task_updated;
 use cache;
 use core\persistent;
-use comment;
 use context_block;
 
 /**

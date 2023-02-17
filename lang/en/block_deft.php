@@ -137,3 +137,4 @@ $string['venue'] = 'Venue';
 $string['venueclosed'] = 'This venue is currently closed. A moderator will have to open it before you can participate.';
 $string['venuesettings'] = 'Venue settings';
 $string['visible'] = 'Visible';
+$string['cleanuptask'] = 'Cleanup task for Deft response block';

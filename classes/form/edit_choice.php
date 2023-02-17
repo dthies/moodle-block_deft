@@ -70,6 +70,7 @@ class edit_choice extends edit_task {
             && $task = $this->get_task($this->_ajaxformdata['id'])
         ) {
             $configdata = (array) $task->get_config();
+            unset($configdata['contextid']);
             $mform->setDefault('id', $task->get('id'));
             $mform->setDefault('contextid', $this->get_context_for_dynamic_submission()->id);
             foreach ($configdata as $field => $value) {

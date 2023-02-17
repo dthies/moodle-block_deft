@@ -77,6 +77,7 @@ class edit_venue extends edit_task {
             && $task = $this->get_task($this->_ajaxformdata['id'])
         ) {
             $configdata = $task->get_config();
+            unset($configdata->contextid);
             $draftid = $data->intro->itemid ?? 0;
             $format = $configdata->intro->format;
             $intro = file_prepare_draft_area(
@@ -157,6 +158,7 @@ class edit_venue extends edit_task {
 
             $task = $this->get_task($data->id);
             unset($data->id);
+            unset($data->contextid);
             $task->set('configdata', json_encode($data));
             $task->update();
 

@@ -1,5 +1,5 @@
 <?php
-// This file is part of Moodle - https://moodle.org/
+// This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -12,23 +12,26 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Plugin version and other meta-data are defined here.
- *
- * @package     block_deft
- * @copyright   2022 Daniel Thies <dethies@gmail.com>
- * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * Task definition for block_deft.
+ * @copyright Daniel Thies 2023
+ * @package   block_deft
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 defined('MOODLE_INTERNAL') || die();
 
-$plugin->component = 'block_deft';
-$plugin->release = '1.1 Alpha';
-$plugin->version = 2022111417;
-$plugin->requires = 2021051700;
-$plugin->maturity = MATURITY_ALPHA;
-$plugin->dependencies = [
-    'mod_lti' => 2021051700,
+$tasks = [
+    [
+        'classname' => '\block_deft\task\cleanup',
+        'blocking' => 0,
+        'minute' => 'R',
+        'hour' => 'R',
+        'day' => '*',
+        'month' => '*',
+        'dayofweek' => '*',
+        'disabled' => 0
+    ]
 ];
