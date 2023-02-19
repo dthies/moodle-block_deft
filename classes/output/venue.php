@@ -82,17 +82,21 @@ class venue implements renderable, templatable {
              WHERE p.taskid = ?',
             [$this->task->id]
         );
-        $peers = $DB->get_records_sql('
-            SELECT p.id AS peerid, p.mute, u.*
-              FROM {block_deft_peer} p
-              JOIN {sessions} s ON p.sessionid = s.id
-              JOIN {user} u ON p.userid = u.id
-             WHERE p.status = 0
-                   AND p.taskid = ?',
-            [$this->task->id]
-        );
-        foreach ($peers as $peer) {
-            $peer->fullname = fullname($peer);
+        if (has_capability('block/deft:joinvenue', $this->context)) {
+            $peers = $DB->get_records_sql('
+                SELECT p.id AS peerid, p.mute, u.*
+                  FROM {block_deft_peer} p
+                  JOIN {sessions} s ON p.sessionid = s.id
+                  JOIN {user} u ON p.userid = u.id
+                 WHERE p.status = 0
+                       AND p.taskid = ?',
+                [$this->task->id]
+            );
+            foreach ($peers as $peer) {
+                $peer->fullname = fullname($peer);
+            }
+        } else {
+            $peers = [];
         }
         $url = new moodle_url('/blocks/deft/venue.php', ['task' => $this->task->id]);
         return [
