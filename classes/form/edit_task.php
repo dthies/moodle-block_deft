@@ -94,8 +94,10 @@ class edit_task extends dynamic_form {
 
         if ($data = $this->get_data()) {
             $instance = $this->get_context_for_dynamic_submission()->instanceid;
+            $contextid = $this->get_context_for_dynamic_submission()->id;
             if (empty($data->id)) {
                 unset($data->id);
+                unset($data->contextid);
                 $record = (object) [
                     'type' => $this->type,
                     'configdata' => json_encode($data),
@@ -108,16 +110,16 @@ class edit_task extends dynamic_form {
                 $task->create();
                 $formclass = "\\block_deft\\form\\status_$record->type";
                 $form = new $formclass(null, null, 'post', '', [], true, [
-                    'contextid' => $data->contextid,
+                    'contextid' => $contextid,
                     'id' => $task->get('id'),
                 ]);
                 $form->set_data_for_dynamic_submission([
-                    'contextid' => $data->contextid,
+                    'contextid' => $contextid,
                     'id' => $task->get('id'),
                 ]);
                 return [
                     'canedit' => true,
-                    'contextid' => $data->contextid,
+                    'contextid' => $contextid,
                     'form' => $form->render(),
                     'id' => $task->get('id'),
                     'configdata' => $task->get_config(),
@@ -126,13 +128,14 @@ class edit_task extends dynamic_form {
             } else {
                 $task = $this->get_task($data->id);
                 unset($data->id);
+                unset($data->contextid);
                 $task->set('configdata', json_encode($data));
                 $task->update();
                 $returndata = [
                     'html' => $OUTPUT->render_from_template('block_deft/taskinfo', [
                         'canedit' => true,
                         'form' => !empty($form) ? $form->render() : '',
-                        'contextid' => $data->contextid,
+                        'contextid' => $contextid,
                         'configdata' => $task->get_config(),
                         'id' => $task->get('id'),
                         'type' => $task->get('type'),
@@ -142,8 +145,10 @@ class edit_task extends dynamic_form {
                 ];
 
                 // Update block display.
-                $socket = $this->get_socket($this->get_context_for_dynamic_submission());
-                $socket->dispatch();
+                if (!empty($task->get_state()->visible)) {
+                    $socket = $this->get_socket($this->get_context_for_dynamic_submission());
+                    $socket->dispatch();
+                }
 
                 return $returndata;
             }
@@ -164,6 +169,7 @@ class edit_task extends dynamic_form {
             && $task = $this->get_task($this->_ajaxformdata['id'])
         ) {
             $configdata = (array) $task->get_config();
+            unset($configdata['contextid']);
             $mform->setDefault('id', $task->get('id'));
             $mform->setDefault('contextid', $this->get_context_for_dynamic_submission()->id);
             foreach ($configdata as $field => $value) {

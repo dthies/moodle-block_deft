@@ -63,7 +63,7 @@ class view implements renderable, templatable {
      * @return array
      */
     public function export_for_template(renderer_base $output) {
-        global $DB, $USER;
+        global $DB, $SESSION, $USER;
 
         $cache = cache::make('block_deft', 'tasks');
         $tasks = $cache->get($this->context->instanceid);
@@ -89,6 +89,11 @@ class view implements renderable, templatable {
                 case 'text':
                     $text = new text($this->context, $record);
                     $record->text = $text->export_for_template($output);
+                    break;
+                case 'venue':
+                    $venue = new venue($this->context, $record);
+                    $record->venue = $venue->export_for_template($output);
+                    $lastmodified = max($lastmodified, $record->venue['lastmodified'] ?? 0);
                     break;
             }
             $tasklist[] = $record;

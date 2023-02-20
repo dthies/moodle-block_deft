@@ -24,8 +24,6 @@
 
 namespace block_deft\form;
 
-use context;
-use context_user;
 use core_form\dynamic_form;
 use moodle_exception;
 use moodle_url;

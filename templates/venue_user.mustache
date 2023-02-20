@@ -1,0 +1,65 @@
+{{!
+    This file is part of Moodle - http://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+}}
+{{!
+    @template block_deft/venue_user
+
+    This template renders card content to display user in a venue
+
+    Example context (json):
+    {
+        "peerid": 2,
+        "user": {
+        },
+        "fullname": "Forrest Gump"
+    }
+}}
+
+<div id="deft-venue-peer-{{peerid}}" data-peerid="{{ peerid }}" class="card col" data-region="deft-meet">
+    {{# user }}
+        {{# picture }}
+            <img src="{{ pictureurl }}" class="card-img-top rounded-circle">
+        {{/ picture }}
+        {{^ picture }}
+            {{{ avatar }}}
+        {{/ picture }}
+        <div class="card-body">
+            <div class="card-title">
+                <h5 class="card-title text-center">
+                {{ fullname }}
+                </h5>
+            </div>
+        </div>
+        <div class="card-footer">
+            <div class="card-text text-center">
+                <p class="h3">
+                    {{# manage }}
+                        <a href="#" class="card-link m-0" data-action="mute" title="{{# str }} mute, block_deft {{/ str }}"><i class="icon fa fa-microphone p-2 bg-secondary rounded-circle"></i></a>
+                    {{/ manage }}
+                    {{^ manage }}
+                        <span class="card-link m-0" data-action="mute" title="{{# str }} mute, block_deft {{/ str }}"><i class="icon fa fa-microphone p-2 rounded-circle"></i></span>
+                    {{/ manage }}
+                    <span class="card-link hidden m-0" data-action="unmute" title="{{# str }} unmute, block_deft {{/ str }}"><i class="icon fa fa-microphone-slash p-2 bg-warning rounded-circle"></i></span>
+                    <span class="card-link m-0" data-action="raisehand" title="{{# str }} raisehand, block_deft {{/ str }}"><i class="icon fa fa-hand-grab-o m-0 p-2 rounded-circle"></i></span><span class="card-link m-0 hidden" data-action="lowerhand" title="{{# str }} lowerhand, block_deft {{/ str }}"><i class="icon fa fa-hand-stop-o m-0 p-2 bg-success rounded-circle"></i></span>
+                </p>
+                {{> block_deft/volume_indicator }}
+            </div>
+        </div>
+    {{/ user }}
+</div>
+<div class="hidden">
+    <audio autoplay></audio>
+</div>

@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
 /**
- * Add comment dynamic form
+ * Delete comment dynamic form
  *
  * @package     block_deft
  * @copyright   2022 Daniel Thies <dethies@gmail.com>
@@ -28,7 +28,6 @@ defined('MOODLE_INTERNAL') || die();
 
 require_once($CFG->dirroot . '/blocks/deft/lib.php');
 
-use cache;
 use block_deft\comment;
 use context;
 use core_user;
@@ -39,7 +38,7 @@ use stdClass;
 use block_deft\task;
 
 /**
- * Add comment dynamic form
+ * Delete comment dynamic form
  *
  * @package     block_deft
  * @copyright   2022 Daniel Thies <dethies@gmail.com>

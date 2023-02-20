@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
 /**
- * Edit form base for choice task
+ * Edit form for choice task
  *
  * @package     block_deft
  * @copyright   2022 Daniel Thies <dethies@gmail.com>
@@ -24,15 +24,13 @@
 
 namespace block_deft\form;
 
-use context;
-use context_user;
 use core_form\dynamic_form;
 use moodle_exception;
 use moodle_url;
 use block_deft\task;
 
 /**
- * Edit form base for choice task
+ * Edit form for choice task
  *
  * @package     block_deft
  * @copyright   2022 Daniel Thies <dethies@gmail.com>
@@ -72,6 +70,7 @@ class edit_choice extends edit_task {
             && $task = $this->get_task($this->_ajaxformdata['id'])
         ) {
             $configdata = (array) $task->get_config();
+            unset($configdata['contextid']);
             $mform->setDefault('id', $task->get('id'));
             $mform->setDefault('contextid', $this->get_context_for_dynamic_submission()->id);
             foreach ($configdata as $field => $value) {

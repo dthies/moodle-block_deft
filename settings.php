@@ -42,5 +42,48 @@ if ($hassiteconfig) {
             new lang_string('throttle', 'block_deft'),
             new lang_string('throttle_desc', 'block_deft'), 100, PARAM_INT, null, 10)
         );
+
+        // Venue options heading.
+        $settings->add(new admin_setting_heading(
+            'block_deft/venuesettings',
+            new lang_string('venuesettings', 'block_deft'),
+            ''
+        ));
+
+        $settings->add(new admin_setting_configcheckbox(
+            'block_deft/echocancellation',
+            new lang_string('echocancellation', 'block_deft'),
+            new lang_string('echocancellation_desc', 'block_deft'),
+            1
+        ));
+
+        $settings->add(new admin_setting_configcheckbox(
+            'block_deft/autogaincontrol',
+            new lang_string('autogaincontrol', 'block_deft'),
+            new lang_string('autogaincontrol_desc', 'block_deft'),
+            1
+        ));
+
+        $settings->add(new admin_setting_configcheckbox(
+            'block_deft/noisesuppresion',
+            new lang_string('noisesuppresion', 'block_deft'),
+            new lang_string('noisesuppresion_desc', 'block_deft'),
+            1
+        ));
+
+        $options = [
+            8000 => 8000,
+            11025 => 11025,
+            22050 => 22050,
+            44100 => 44100,
+            48000 => 48000,
+            96000 => 96000,
+        ];
+        $settings->add(new admin_setting_configselect('block_deft/samplerate',
+            new lang_string('samplerate', 'block_deft'),
+            new lang_string('samplerate_desc', 'block_deft'),
+            11025,
+            $options)
+        );
     }
 }

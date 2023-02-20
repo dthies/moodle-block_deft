@@ -1,0 +1,103 @@
+{{!
+    This file is part of Moodle - http://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+}}
+{{!
+    @template block_deft/venue_manager
+
+    This template renders the main venue window page
+
+    Example context (json):
+    {
+        "autogaincontrol": true,
+        "contextid": 2,
+        "echocancellation": true,
+        "iceservers": "[]",
+        "intro": "Hello world",
+        "noisesuppression": true,
+        "peerid": 109,
+        "peers": "[105, 106]",
+        "samplerate": 11025,
+        "title": "Venue",
+        "token": "dladfjlakerlaa3j4lr",
+        "throttle": 100,
+        "uniqueid": "eworio"
+    }
+}}
+
+<div id="block-deft-{{uniqid}}" class="block-deft block-cards" data-region="deft-venue">
+    <div class="container-fluid">
+        <div class="row">
+            {{^ peerid }}
+            <div class="card col col-12 text-center p-3">
+                <div class="card-body">
+                {{# str }} venueclosed, block_deft {{/ str }}
+                </div>
+            </div>
+            {{/ peerid }}
+            {{# peerid }}
+            <div class="card col col-12 text-center p-3">
+                    <h4 class="card-title">{{ title }}</h4>
+                    <div class="card-text">{{{ intro }}}</div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col col-12 col-sm-6 {{# popup }} col-md-4 col-lg-3 {{/ popup }}">
+                <div class="container-fluid p-0" data-peerid="{{ peerid }}">
+                    <div class="row">
+                        {{# user }}
+                            <div class="card col col-12 text-center p-3">
+                                {{# picture }}
+                                    <img src="{{ pictureurl }}" class="card-img-top img-fluid rounded-circle">
+                                {{/ picture }}
+                                {{^ picture }}
+                                    {{{ avatar }}}
+                                {{/ picture }}
+                            </div>
+                            <div class="card col col-12">
+                                <div class="card-body">
+                                    <div class="card-head">
+                                        <h5 class="text-center">
+                                            {{ fullname }}
+                                        </h5>
+                                    </div>
+                                </div>
+                                <div class="card-footer">
+                                    <p class="text-center h3 p-0">
+                                        <a href="#" class="card-link m-0 p-1" data-action="mute" title="{{# str }} mute, block_deft {{/ str }}"><i class="icon fa fa-microphone bg-secondary rounded-circle m-0 p-2"></i></a><a href="#" class="card-link hidden m-0 p-1" data-action="unmute" title="{{# str }} unmute, block_deft {{/ str }}"><i class="icon fa fa-microphone-slash bg-warning rounded-circle m-0 p-2"></i></a>
+                                        <a href="#" class="card-link m-0 p-1" data-action="raisehand" title="{{# str }} raisehand, block_deft {{/ str }}"><i class="icon fa fa-hand-grab-o bg-secondary rounded-circle m-0 p-2"></i></a><a href="#" class="card-link hidden m-0 p-1" data-action="lowerhand" title="{{# str }} lowerhand, block_deft {{/ str }}"><i class="icon fa fa-hand-stop-o bg-success rounded-circle m-0 p-2"></i></a>
+                                        <a href="#" class="card-link m-0 p-1" data-action="close" title="{{# str }} close, block_deft {{/ str }}"><i class="icon fa fa-sign-out bg-secondary rounded-circle m-0 p-2"></i></a>
+                                    </p>
+                                    {{> block_deft/volume_indicator }}
+                                </div>
+                            </div>
+                        {{/ user }}
+                    </div>
+                </div>
+            </div>
+            <div class="col col-12 col-sm-6 {{# popup }} col-md-8 col-lg-9 {{/ popup }}">
+                <div class="container-fluid">
+                    <div id="deft_audio" class="row p-0"></div>
+                </div>
+            </div>
+            {{/ peerid }}
+        </div>
+    </div>
+</div>
+{{#js}}
+    require(['block_deft/venue_manager', 'core/adapter'], function(VenueManager) {
+        new VenueManager({{ contextid }}, '{{ token }}', {{ peers }}, {{ peerid }}, {{{ iceservers }}}, {{ autogaincontrol }}, {{ echocancellation }}, {{ noisesuppression }}, {{ samplerate }});
+    });
+{{/js}}

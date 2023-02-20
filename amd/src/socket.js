@@ -44,7 +44,9 @@ const Socket = class {
 
         this.websocket.addEventListener('close', (e) => {
             Log.debug('Disconnected');
-            if (e.code == 1011) {
+            if (this.disconnected) {
+                return this;
+            } else if (e.code == 1011) {
                 Log.debug('Authentication failed');
                 Ajax.call([{
                     methodname: 'block_deft_renew_token',
@@ -62,6 +64,19 @@ const Socket = class {
                 }, 5000);
             }
         });
+
+        return this;
+    }
+
+    /**
+     * Disconnect socket
+     *
+     * @returns {object}
+     * @chainable
+     */
+    disconnect() {
+        this.disconnected = true;
+        this.websocket.close();
 
         return this;
     }

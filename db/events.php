@@ -37,4 +37,9 @@ $observers = [
         'callback' => 'block_deft\comment::observe',
         'internal' => true,
     ],
+    [
+        'eventname' => '\core\event\user_loggedout',
+        'callback' => 'block_deft\venue_manager::logout',
+        'internal' => true,
+    ],
 ];

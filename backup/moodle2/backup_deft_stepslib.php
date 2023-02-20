@@ -86,6 +86,7 @@ class backup_deft_block_structure_step extends backup_block_structure_step {
         $response->annotate_ids('user', 'userid');
 
         // Define file annotations.
+        $task->annotate_files('block_deft', 'venue', 'id');
 
         return $this->prepare_block_structure($root);
     }
