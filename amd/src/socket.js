@@ -63,6 +63,8 @@ const Socket = class {
                     this.connect(contextid, token);
                 }, 5000);
             }
+
+            return true;
         });
 
         return this;

@@ -87,7 +87,9 @@ const handleClick = (e) => {
                             Templates.replaceNodeContents(root[0], '', '');
                             document.querySelector('body').classList.remove('block_deft_venue_page');
                         });
-                    });
+
+                        return modal;
+                    }).fail(Notification.exception);
                 } else {
                     document.querySelector('body').classList.remove('block_deft_venue_page');
                     window.open(url, 'block_deft_venue', 'popup,height=400,width=600');

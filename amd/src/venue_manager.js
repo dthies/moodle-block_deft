@@ -31,7 +31,7 @@ export default class {
      * @param {bool} noisesuppression
      * @param {int} samplerate
      */
-    constructor (contextid, token, peers, peerid, iceServers, autogaincontrol, echocancellation, noisesuppression, samplerate) {
+    constructor(contextid, token, peers, peerid, iceServers, autogaincontrol, echocancellation, noisesuppression, samplerate) {
         this.contextid = contextid;
         this.peerid = peerid;
         this.iceServers = iceServers;
@@ -56,18 +56,21 @@ export default class {
             ).then(notice => {
                 const root = notice.getRoot();
                 root.on(ModalEvents.cancel, () => {
-                    Ajax.call([{
+                    return Ajax.call([{
                         args: {
                             mute: false,
                             "status": true
                         },
                         fail: Notification.exception,
                         methodname: 'block_deft_venue_settings'
-                    }])[0].then(() => {
+                    }])[0].then((status) => {
                         window.close();
+                        return status;
                     });
                 });
-            });
+
+                return notice;
+            }).fail(Notification.exception);
 
             return;
         }
@@ -93,7 +96,7 @@ export default class {
 
             return false;
         });
-        this.audioInput.then(this.monitorVolume.bind(this));
+        this.audioInput.then(this.monitorVolume.bind(this)).catch(Log.debug);
 
         document.querySelector('body').removeEventListener('click', this.handleMuteButtons.bind(this));
         document.querySelector('body').addEventListener('click', this.handleMuteButtons.bind(this));
@@ -358,7 +361,7 @@ export default class {
                 player.srcObject = e.streams[0];
             }
             return;
-        });
+        }).catch(Notification.exception);
     }
 
     /**
@@ -537,11 +540,11 @@ export default class {
                             this.monitorVolume(audioStream);
 
                             return audioStream;
-                        }).catch((e) => {
-                            Log.debug(e);
-                        });
+                        }).catch(Log.debug);
                     }
-                });
+
+                    return audioStream;
+                }).catch(Notification.exception);
             } else {
                 Ajax.call([{
                     args: {
@@ -622,7 +625,7 @@ export default class {
                     maxDecibels: -50,
                     minDecibels: -90,
                     fftSize: 2048,
-                    smoothingTimeConstant: .3
+                    smoothingTimeConstant: 0.3
                 }),
                 bufferLength = analyser.frequencyBinCount,
                 data = new Uint8Array(bufferLength);

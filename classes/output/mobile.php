@@ -144,12 +144,12 @@ class mobile {
 
         $course = get_course($context->get_course_context()->instanceid);
         $options = new stdClass();
-        $options->context   = $context;
-        $options->course    = $course;
-        $options->area      = 'task';
-        $options->itemid    = $task->get('id');
+        $options->context = $context;
+        $options->course = $course;
+        $options->area = 'task';
+        $options->itemid = $task->get('id');
         $options->component = 'block_deft';
-        $options->showcount  = true;
+        $options->showcount = true;
         $options->displaycancel = false;
         $comment = new comment($options);
         $comment->set_view_permission(true);

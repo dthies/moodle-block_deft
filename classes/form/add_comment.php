@@ -92,9 +92,9 @@ class add_comment extends dynamic_form {
     public function process_dynamic_submission() {
         if ($data = $this->get_data()) {
             $options = new stdClass();
-            $options->area    = 'task';
+            $options->area = 'task';
             $options->context = $this->get_context_for_dynamic_submission();
-            $options->itemid  = $data->id;
+            $options->itemid = $data->id;
             $options->component = 'block_deft';
             $comment = new comment($options);
             $comment->add($data->content);
