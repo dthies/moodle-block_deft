@@ -44,6 +44,8 @@ export default class {
         this.dataChannels = [];
         this.peerConnections = {};
         this.queueout = [];
+        this.ignoreOffer = new Set();
+        this.makingOffer = new Set();
 
         if (!window.RTCPeerConnection) {
             document.querySelectorAll('.venue_manager').forEach((venue) => {
@@ -107,11 +109,18 @@ export default class {
             }),
                 dataChannel = pc.createDataChannel('Events');
             this.dataChannels.push(dataChannel);
+            this.ignoreOffer.delete(String(peerid));
             dataChannel.onmessage = this.handleMessage.bind(this, peerid);
             pc.onnegotiationneeded = this.negotiate.bind(this, contextid, pc, peerid);
             pc.onicecandidate = this.handleICECandidate.bind(this, contextid, peerid);
             pc.ontrack = this.handleTrackEvent.bind(this, peerid);
             pc.onconnectionstatechange = this.handleStateChange.bind(this, peerid);
+            pc.oniceconnectionstatechange = () => {
+                if (pc.iceConnectionState === "failed") {
+                    Log.debug('restart');
+                    pc.restartIce();
+                }
+            };
             this.peerConnections[String(peerid)] = pc;
         });
 
@@ -266,10 +275,14 @@ export default class {
      * @return {Promise}
      */
     negotiate(contextid, pc, peerid) {
-        return pc.createOffer().then(offer => {
-            return pc.setLocalDescription(offer).then(() => {
-                return this.sendSignal(peerid, 'audio-offer', offer);
-            }).catch(Log.debug);
+        this.makingOffer.add(String(peerid));
+
+        return pc.setLocalDescription().then(() => {
+            return pc.setLocalDescription().then(() => {
+                return this.sendSignal(peerid, 'audio-offer', pc.localDescription);
+            }).catch(Log.debug).finally(() => {
+                this.makingOffer.delete(String(peerid));
+            });
         });
     }
 
@@ -279,33 +292,50 @@ export default class {
      * @param {object} signal Signal received to process
      */
     processSignal(signal) {
-        if (signal.type === 'audio-offer') {
+        if ((signal.type === 'audio-offer') || (signal.type === 'audio-answer')) {
             const pc = this.peerConnections[String(signal.frompeer)] || new RTCPeerConnection({
                  iceServers: this.iceServers
-            });
+            }),
+                description = JSON.parse(signal.message),
+                polite = (Number(signal.frompeer) < Number(this.peerid));
             if (!this.peerConnections[String(signal.frompeer)]) {
                 this.peerConnections[String(signal.frompeer)] = pc;
-            }
-            Log.debug('Received offer');
-            pc.onnegotiationneeded = this.negotiate.bind(this, this.contextid, pc, signal.frompeer);
-            pc.onicecandidate = this.handleICECandidate.bind(this, this.contextid, signal.frompeer);
-            pc.ontrack = this.handleTrackEvent.bind(this, signal.frompeer);
-            pc.onconnectionstatechange = this.handleStateChange.bind(this, signal.frompeer);
-            pc.ondatachannel = (e) => {
-                this.peerAudioPlayer(signal.frompeer);
-                this.dataChannels.push(e.channel);
-                e.channel.onmessage = this.handleMessage.bind(this, signal.frompeer);
-                e.channel.onopen = () => {
-                    window.setTimeout(() => {
-                        e.channel.send(JSON.stringify({
-                            "raisehand": !!document.querySelector(
-                                '[data-peerid="' + this.peerid + '"] a.hidden[data-action="raisehand"]'
-                            )
-                        }));
-                    }, 3000);
+                pc.onnegotiationneeded = this.negotiate.bind(this, this.contextid, pc, signal.frompeer);
+                pc.oniceconnectionstatechange = () => {
+                    if (pc.iceConnectionState === "failed") {
+                        Log.debug('restart');
+                        pc.restartIce();
+                    }
                 };
-            };
-            pc.setRemoteDescription(JSON.parse(signal.message)).then(() => {
+                pc.onicecandidate = this.handleICECandidate.bind(this, this.contextid, signal.frompeer);
+                pc.ontrack = this.handleTrackEvent.bind(this, signal.frompeer);
+                pc.onconnectionstatechange = this.handleStateChange.bind(this, signal.frompeer);
+                pc.ondatachannel = (e) => {
+                    this.peerAudioPlayer(signal.frompeer);
+                    this.dataChannels.push(e.channel);
+                    e.channel.onmessage = this.handleMessage.bind(this, signal.frompeer);
+                    e.channel.onopen = () => {
+                        window.setTimeout(() => {
+                            e.channel.send(JSON.stringify({
+                                "raisehand": !!document.querySelector(
+                                    '[data-peerid="' + this.peerid + '"] a.hidden[data-action="raisehand"]'
+                                )
+                            }));
+                        }, 3000);
+                    };
+                };
+            }
+            if (
+                !polite
+                && (description.type === 'offer')
+                && (this.makingOffer.has(String(signal.frompeer)) || pc.signalingState !== "stable")
+            ) {
+                this.ignoreOffer.add(String(signal.frompeer));
+                Log.debug('ignore offer');
+                return;
+            }
+            this.ignoreOffer.delete(String(signal.frompeer));
+            pc.setRemoteDescription(description).then(() => {
                 Log.debug('Set Remote');
                 return this.audioInput.then(audioStream => {
                     if (audioStream) {
@@ -317,28 +347,23 @@ export default class {
                         }
                     }
                     Log.debug('Create answer');
-                    return pc.createAnswer().then(answer => {
-                        Log.debug('Answer created');
-                        if (!pc || pc.signalingState == 'stable') {
-                            return false;
-                        }
-                        return pc.setLocalDescription(answer).then(() => {
+                    if (description.type == 'offer') {
+                        pc.setLocalDescription().then(() => {
                             Log.debug('Set local');
-                            return this.sendSignal(signal.frompeer, 'audio-answer', answer);
+                            return this.sendSignal(signal.frompeer, 'audio-answer', pc.localDescription);
                         }).catch(Log.debug);
-                    }).catch(Notification.exception);
+                    }
+                    return audioStream;
                 }).catch(Notification.exception);
             }).catch(Log.debug);
-        } else if (signal.type === 'audio-answer') {
-            const pc = this.peerConnections[String(signal.frompeer)];
-            Log.debug('Audio answer');
-            if (pc && pc.signalingState == 'have-local-offer') {
-                pc.setRemoteDescription(JSON.parse(signal.message));
-            }
         } else if (signal.type === 'new-ice-candidate') {
             const pc = this.peerConnections[String(signal.frompeer)] || null;
             if (pc && pc.currentRemoteDescription) {
-                pc.addIceCandidate(JSON.parse(signal.message));
+                pc.addIceCandidate(JSON.parse(signal.message)).catch(e => {
+                    if (!this.ignoreOffer.has(String(signal.frompeer))) {
+                        Log.debug(e);
+                    }
+                });
             }
         }
     }
@@ -412,6 +437,7 @@ export default class {
                 indicator.querySelector('.low').style.opacity = message.volume.low;
                 indicator.querySelector('.mid').style.opacity = message.volume.mid;
                 indicator.querySelector('.high').style.opacity = message.volume.high;
+                indicator.setAttribute('data-volume', message.volume.smooth);
             });
         }
         this.peerAudioPlayer(peerid);
@@ -429,8 +455,7 @@ export default class {
                 case 'connected':
                     userinfo.classList.remove('hidden');
                     break;
-                case 'close':
-                case 'failed':
+                case 'closed':
                     userinfo.remove();
                     break;
                 case 'disconnected':
@@ -627,16 +652,28 @@ export default class {
                     fftSize: 2048,
                     smoothingTimeConstant: 0.3
                 }),
+                smoothanalyser = new AnalyserNode(audioContext, {
+                    maxDecibels: -50,
+                    minDecibels: -90,
+                    fftSize: 2048,
+                    smoothingTimeConstant: 0.6
+                }),
                 bufferLength = analyser.frequencyBinCount,
-                data = new Uint8Array(bufferLength);
+                data = new Uint8Array(bufferLength),
+                smootheddata = new Uint8Array(bufferLength);
             source.connect(analyser);
+            source.connect(smoothanalyser);
             clearInterval(this.meterId);
             this.meterId = setInterval(() => {
                 analyser.getByteFrequencyData(data);
+                smoothanalyser.getByteFrequencyData(smootheddata);
                 const volume = {
                     low: Math.min(1, data.slice(0, 16).reduce((a, b) => a + b, 0) / 2000),
                     mid: Math.min(1, data.slice(17, 31).reduce((a, b) => a + b, 0) / 1000),
-                    high: Math.min(1, data.slice(32).reduce((a, b) => a + b, 0) / 4000)
+                    high: Math.min(1, data.slice(32).reduce((a, b) => a + b, 0) / 4000),
+                    smooth: Math.min(1, smootheddata.slice(0, 16).reduce((a, b) => a + b, 0) / 2000)
+                        + Math.min(1, smootheddata.slice(17, 31).reduce((a, b) => a + b, 0) / 1000)
+                        + Math.min(1, smootheddata.slice(32).reduce((a, b) => a + b, 0) / 4000)
                 },
                     message = JSON.stringify({volume: volume}),
                     peers = [];
@@ -661,11 +698,11 @@ export default class {
                 });
                 peers.sort((a, b) => {
                     let volume = 0;
-                    a.querySelectorAll('.high, .mid, .low').forEach(indicator => {
-                        volume += -indicator.style.opacity;
+                    a.querySelectorAll('[data-volume]').forEach(indicator => {
+                        volume += -Number(indicator.getAttribute('data-volume'));
                     });
-                    b.querySelectorAll('.high, .mid, .low').forEach(indicator => {
-                        volume += indicator.style.opacity;
+                    b.querySelectorAll('[data-volume]').forEach(indicator => {
+                        volume += Number(indicator.getAttribute('data-volume'));
                     });
                     return volume;
                 });

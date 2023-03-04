@@ -28,6 +28,7 @@ defined('MOODLE_INTERNAL') || die;
 require_once($CFG->dirroot.'/mod/lti/locallib.php');
 
 use context_system;
+use moodle_exception;
 use moodle_url;
 use renderable;
 use templatable;
@@ -81,7 +82,9 @@ class configuration implements renderable, templatable {
         $requestparams = array_merge($requestparams, $jwt);
         $query = html_entity_decode(http_build_query($requestparams));
 
-        $response = file_get_contents($endpoint . '?' . $query);
+        if (!$response = file_get_contents($endpoint . '?' . $query)) {
+            throw new moodle_exception('serverinaccessible', 'block_deft');
+        }
         $registrationurl = new moodle_url('/mod/lti/startltiadvregistration.php', [
             'url' => json_decode($response),
             'sesskey' => sesskey(),

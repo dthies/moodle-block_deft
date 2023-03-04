@@ -390,6 +390,8 @@ function block_deft_output_fragment_venue_manager($args) {
         $peerid = $SESSION->deft_session->peerid;
         unset($SESSION->deft_session);
         venue_manager::close_peer($peerid);
+        $socket = new socket($context);
+        $socket->dispatch();
     }
 
     $venue = new venue_manager($context, $task);

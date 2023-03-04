@@ -35,8 +35,11 @@ jobs:
             moodle-branch: 'master'
             database: 'mariadb'
           - php: '8.0'
-            moodle-branch: 'MOODLE_400_STABLE'
+            moodle-branch: 'MOODLE_401_STABLE'
             database: 'pgsql'
+          - php: '8.0'
+            moodle-branch: 'MOODLE_401_STABLE'
+            database: 'mariadb'
           - php: '7.4'
             moodle-branch: 'MOODLE_400_STABLE'
             database: 'mariadb'
@@ -107,7 +110,7 @@ jobs:
         run: moodle-plugin-ci mustache
 
       - name: Grunt
-        if: ${{ matrix.moodle-branch == 'master' }}
+        if: ${{ matrix.moodle-branch == 'MOODLE_401_STABLE' }}
         run: moodle-plugin-ci grunt
 
       - name: PHPUnit tests

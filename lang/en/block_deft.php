@@ -26,7 +26,7 @@
 defined('MOODLE_INTERNAL') || die();
 
 $string['activate'] = 'Activate';
-$string['activatemessage'] = 'This will contact the server and deftly.us and obtain and registration url to configure an LTI connection. It will then a External tool configuration to you site. This will be used to authenticate messages sent to clients to update the block content.';
+$string['activatemessage'] = 'This will contact the server and deftly.us and obtain a registration url to configure an LTI connection. It will then add an External tool configuration to your site. This will be used to authenticate messages sent to clients to update the block content. Your server needs to be pubicly accessible to the internet for this to work.';
 $string['addchoice'] = 'Add choice';
 $string['addcomments'] = 'Add comments';
 $string['addtext'] = 'Add text';
@@ -120,6 +120,7 @@ $string['search:choice'] = 'Deft response choice task';
 $string['search:comments'] = 'Deft response comments task';
 $string['search:text'] = 'Deft response text task';
 $string['search:venue'] = 'Deft response venue task';
+$string['serverinaccessible'] = 'Your server appears inaccessible to deftly.us. For the server to work your server needs to available frome the internet. Servers only on a private network or localhost can not be registered.';
 $string['showcomments'] = 'Show comments';
 $string['showsummary'] = 'Show summary';
 $string['showtitle'] = 'Show title';
