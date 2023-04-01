@@ -12,7 +12,7 @@ import Log from "core/log";
 import Notification from "core/notification";
 
 
-const Socket = class {
+export class Socket {
     /**
      * Listen to WebSocket and refresh content
      *
@@ -48,15 +48,7 @@ const Socket = class {
                 return this;
             } else if (e.code == 1011) {
                 Log.debug('Authentication failed');
-                Ajax.call([{
-                    methodname: 'block_deft_renew_token',
-                    args: {contextid: contextid},
-                    done: (replacement) => {
-                        Log.debug('Reconnecting');
-                        this.connect(contextid, replacement.token);
-                    },
-                    fail: Notification.exception
-                }]);
+                this.renewToken(contextid);
             } else {
                 setTimeout(() => {
                     Log.debug('Reconnecting');
@@ -96,6 +88,23 @@ const Socket = class {
 
         return this;
     }
-};
+
+    /**
+     * Renew token
+     *
+     * @param {int} contextid Context id of block
+     */
+    renewToken(contextid) {
+        Ajax.call([{
+            methodname: 'block_deft_renew_token',
+            args: {contextid: contextid},
+            done: (replacement) => {
+                Log.debug('Reconnecting');
+                this.connect(contextid, replacement.token);
+            },
+            fail: Notification.exception
+        }]);
+    }
+}
 
 export default Socket;

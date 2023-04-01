@@ -136,10 +136,10 @@ class venue_manager implements renderable, templatable {
         ]);
         $config = $this->task->get_config();
         return [
-            'autogaincontrol' => !empty(get_config('autogaincontrol', 'block_deft')),
+            'autogaincontrol' => !empty(get_config('block_deft', 'autogaincontrol')),
             'canmanage' => has_capability('block/deft:moderate', $this->context),
             'contextid' => $this->context->id,
-            'echocancellation' => !empty(get_config('echocancellation', 'block_deft')),
+            'echocancellation' => !empty(get_config('block_deft', 'echocancellation')),
             'iceservers' => json_encode($this->socket->ice_servers()),
             'intro' => format_text(
                 file_rewrite_pluginfile_urls(
@@ -153,12 +153,12 @@ class venue_manager implements renderable, templatable {
                 $config->intro->format ?? FORMAT_MOODLE,
                 ['context' => $this->context]
             ),
-            'noisesuppression' => !empty(get_config('noisesuppression', 'block_deft')),
+            'noisesuppression' => !empty(get_config('block_deft', 'noisesuppression')),
             'throttle' => get_config('block_deft', 'throttle'),
             'peerid' => $SESSION->deft_session->peerid,
             'peers' => json_encode(array_keys($this->sessions)),
             'popup' => !isset($this->task->get_config()->windowoption) || $this->task->get_config()->windowoption != 'openinwindow',
-            'samplerate' => get_config('samplerate', 'block_deft'),
+            'samplerate' => get_config('block_deft', 'samplerate'),
             'sessions' => array_values($this->sessions),
             'token' => $this->socket->get_token(),
             'title' => format_string($this->task->get_config()->name),
