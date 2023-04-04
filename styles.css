@@ -20,10 +20,31 @@ body.block_deft_venue_page.block_deft_raisehand .block_deft_venue [data-action="
     display: block;
 }
 
+[data-region="deft-venue"] .card {
+    flex-direction: row;
+}
+
+[data-region="deft-venue"] img.card-img-top,
 [data-region="deft-venue"] span.userinitials,
 #page-blocks-deft-venue span.userinitials {
-    aspect-ratio: 1 / 1; /* stylelint-disable-line property-no-unknown */
+    height: 60px;
+    width: 60px;
+    margin: 10px;
     font-size: 32px;
+}
+
+#deft_audio span.userinitials {
+    height: 48px;
+    width: 48px;
+    margin: 2px;
+    padding: 3px;
+    font-size: 18px;
+}
+
+[data-region="deft-venue"] #deft_audio img.card-img-top {
+    height: 48px;
+    width: 48px;
+    margin: 2px;
 }
 
 [data-region="deft-view-content"] .chart-area .chart-image {

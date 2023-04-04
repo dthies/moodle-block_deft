@@ -36,8 +36,7 @@
         "uniqueid": "eworio"
     }
 }}
-
-<div id="block-deft-{{uniqid}}" class="block-deft block-cards" data-region="deft-venue">
+<div id="block-deft-{{uniqid}}" class="block-deft block-cards" data-task="{{ taskid }}" data-region="deft-venue">
     <div class="container-fluid">
         <div class="row">
             {{^ peerid }}
@@ -49,51 +48,39 @@
             {{/ peerid }}
             {{# peerid }}
             <div class="card col col-12 text-center p-3">
+                <div class="card-body">
                     <h4 class="card-title">{{ title }}</h4>
                     <div class="card-text">{{{ intro }}}</div>
+                </div>
             </div>
-        </div>
-        <div class="row">
-            <div class="col col-12 col-sm-6 {{# popup }} col-md-4 col-lg-3 {{/ popup }}">
-                <div class="container-fluid p-0" data-peerid="{{ peerid }}">
-                    <div class="row">
-                        {{# user }}
-                            <div class="card col col-12 text-center p-3">
-                                {{# picture }}
-                                    <img src="{{ pictureurl }}" class="card-img-top img-fluid rounded-circle">
-                                {{/ picture }}
-                                {{^ picture }}
-                                    {{{ avatar }}}
-                                {{/ picture }}
-                            </div>
-                            <div class="card col col-12">
-                                <div class="card-body">
-                                    <div class="card-head">
-                                        <h5 class="text-center">
-                                            {{ fullname }}
-                                        </h5>
-                                    </div>
-                                </div>
-                                <div class="card-footer">
-                                    <p class="text-center h3 p-0">
-                                        <a href="#" class="card-link m-0 p-1" data-action="mute" title="{{# str }} mute, block_deft {{/ str }}"><i class="icon fa fa-microphone bg-secondary rounded-circle m-0 p-2"></i></a><a href="#" class="card-link hidden m-0 p-1" data-action="unmute" title="{{# str }} unmute, block_deft {{/ str }}"><i class="icon fa fa-microphone-slash bg-warning rounded-circle m-0 p-2"></i></a>
-                                        <a href="#" class="card-link m-0 p-1" data-action="raisehand" title="{{# str }} raisehand, block_deft {{/ str }}"><i class="icon fa fa-hand-grab-o bg-secondary rounded-circle m-0 p-2"></i></a><a href="#" class="card-link hidden m-0 p-1" data-action="lowerhand" title="{{# str }} lowerhand, block_deft {{/ str }}"><i class="icon fa fa-hand-stop-o bg-success rounded-circle m-0 p-2"></i></a>
-                                        <a href="#" class="card-link m-0 p-1" data-action="close" title="{{# str }} close, block_deft {{/ str }}"><i class="icon fa fa-sign-out bg-secondary rounded-circle m-0 p-2"></i></a>
-                                    </p>
-                                    {{> block_deft/volume_indicator }}
-                                </div>
-                            </div>
-                        {{/ user }}
+            {{# user }}
+                <div class="card col-12" data-peerid={{ peerid }}>
+                    {{# picture }}
+                        <img src="{{ pictureurl }}" class="card-img-top img-fluid rounded-circle">
+                    {{/ picture }}
+                    {{^ picture }}
+                        {{{ avatar }}}
+                    {{/ picture }}
+                    <div class="card-body">
+                        <div class="card-head">
+                            <h5 class="text-center">
+                                {{ fullname }}
+                            </h5>
+                        </div>
+                        {{> block_deft/volume_indicator }}
+                    </div>
+                    <div class="card-footer p-1">
+                        <p class="text-center h3 p-0  m-1">
+                            <a href="#" class="card-link m-0 p-1" data-action="mute" title="{{# str }} mute, block_deft {{/ str }}"><i class="icon fa fa-microphone bg-secondary rounded-circle m-0 p-2"></i></a><a href="#" class="card-link hidden m-0 p-1" data-action="unmute" title="{{# str }} unmute, block_deft {{/ str }}"><i class="icon fa fa-microphone-slash bg-warning rounded-circle m-0 p-2"></i></a>
+                            <a href="#" class="card-link m-0 p-1" data-action="raisehand" title="{{# str }} raisehand, block_deft {{/ str }}"><i class="icon fa fa-hand-grab-o bg-secondary rounded-circle m-0 p-2"></i></a><a href="#" class="card-link hidden m-0 p-1" data-action="lowerhand" title="{{# str }} lowerhand, block_deft {{/ str }}"><i class="icon fa fa-hand-stop-o bg-success rounded-circle m-0 p-2"></i></a>
+                            <a href="#" class="card-link m-0 p-1" data-action="close" title="{{# str }} close, block_deft {{/ str }}"><i class="icon fa fa-sign-out bg-secondary rounded-circle m-0 p-2"></i></a>
+                        </p>
                     </div>
                 </div>
-            </div>
-            <div class="col col-12 col-sm-6 {{# popup }} col-md-8 col-lg-9 {{/ popup }}">
-                <div class="container-fluid">
-                    <div id="deft_audio" class="row p-0"></div>
-                </div>
-            </div>
+            {{/ user }}
             {{/ peerid }}
         </div>
+        <div id="deft_audio" class="row p-0"></div>
     </div>
 </div>
 {{#js}}

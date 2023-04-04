@@ -729,9 +729,9 @@ export default class {
             const node = document.createElement('div');
             node.setAttribute('data-peerid', peerid);
             if (document.querySelector('body#page-blocks-deft-venue')) {
-                node.setAttribute('class', 'col col-12 col-md-6 col-lg-4 col-xl-3 m-2');
+                node.setAttribute('class', 'col col-12 col-sm-6 col-md-4 col-lg-3 p-2');
             } else {
-                node.setAttribute('class', 'col col-12 m-2');
+                node.setAttribute('class', 'col col-12 col-sm-6 col-md-4 p-2');
             }
             window.setTimeout(() => {
                 node.querySelectorAll('img.card-img-top').forEach(image => {

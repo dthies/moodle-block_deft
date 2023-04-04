@@ -28,7 +28,7 @@
     }
 }}
 
-<div id="deft-venue-peer-{{peerid}}" data-peerid="{{ peerid }}" class="card col" data-region="deft-meet">
+<div id="deft-venue-peer-{{peerid}}" data-peerid="{{ peerid }}" class="card">
     {{# user }}
         {{# picture }}
             <img src="{{ pictureurl }}" class="card-img-top rounded-circle">
@@ -36,30 +36,32 @@
         {{^ picture }}
             {{{ avatar }}}
         {{/ picture }}
-        <div class="card-body">
+        <div class="card-body p-0">
             <div class="card-title">
-                <h5 class="card-title text-center">
-                {{ fullname }}
-                </h5>
+                <h6 class="card-title text-center">
+                    {{ fullname }}
+                </h6>
             </div>
-        </div>
-        <div class="card-footer">
-            <div class="card-text text-center">
-                <p class="h3">
-                    {{# manage }}
-                        <a href="#" class="card-link m-0" data-action="mute" title="{{# str }} mute, block_deft {{/ str }}"><i class="icon fa fa-microphone p-2 bg-secondary rounded-circle"></i></a>
-                    {{/ manage }}
-                    {{^ manage }}
-                        <span class="card-link m-0" data-action="mute" title="{{# str }} mute, block_deft {{/ str }}"><i class="icon fa fa-microphone p-2 rounded-circle"></i></span>
-                    {{/ manage }}
-                    <span class="card-link hidden m-0" data-action="unmute" title="{{# str }} unmute, block_deft {{/ str }}"><i class="icon fa fa-microphone-slash p-2 bg-warning rounded-circle"></i></span>
-                    <span class="card-link m-0" data-action="raisehand" title="{{# str }} raisehand, block_deft {{/ str }}"><i class="icon fa fa-hand-grab-o m-0 p-2 rounded-circle"></i></span><span class="card-link m-0 hidden" data-action="lowerhand" title="{{# str }} lowerhand, block_deft {{/ str }}"><i class="icon fa fa-hand-stop-o m-0 p-2 bg-success rounded-circle"></i></span>
-                </p>
-                {{> block_deft/volume_indicator }}
+            <div class="p-1">
+                <div class="card-text text-center">
+                    <p class="p-0 m-0">
+                        {{# manage }}
+                            <a href="#" class="card-link m-0" data-action="mute" title="{{# str }} mute, block_deft {{/ str }}"><i class="icon fa fa-microphone p-2 bg-secondary rounded-circle"></i></a>
+                        {{/ manage }}
+                        {{^ manage }}
+                            <span class="card-link m-0" data-action="mute" title="{{# str }} mute, block_deft {{/ str }}"><i class="icon fa fa-microphone p-2 rounded-circle"></i></span>
+                        {{/ manage }}
+                        <span class="card-link hidden m-0" data-action="unmute" title="{{# str }} unmute, block_deft {{/ str }}"><i class="icon fa fa-microphone-slash p-2 bg-warning rounded-circle"></i></span>
+                        <span class="card-link m-0" data-action="raisehand" title="{{# str }} raisehand, block_deft {{/ str }}"><i class="icon fa fa-hand-grab-o m-0 p-2 rounded-circle"></i></span><span class="card-link m-0 hidden" data-action="lowerhand" title="{{# str }} lowerhand, block_deft {{/ str }}"><i class="icon fa fa-hand-stop-o m-0 p-2 bg-success rounded-circle"></i></span>
+                    </p>
+                </div>
+            </div>
+            <div class="w-100">
+            {{> block_deft/volume_indicator }}
             </div>
         </div>
     {{/ user }}
-</div>
-<div class="hidden">
-    <audio autoplay></audio>
+    <div class="hidden">
+        <audio autoplay></audio>
+    </div>
 </div>

@@ -26,7 +26,7 @@ let venue = null;
 const handleClick = (e) => {
     'use strict';
 
-    let button = e.target.closest('.block_deft_venue button[data-action]');
+    let button = e.target.closest('.block_deft_venue button[data-action]:not([disabled])');
     if (button) {
         let task = button.closest('[data-task]').getAttribute('data-task'),
             url = new URL(Config.wwwroot + '/blocks/deft/venue.php');
