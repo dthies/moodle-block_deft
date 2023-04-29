@@ -30,6 +30,7 @@ require_once($CFG->dirroot . '/lib/accesslib.php');
 
 use block_deft\output\view;
 use block_deft\venue_manager;
+use block_deft\janus_room;
 use block_deft\socket;
 use block_deft\task;
 
@@ -116,10 +117,12 @@ function block_deft_output_fragment_venue($args) {
     $context = $args['context'];
     $peerid = $args['peerid'];
     $peer = $DB->get_record('block_deft_peer', [
-        'id' => $peerid
+        'id' => $peerid,
+        'status' => 0,
     ]);
+    require_capability('block/deft:joinvenue', $context);
 
-    if (!$user = core_user::get_user($peer->userid)) {
+    if (!$peer || !$user = core_user::get_user($peer->userid)) {
         return '';
     }
     $url = new moodle_url('/user/view.php', [
@@ -132,7 +135,7 @@ function block_deft_output_fragment_venue($args) {
     $user->avatar = $OUTPUT->user_picture($user, [
         'class' => 'card-img-top',
         'link' => false,
-        'size' => 256,
+        'size' => 32,
     ]);
     $user->manage = has_capability('block/deft:moderate', $context);
     $user->profileurl = $url->out(false);

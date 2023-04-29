@@ -14,9 +14,9 @@ import ModalEvents from 'core/modal_events';
 import Notification from "core/notification";
 import Log from "core/log";
 import Socket from "block_deft/socket";
-import "core/adapter";
+import adapter from "core/adapter";
 
-export default class {
+export default class VenueManager {
 
     /**
      * Listen for comment actions
@@ -30,14 +30,21 @@ export default class {
      * @param {bool} echocancellation
      * @param {bool} noisesuppression
      * @param {int} samplerate
+     * @param {int} roomid
+     * @param {string} server
      */
-    constructor(contextid, token, peers, peerid, iceServers, autogaincontrol, echocancellation, noisesuppression, samplerate) {
+    constructor(
+        contextid, token, peers, peerid, iceServers, autogaincontrol,
+        echocancellation, noisesuppression, samplerate, roomid, server
+    ) {
         this.contextid = contextid;
+        this.token = token;
         this.peerid = peerid;
         this.iceServers = iceServers;
         this.autogaincontrol = autogaincontrol;
         this.echocancellation = echocancellation;
         this.noisesuppression = noisesuppression;
+        this.roomid = roomid;
         this.samplerate = samplerate;
         this.lastSignal = 0;
         this.lastUpdate = 0;
@@ -46,6 +53,10 @@ export default class {
         this.queueout = [];
         this.ignoreOffer = new Set();
         this.makingOffer = new Set();
+        this.peers = peers;
+        this.server = server;
+
+        window.adapter = adapter;
 
         if (!window.RTCPeerConnection) {
             document.querySelectorAll('.venue_manager').forEach((venue) => {
@@ -76,12 +87,34 @@ export default class {
 
             return;
         }
+
+        this.addListeners();
+
+        this.startConnection();
+    }
+
+    /**
+     * Add event listeners
+     */
+    addListeners() {
+
+        document.querySelector('body').removeEventListener('click', this.handleMuteButtons.bind(this));
+        document.querySelector('body').addEventListener('click', this.handleMuteButtons.bind(this));
+
+        document.querySelector('body').removeEventListener('click', this.handleRaiseHand.bind(this));
+        document.querySelector('body').addEventListener('click', this.handleRaiseHand.bind(this));
+
+        document.querySelector('body').removeEventListener('click', this.closeConnections.bind(this));
+        document.querySelector('body').addEventListener('click', this.closeConnections.bind(this));
+
+        window.onbeforeunload = this.closeConnections.bind(this);
+
         this.audioInput = navigator.mediaDevices.getUserMedia({
             audio: {
-                autoGainControl: autogaincontrol,
-                echoCancellation: echocancellation,
-                noiseSuppression: noisesuppression,
-                sampleRate: samplerate
+                autoGainControl: this.autogaincontrol,
+                echoCancellation: this.echocancellation,
+                noiseSuppression:this. noisesuppression,
+                sampleRate: this.samplerate
             },
             video: false
         }).catch((e) => {
@@ -100,19 +133,26 @@ export default class {
         });
         this.audioInput.then(this.monitorVolume.bind(this)).catch(Log.debug);
 
-        document.querySelector('body').removeEventListener('click', this.handleMuteButtons.bind(this));
-        document.querySelector('body').addEventListener('click', this.handleMuteButtons.bind(this));
+        this.socket = new Socket(this.contextid, this.token);
+        this.socket.subscribe(() => {
+            this.sendSignals();
+        });
+    }
 
-        peers.forEach(peerid => {
+    /**
+     * Start to establish the peer connections
+     */
+    startConnection() {
+        this.peers.forEach(peerid => {
             const pc = new RTCPeerConnection({
-                 iceServers: iceServers
+                 iceServers: this.iceServers
             }),
                 dataChannel = pc.createDataChannel('Events');
             this.dataChannels.push(dataChannel);
             this.ignoreOffer.delete(String(peerid));
             dataChannel.onmessage = this.handleMessage.bind(this, peerid);
-            pc.onnegotiationneeded = this.negotiate.bind(this, contextid, pc, peerid);
-            pc.onicecandidate = this.handleICECandidate.bind(this, contextid, peerid);
+            pc.onnegotiationneeded = this.negotiate.bind(this, this.contextid, pc, peerid);
+            pc.onicecandidate = this.handleICECandidate.bind(this, this.contextid, peerid);
             pc.ontrack = this.handleTrackEvent.bind(this, peerid);
             pc.onconnectionstatechange = this.handleStateChange.bind(this, peerid);
             pc.oniceconnectionstatechange = () => {
@@ -122,19 +162,6 @@ export default class {
                 }
             };
             this.peerConnections[String(peerid)] = pc;
-        });
-
-        document.querySelector('body').removeEventListener('click', this.handleRaiseHand.bind(this));
-        document.querySelector('body').addEventListener('click', this.handleRaiseHand.bind(this));
-
-        document.querySelector('body').removeEventListener('click', this.closeConnections.bind(this));
-        document.querySelector('body').addEventListener('click', this.closeConnections.bind(this));
-
-        window.onbeforeunload = this.closeConnections.bind(this);
-
-        this.socket = new Socket(contextid, token);
-        this.socket.subscribe(() => {
-            this.sendSignals();
         });
     }
 
@@ -509,7 +536,7 @@ export default class {
             pc.close();
         });
 
-        document.querySelectorAll('.deft-venue [data-peerid="' + this.peerid + '"]').forEach(venue => {
+        document.querySelectorAll('[data-region="deft-venue"] [data-peerid="' + this.peerid + '"]').forEach(venue => {
             const event = new Event('venueclosed');
             venue.dispatchEvent(event);
         });
@@ -526,6 +553,7 @@ export default class {
         const button = e.target.closest(
             'a[data-action="mute"], a[data-action="unmute"]'
         );
+        Log.debug(e);
         if (button) {
             const action = button.getAttribute('data-action'),
                 peerid = button.closest('[data-peerid]').getAttribute('data-peerid');
@@ -577,7 +605,7 @@ export default class {
                         peerid: peerid,
                         "status": false
                     },
-                        fail: Notification.exception,
+                    fail: Notification.exception,
                     methodname: 'block_deft_venue_settings'
                 }]);
             }
@@ -623,17 +651,21 @@ export default class {
                     fail: Notification.exception,
                 methodname: 'block_deft_raise_hand'
             }]);
-            this.dataChannels.forEach(dataChannel => {
-                if (dataChannel.readyState != 'open') {
-                    return;
-                }
-                if (action == 'raisehand') {
-                    dataChannel.send('{"raisehand": true}');
-                } else {
-                    dataChannel.send('{"raisehand": false}');
-                }
-            });
+            this.sendMessage(JSON.stringify({"raisehand": action == 'raisehand'}));
         }
+    }
+
+    /**
+     * Send a message through data channel to peers
+     *
+     * @param {string} message
+     */
+    sendMessage(message) {
+        this.dataChannels.forEach(dataChannel => {
+            if (dataChannel.readyState == 'open') {
+                dataChannel.send(message);
+            }
+        });
     }
 
     /**
@@ -688,11 +720,7 @@ export default class {
                         high.style.opacity = volume.high;
                     });
                 });
-                this.dataChannels.forEach(dataChannel => {
-                    if (dataChannel.readyState == 'open') {
-                        dataChannel.send(message);
-                    }
-                });
+                this.sendMessage(message);
                 document.querySelectorAll('#deft_audio > div').forEach(peer => {
                     peers.push(peer);
                 });

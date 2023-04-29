@@ -100,4 +100,13 @@ $capabilities = [
             'editingteacher' => CAP_ALLOW
         ],
     ],
+
+    'block/deft:sharevideo' => [
+        'captype' => 'write',
+        'contextlevel' => CONTEXT_BLOCK,
+        'archetypes' => [
+            'teacher' => CAP_ALLOW,
+            'editingteacher' => CAP_ALLOW
+        ],
+    ],
 ];

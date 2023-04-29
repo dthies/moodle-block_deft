@@ -68,7 +68,6 @@ const handleClick = (e) => {
                                 fail: Notification.exception,
                                 methodname: 'block_deft_venue_settings'
                             }]);
-                            Templates.replaceNodeContents(root[0], '', '');
                         });
                         Fragment.loadFragment(
                             'block_deft',
@@ -78,15 +77,9 @@ const handleClick = (e) => {
                                 taskid: task
                             }
                         ).done((html, js) => {
-                            Templates.replaceNodeContents(root[0].querySelector('.venue_manager'), html, js);
-                        })
-                            .catch(Notification.exception);
+                            Templates.replaceNodeContents(root[0].querySelector('.modal-content .modal-body'), html, js);
+                        }).catch(Notification.exception);
                         modal.show();
-                        root.on('venueclosed', () => {
-                            modal.hide();
-                            Templates.replaceNodeContents(root[0], '', '');
-                            document.querySelector('body').classList.remove('block_deft_venue_page');
-                        });
 
                         return modal;
                     }).fail(Notification.exception);
@@ -127,6 +120,15 @@ const handleClick = (e) => {
     }
 };
 
+const cleanupVenue = function() {
+    if (venue) {
+        venue.destroy();
+        venue = null;
+    }
+
+    document.querySelector('body').classList.remove('block_deft_venue_page');
+};
+
 /**
  * Initialize listeners
  */
@@ -135,4 +137,7 @@ export const init = () => {
 
     document.removeEventListener('click', handleClick);
     document.addEventListener('click', handleClick);
+
+    document.querySelector('body').removeEventListener('venueclosed', cleanupVenue);
+    document.querySelector('body').addEventListener('venueclosed', cleanupVenue);
 };

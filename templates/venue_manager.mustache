@@ -29,14 +29,16 @@
         "noisesuppression": true,
         "peerid": 109,
         "peers": "[105, 106]",
+        "roomid": 3,
         "samplerate": 11025,
+        "server": "wss://deftly.us/janus/ws",
         "title": "Venue",
         "token": "dladfjlakerlaa3j4lr",
         "throttle": 100,
         "uniqueid": "eworio"
     }
 }}
-<div id="block-deft-{{uniqid}}" class="block-deft block-cards" data-task="{{ taskid }}" data-region="deft-venue">
+<div id="block-deft-{{uniqid}}" class="block-deft block-cards" data-task="{{ taskid }}" data-region="deft-venue" data-roomid="{{ roomid }}">
     <div class="container-fluid">
         <div class="row">
             {{^ peerid }}
@@ -53,6 +55,11 @@
                     <div class="card-text">{{{ intro }}}</div>
                 </div>
             </div>
+            {{# enablevideo }}
+                <div class="col col-12">
+                    <video id="deft_venue_remote_video" width="100%" controls autoplay class="hidden"></video>
+                </div>
+            {{/ enablevideo }}
             {{# user }}
                 <div class="card col-12" data-peerid={{ peerid }}>
                     {{# picture }}
@@ -71,6 +78,17 @@
                     </div>
                     <div class="card-footer p-1">
                         <p class="text-center h3 p-0  m-1">
+                                        {{# sharevideo }}
+                                            <a href="#" class="card-link m-0 p-1" data-action="publish" data-roomid="{{ roomid }}" data-contextid="{{ contextid }}" title="{{# str }} sharevideo, block_deft {{/ str }}">
+                                                <i class="icon fa fa-camera bg-secondary rounded-circle m-0 p-2"></i>
+                                            </a>
+                                            <a href="#" class="card-link m-0 p-1 hidden" data-action="unpublish" data-roomid="{{ roomid }}" data-contextid="{{ contextid }}" title="{{# str }} stopvideo, block_deft {{/ str }}">
+                                                <i class="icon fa fa-stop bg-danger rounded-circle m-0 p-2"></i>
+                                            </a>
+                                            <a href="#" class="card-link m-0 p-1" data-action="publish" data-type="display" data-roomid="{{ roomid }}" data-contextid="{{ contextid }}" title="{{# str }} sharevideo, block_deft {{/ str }}">
+                                                <i class="icon fa fa-television bg-secondary rounded-circle m-0 p-2"></i>
+                                            </a>
+                                        {{/ sharevideo }}
                             <a href="#" class="card-link m-0 p-1" data-action="mute" title="{{# str }} mute, block_deft {{/ str }}"><i class="icon fa fa-microphone bg-secondary rounded-circle m-0 p-2"></i></a><a href="#" class="card-link hidden m-0 p-1" data-action="unmute" title="{{# str }} unmute, block_deft {{/ str }}"><i class="icon fa fa-microphone-slash bg-warning rounded-circle m-0 p-2"></i></a>
                             <a href="#" class="card-link m-0 p-1" data-action="raisehand" title="{{# str }} raisehand, block_deft {{/ str }}"><i class="icon fa fa-hand-grab-o bg-secondary rounded-circle m-0 p-2"></i></a><a href="#" class="card-link hidden m-0 p-1" data-action="lowerhand" title="{{# str }} lowerhand, block_deft {{/ str }}"><i class="icon fa fa-hand-stop-o bg-success rounded-circle m-0 p-2"></i></a>
                             <a href="#" class="card-link m-0 p-1" data-action="close" title="{{# str }} close, block_deft {{/ str }}"><i class="icon fa fa-sign-out bg-secondary rounded-circle m-0 p-2"></i></a>
@@ -81,10 +99,15 @@
             {{/ peerid }}
         </div>
         <div id="deft_audio" class="row p-0"></div>
+        <div id="room" class="hidden">
+            <audio class="rounded centered" id="roomaudio" autoplay></audio>
+        </div>
     </div>
 </div>
 {{#js}}
-    require(['block_deft/venue_manager', 'core/adapter'], function(VenueManager) {
-        new VenueManager({{ contextid }}, '{{ token }}', {{ peers }}, {{ peerid }}, {{{ iceservers }}}, {{ autogaincontrol }}, {{ echocancellation }}, {{ noisesuppression }}, {{ samplerate }});
-    });
+    require([
+        {{^ roomid }} 'block_deft/venue_manager'{{/ roomid }}{{# roomid }} 'block_deft/janus_venue'{{/ roomid }},
+    ], function(VenueManager) {
+        new VenueManager({{ contextid }}, '{{ token }}', {{ peers }}, {{ peerid }}, {{{ iceservers }}}, {{ autogaincontrol }}, {{ echocancellation }}, {{ noisesuppression }}, {{ samplerate }}, {{ roomid }}, '{{ server }}');
+});
 {{/js}}

@@ -28,6 +28,7 @@ use core_form\dynamic_form;
 use moodle_exception;
 use moodle_url;
 use block_deft\task;
+use block_deft\janus_room;
 
 /**
  * Edit form for venue task
@@ -61,6 +62,15 @@ class edit_venue extends edit_task {
             'openinwindow' => get_string('openinwindow', 'block_deft'),
         ]);
 
+        if (get_config('block_deft', 'enablebridge')) {
+            $mform->addElement('select', 'connection', get_string('connectiontype', 'block_deft'), [
+                'peer' => get_string('peerconnection', 'block_deft'),
+                'mixed' => get_string('bridgedconnection', 'block_deft'),
+            ]);
+        } else {
+            $mform->addElement('hidden', 'connection');
+        }
+        $mform->setDefault('connection', 'peer');
     }
 
     /**
@@ -161,6 +171,11 @@ class edit_venue extends edit_task {
             unset($data->contextid);
             $task->set('configdata', json_encode($data));
             $task->update();
+            if ($data->connection == 'mixed') {
+                $room = new janus_room($task);
+            } else {
+                janus_room::remove($task);
+            }
 
             return $returndata;
         }

@@ -18,6 +18,11 @@ namespace block_deft\external;
 
 use block_deft\socket;
 use context;
+use external_api;
+use external_function_parameters;
+use external_multiple_structure;
+use external_single_structure;
+use external_value;
 
 /**
  * External function for getting new token
@@ -26,17 +31,17 @@ use context;
  * @copyright  2022 Daniel Thies <dethies@gmail.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class renew_token extends \external_api {
+class renew_token extends external_api {
 
     /**
      * Get parameter definition for renew_token.
      *
-     * @return \external_function_parameters
+     * @return external_function_parameters
      */
-    public static function execute_parameters(): \external_function_parameters {
-        return new \external_function_parameters(
+    public static function execute_parameters(): external_function_parameters {
+        return new external_function_parameters(
             [
-                'contextid' => new \external_value(PARAM_INT, 'Block context id'),
+                'contextid' => new external_value(PARAM_INT, 'Block context id'),
             ]
         );
     }
@@ -49,8 +54,8 @@ class renew_token extends \external_api {
      */
     public static function execute($contextid): array {
         $params = self::validate_parameters(self::execute_parameters(), [
-            'contextid' => $contextid, ]
-        );
+            'contextid' => $contextid,
+        ]);
         $contextid = $params['contextid'];
 
         $context = context::instance_by_id($contextid);
@@ -67,11 +72,11 @@ class renew_token extends \external_api {
     /**
      * Get return definition for renew_token
      *
-     * @return \external_single_structure
+     * @return external_single_structure
      */
-    public static function execute_returns(): \external_single_structure {
-        return new \external_single_structure([
-            'token' => new \external_value(PARAM_ALPHANUM, 'Valid authentication token for deftly.us'),
+    public static function execute_returns(): external_single_structure {
+        return new external_single_structure([
+            'token' => new external_value(PARAM_ALPHANUM, 'Valid authentication token for deftly.us'),
         ]);
     }
 }

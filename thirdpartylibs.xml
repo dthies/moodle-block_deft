@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<libraries>
+    <library>
+        <location>amd/src/janus-gateway.js</location>
+        <name>Janus gateway javascript API</name>
+        <license>MIT</license>
+        <version>[v1.1.3] - 2023-03-06</version>
+        <licenseversion></licenseversion>
+    </library>
+</libraries>

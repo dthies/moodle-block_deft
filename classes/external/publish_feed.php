@@ -16,7 +16,9 @@
 
 namespace block_deft\external;
 
+use block_deft\janus;
 use block_deft\socket;
+use block_deft\task;
 use block_deft\venue_manager;
 use cache;
 use context;
@@ -26,15 +28,16 @@ use external_function_parameters;
 use external_multiple_structure;
 use external_single_structure;
 use external_value;
+use stdClass;
 
 /**
- * External function for logging hand raising events
+ * External function to offer feed to venue
  *
  * @package    block_deft
  * @copyright  2023 Daniel Thies <dethies@gmail.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class raise_hand extends external_api {
+class publish_feed extends external_api {
 
     /**
      * Get parameter definition for raise hand
@@ -44,22 +47,28 @@ class raise_hand extends external_api {
     public static function execute_parameters(): external_function_parameters {
         return new external_function_parameters(
             [
-                'status' => new external_value(PARAM_BOOL, 'Whether hand should be raised'),
+                'id' => new external_value(PARAM_INT, 'Peer id for user session'),
+                'publish' => new external_value(PARAM_BOOL, 'Whhether to publish or not', VALUE_DEFAULT, true),
+                'room' => new external_value(PARAM_INT, 'Room id being joined'),
             ]
         );
     }
 
     /**
-     * Log action
+     * Publish feed
      *
-     * @param int $status Whether to raise hand
-     * @return array Status indicator
+     * @param string $id Venue peer id
+     * @param bool $publish Whether to publish
+     * @param int $room Room id being joined
+     * @return array
      */
-    public static function execute($status): array {
+    public static function execute($id, $publish, $room): array {
         global $DB, $SESSION;
 
         $params = self::validate_parameters(self::execute_parameters(), [
-            'status' => $status,
+            'id' => $id,
+            'publish' => $publish,
+            'room' => $room,
         ]);
 
         if (empty($SESSION->deft_session)) {
@@ -67,27 +76,65 @@ class raise_hand extends external_api {
                 'status' => false,
             ];
         }
-        $task = $DB->get_record_select(
+        $record = $DB->get_record_select(
             'block_deft',
             'id IN (SELECT taskid FROM {block_deft_peer} WHERE id = ?)',
             [$SESSION->deft_session->peerid]
         );
 
-        $context = context_block::instance($task->instance);
+        $context = context_block::instance($record->instance);
         self::validate_context($context);
 
         require_login();
         require_capability('block/deft:joinvenue', $context);
+        if ($publish) {
+            require_capability('block/deft:sharevideo', $context);
+        }
+
+        $task = new task();
+        $task->from_record($record);
+
+        $record = $DB->get_record('block_deft_room', [
+            'roomid' => $room,
+            'component' => 'block_deft',
+        ]);
+        $data = json_decode($record->data) ?? new stdClass();
+        if (!$publish && !empty($data->feed) && $data->feed == $id) {
+            $data->feed = 0;
+        } else if ($publish) {
+            if (
+                !empty($data->feed)
+                && ($data->feed != $id)
+                && $DB->get_record('block_deft_peer', [
+                    'id' => $data->feed,
+                    'status' => 0,
+                ])
+            ) {
+                require_capability('block/deft:moderate', $context);
+            }
+            $data->feed = $id;
+        } else {
+            return [
+                'status' => false,
+            ];
+        }
+
+        $record->timemodified = time();
+        $record->data = json_encode($data);
+        $DB->update_record('block_deft_room', $record);
+        $task->clear_cache();
+        $socket = new socket($context);
+        $socket->dispatch();
 
         $params = [
             'context' => $context,
-            'objectid' => $task->id,
+            'objectid' => $task->get('id'),
         ];
 
-        if ($status) {
-            $event = \block_deft\event\hand_raise_sent::create($params);
+        if ($publish) {
+            $event = \block_deft\event\video_started::create($params);
         } else {
-            $event = \block_deft\event\hand_lower_sent::create($params);
+            $event = \block_deft\event\video_ended::create($params);
         }
         $event->trigger();
 

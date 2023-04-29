@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<XMLDB PATH="blocks/deft/db" VERSION="20230129" COMMENT="XMLDB file for Moodle blocks/deft"
+<XMLDB PATH="blocks/deft/db" VERSION="20230406" COMMENT="XMLDB file for Moodle blocks/deft"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:noNamespaceSchemaLocation="../../../lib/xmldb/xmldb.xsd"
 >
@@ -69,6 +69,26 @@
         <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
         <KEY NAME="frompeer" TYPE="foreign" FIELDS="frompeer" REFTABLE="block_deft_peer" REFFIELDS="id"/>
         <KEY NAME="topeer" TYPE="foreign" FIELDS="topeer" REFTABLE="block_deft_peer" REFFIELDS="id"/>
+      </KEYS>
+    </TABLE>
+    <TABLE NAME="block_deft_room" COMMENT="External room assignments for venues">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="component" TYPE="char" LENGTH="40" NOTNULL="false" SEQUENCE="false" COMMENT="Plugin component assigned room"/>
+        <FIELD NAME="itemid" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="roomid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="server" TYPE="char" LENGTH="80" NOTNULL="false" SEQUENCE="false" COMMENT="Server url"/>
+        <FIELD NAME="secret" TYPE="char" LENGTH="40" NOTNULL="false" SEQUENCE="false" COMMENT="Admin secret for room"/>
+        <FIELD NAME="usermodified" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="maximum" TYPE="int" LENGTH="10" NOTNULL="false" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="data" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="Data saved In JSON for moderation and activities"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="usermodified" TYPE="foreign" FIELDS="usermodified" REFTABLE="user" REFFIELDS="id"/>
+        <KEY NAME="comitem" TYPE="unique" FIELDS="component, itemid"/>
       </KEYS>
     </TABLE>
   </TABLES>

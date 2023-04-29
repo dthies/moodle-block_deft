@@ -26,6 +26,7 @@ namespace block_deft;
 use cache;
 use context_block;
 use core_user;
+use moodle_exception;
 use moodle_url;
 use renderable;
 use renderer_base;
@@ -130,16 +131,20 @@ class venue_manager implements renderable, templatable {
         $userpicture = new user_picture($user);
         $user->pictureurl = $userpicture->get_url($PAGE, $output);
         $user->avatar = $output->user_picture($user, [
-            'class' => 'card-img-top',
+            'class' => 'card-img-top p-1 m-1',
             'link' => false,
-            'size' => 256,
+            'size' => 36,
         ]);
+
         $config = $this->task->get_config();
+        list($roomid, $roomtoken, $server) = $this->get_room();
+
         return [
             'autogaincontrol' => !empty(get_config('block_deft', 'autogaincontrol')),
             'canmanage' => has_capability('block/deft:moderate', $this->context),
             'contextid' => $this->context->id,
             'echocancellation' => !empty(get_config('block_deft', 'echocancellation')),
+            'enablevideo' => true,
             'iceservers' => json_encode($this->socket->ice_servers()),
             'intro' => format_text(
                 file_rewrite_pluginfile_urls(
@@ -156,10 +161,19 @@ class venue_manager implements renderable, templatable {
             'noisesuppression' => !empty(get_config('block_deft', 'noisesuppression')),
             'throttle' => get_config('block_deft', 'throttle'),
             'peerid' => $SESSION->deft_session->peerid,
+            'peerconnection' => ($config->connection ?? 'peer') == 'peer',
             'peers' => json_encode(array_keys($this->sessions)),
             'popup' => !isset($this->task->get_config()->windowoption) || $this->task->get_config()->windowoption != 'openinwindow',
             'samplerate' => get_config('block_deft', 'samplerate'),
+            'roomid' => $roomid,
+            'server' => $server,
             'sessions' => array_values($this->sessions),
+            'sharevideo' => has_capability('block/deft:sharevideo', $this->context)
+            && !empty($config->connection)
+            && ('peer' != $config->connection)
+            && get_config('block_deft', 'enablebridge')
+            && get_config('block_deft', 'enablevideo'),
+            'taskid' => $this->task->get('id'),
             'token' => $this->socket->get_token(),
             'title' => format_string($this->task->get_config()->name),
             'uniqueid' => uniqid(),
@@ -300,5 +314,30 @@ class venue_manager implements renderable, templatable {
             'status = 0 AND taskid = ?',
             [$this->task->get('id')]
         ));
+    }
+
+    /**
+     * Return room information for task
+     *
+     * @return array
+     */
+    protected function get_room() {
+        global $SESSION;
+
+        if (($this->task->get_config()->connection ?? 'peer') == 'peer') {
+            return [0, '', ''];
+        }
+
+        try {
+            $room = new \block_deft\janus_room($this->task);
+        } catch (moodle_exception $e) {
+            return [0, '', ''];
+        }
+
+        $token = $room->get_token();
+
+        $SESSION->deft_session->token = $token;
+
+        return [$room->get_roomid(), $room->get_token(), $room->get_server()];
     }
 }

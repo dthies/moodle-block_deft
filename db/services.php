@@ -26,6 +26,24 @@ defined('MOODLE_INTERNAL') || die();
 
 $functions = [
 
+    'block_deft_join_room' => [
+        'classname' => '\\block_deft\\external\\join_room',
+        'methodname' => 'execute',
+        'description' => 'Regiter entry in Janus room',
+        'type' => 'write',
+        'ajax' => true,
+        'services' => array(MOODLE_OFFICIAL_MOBILE_SERVICE),
+    ],
+
+    'block_deft_publish_feed' => [
+        'classname' => '\\block_deft\\external\\publish_feed',
+        'methodname' => 'execute',
+        'description' => 'Offer video feed',
+        'type' => 'write',
+        'ajax' => true,
+        'services' => array(MOODLE_OFFICIAL_MOBILE_SERVICE),
+    ],
+
     'block_deft_renew_token' => [
         'classname' => '\\block_deft\\external\\renew_token',
         'methodname' => 'execute',

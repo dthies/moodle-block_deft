@@ -25,10 +25,11 @@
 defined('MOODLE_INTERNAL') || die();
 
 $plugin->component = 'block_deft';
-$plugin->release = '1.1';
-$plugin->version = 2023040101;
+$plugin->release = '1.2 Beta';
+$plugin->version = 2023042600;
 $plugin->requires = 2021051700;
-$plugin->maturity = MATURITY_STABLE;
+$plugin->incompatible = 402;
+$plugin->maturity = MATURITY_BETA;
 $plugin->dependencies = [
     'mod_lti' => 2021051700,
 ];

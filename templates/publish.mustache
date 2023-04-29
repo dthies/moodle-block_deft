@@ -15,18 +15,29 @@
     along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 }}
 {{!
-    @template block_deft/venue_manager
+    @template block_deft/venue
 
-    This template renders the volume indicator in venue
+    This template renders the view for the text task
 
     Example context (json):
     {
-        "peerid": 109
+        "name": "Welcome",
+        "contextid": 12,
+        "iceservers": "[{\"urls\": \"stun:stunserver.org\"}]",
+        "roomid": 12,
+        "peerid": 102
     }
 }}
-
-<div class="volume_indicator text-center m-0" data-peerid="{{ peerid }}">
-    <div class="bg-warning pl-3 pr-3 pt-1 pb-0 m-1 d-inline low" style="opacity: 0;"> </div>
-    <div class="bg-warning pl-3 pr-3 pt-1 pb-0 m-1 d-inline mid" style="opacity: 0;"> </div>
-    <div class="bg-warning pl-3 pr-3 pt-1 pb-0 m-1 d-inline high" style="opacity: 0;"> </div>
+<div>
+    <h6>{{ name }}</h6>
+        <div class="">
+            <div class="">
+                 {{# str }} capturingvideo, block_deft {{/ str }}
+            </div>
+        </div>
 </div>
+{{# js }}
+    require(['block_deft/publish'], function(Publish) {
+        new Publish({{ contextid }}, {{{ iceservers }}}, {{ roomid }}, {{ peerid }});
+    });
+{{/ js }}

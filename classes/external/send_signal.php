@@ -17,21 +17,23 @@
 namespace block_deft\external;
 
 use block_deft\socket;
+use block_deft\task;
 use block_deft\venue_manager;
 use context;
 use external_function_parameters;
 use external_multiple_structure;
 use external_single_structure;
 use external_value;
+use external_api;
 
 /**
- * External function for getting new token
+ * External function for send WebRTC negotiatiion message
  *
  * @package    block_deft
  * @copyright  2022 Daniel Thies <dethies@gmail.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class send_signal extends \external_api {
+class send_signal extends external_api {
 
     /**
      * Get parameter definition for send_signal.
@@ -63,7 +65,7 @@ class send_signal extends \external_api {
      * @return array Messages from other peers
      */
     public static function execute($contextid, $messages, $lastsignal): array {
-        global $SESSION;
+        global $DB, $SESSION;
 
         $params = self::validate_parameters(self::execute_parameters(), [
             'contextid' => $contextid,
@@ -90,10 +92,20 @@ class send_signal extends \external_api {
         $peers = venue_manager::peer_connections();
         $settings = venue_manager::settings();
 
+        $data = json_decode($DB->get_field_sql(
+            "SELECT data
+               FROM {block_deft_room} r
+               JOIN {block_deft_peer} p ON p.taskid = r.itemid
+              WHERE p.id = ?
+                    AND r.component = 'block_deft'",
+            [$SESSION->deft_session->peerid]
+        ));
+
         return [
             'messages' => $messages,
             'peers' => $peers,
             'settings' => $settings,
+            'feed' => $data->feed ?? '',
         ];
     }
 
@@ -112,6 +124,7 @@ class send_signal extends \external_api {
                     'type' => new external_value(PARAM_TEXT, 'Message type'),
                 ]),
             ),
+            'feed' => new external_value(PARAM_TEXT, 'Published video feed'),
             'peers' => new external_multiple_structure(
                 new external_value(PARAM_INT, 'Currently available peer id'),
             ),

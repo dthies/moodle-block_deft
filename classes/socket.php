@@ -18,7 +18,7 @@
  * WebSocket manager
  *
  * @package    block_deft
- * @copyright  2022 Daniel Thies <dethies@gmail.com
+ * @copyright  2022 onward Daniel Thies <dethies@gmail.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -39,7 +39,7 @@ require_once($CFG->dirroot . '/mod/lti/locallib.php');
  * Web socket manager
  *
  * @package    block_deft
- * @copyright  2022 Daniel Thies <dethies@gmail.com
+ * @copyright  2022 onward Daniel Thies <dethies@gmail.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class socket {

@@ -23,6 +23,7 @@
  */
 namespace block_deft;
 
+use block_deft\janus_room;
 use block_deft\event\task_created;
 use block_deft\event\task_deleted;
 use block_deft\event\task_updated;
@@ -65,6 +66,11 @@ class task extends persistent {
             'statedata' => [
                 'type' => PARAM_RAW,
             ],
+            'roomid' => [
+                'type' => PARAM_INT,
+                'null' => NULL_ALLOWED,
+                'default' => null,
+            ],
             'visible' => [
                 'type' => PARAM_INT,
             ],
@@ -87,6 +93,17 @@ class task extends persistent {
      */
     public function get_state() {
         return json_decode($this->get('statedata'));
+    }
+
+    /**
+     * Returns state as object
+     *
+     * @return stdClass
+     */
+    public static function get_roomids() {
+        global $DB;
+
+        return $DB->get_fieldset_select('block_deft', 'roomid', 'roomid > 0');
     }
 
     /**
@@ -120,6 +137,13 @@ class task extends persistent {
         $id = $this->get('id');
         $context = context_block::instance($this->get('instance'));
         $this->clear_cache();
+        $config = $this->get_config();
+        if (
+            ($this->get('type') == 'venue')
+            && ('peer' != $config->connection ?? 'peer')
+        ) {
+            janus_room::remove($this);
+        }
 
         $DB->delete_records('block_deft_response', ['task' => $id]);
 

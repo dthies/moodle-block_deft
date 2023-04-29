@@ -21,19 +21,20 @@ use block_deft\venue_manager;
 use cache;
 use context;
 use context_block;
+use external_api;
 use external_function_parameters;
 use external_multiple_structure;
 use external_single_structure;
 use external_value;
 
 /**
- * External function for getting new token
+ * External function for storing user venue settings
  *
  * @package    block_deft
  * @copyright  2023 Daniel Thies <dethies@gmail.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class venue_settings extends \external_api {
+class venue_settings extends external_api {
 
     /**
      * Get parameter definition for send_signal.

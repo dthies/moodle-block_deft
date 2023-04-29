@@ -85,5 +85,37 @@ function xmldb_block_deft_upgrade($oldversion) {
         upgrade_block_savepoint(true, 2022111414, 'deft');
     }
 
+    if ($oldversion < 2023040401) {
+
+        // Define table block_deft_room to be created.
+        $table = new xmldb_table('block_deft_room');
+
+        // Adding fields to table block_deft_room.
+        $table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE, null);
+        $table->add_field('component', XMLDB_TYPE_CHAR, '40', null, null, null, null);
+        $table->add_field('itemid', XMLDB_TYPE_INTEGER, '10', null, null, null, null);
+        $table->add_field('roomid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
+        $table->add_field('server', XMLDB_TYPE_CHAR, '80', null, null, null, null);
+        $table->add_field('secret', XMLDB_TYPE_CHAR, '40', null, null, null, null);
+        $table->add_field('usermodified', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
+        $table->add_field('timecreated', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
+        $table->add_field('timemodified', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
+        $table->add_field('maximum', XMLDB_TYPE_INTEGER, '10', null, null, null, '0');
+        $table->add_field('data', XMLDB_TYPE_TEXT, null, null, null, null, null);
+
+        // Adding keys to table block_deft_room.
+        $table->add_key('primary', XMLDB_KEY_PRIMARY, ['id']);
+        $table->add_key('usermodified', XMLDB_KEY_FOREIGN, ['usermodified'], 'user', ['id']);
+        $table->add_key('comitem', XMLDB_KEY_UNIQUE, ['component', 'itemid']);
+
+        // Conditionally launch create table for block_deft_room.
+        if (!$dbman->table_exists($table)) {
+            $dbman->create_table($table);
+        }
+
+        // Deft savepoint reached.
+        upgrade_block_savepoint(true, 2023040401, 'deft');
+    }
+
     return true;
 }
