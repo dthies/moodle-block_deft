@@ -25,10 +25,9 @@
 defined('MOODLE_INTERNAL') || die();
 
 $plugin->component = 'block_deft';
-$plugin->release = '1.2 Beta';
-$plugin->version = 2023042600;
-$plugin->requires = 2021051700;
-$plugin->incompatible = 402;
+$plugin->release = '1.2 Beta Moodle 4.2+';
+$plugin->version = 2023042900;
+$plugin->requires = 2023042400;
 $plugin->maturity = MATURITY_BETA;
 $plugin->dependencies = [
     'mod_lti' => 2021051700,

@@ -20,11 +20,11 @@ use block_deft\socket;
 use block_deft\task;
 use block_deft\venue_manager;
 use context;
-use external_function_parameters;
-use external_multiple_structure;
-use external_single_structure;
-use external_value;
-use external_api;
+use core_external\external_function_parameters;
+use core_external\external_multiple_structure;
+use core_external\external_single_structure;
+use core_external\external_value;
+use core_external\external_api;
 
 /**
  * External function for send WebRTC negotiatiion message
