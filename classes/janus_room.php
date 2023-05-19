@@ -43,14 +43,19 @@ use stdClass;
 class janus_room {
 
     /**
+     * @var Endpoint Server endpoint
+     */
+    protected const ENDPOINT = 'https://deftly.us/admin/tool/deft/message.php';
+
+    /**
      * @var Plugin component using room
      */
     protected string $component = 'block_deft';
 
     /**
-     * @var Endpoint Server endpoint
+     * @var item id
      */
-    protected const ENDPOINT = 'https://deftly.us/admin/tool/deft/message.php';
+    protected int $itemid = 0;
 
     /**
      * @var Audio bridge plugin handle id
@@ -201,27 +206,21 @@ class janus_room {
         $this->server = $response->server;
         $this->roomid = $response->roomid;
 
-        if (!empty($this->record->id)) {
-            $this->record->secret = $response->secret;
-            $this->record->server = $response->server;
-            $this->record->roomid = $response->roomid;
-            $this->record->itemid = $this->itemid;
-            $this->record->component = $this->component;
-            $this->record->timemodified = time();
-            $this->record->usermodified = $USER->id;
-            $DB->update_record('block_deft_room', $this->record);
-        } else if ($record = $DB->get_record('block_deft_room', [
-            'roomid' => $response->roomid,
-        ])) {
+        if (
+            ($record = $DB->get_record('block_deft_room', [
+                'roomid' => $response->roomid,
+            ]))
+            || ($record = $DB->get_record('block_deft_room', [
+                'component' => $this->component,
+                'itemid' => $this->itemid,
+            ]))
+        ) {
             $record->secret = $response->secret;
+            $record->roomid = $response->roomid;
             $record->server = $response->server;
             $record->itemid = $this->itemid;
             $record->component = $this->component;
             $record->timemodified = time();
-            $this->record->itemid = null;
-            $this->record->component = null;
-            $this->record->timemodified = time();
-            $DB->update_record('block_deft_room', $this->record);
             $DB->update_record('block_deft_room', $record);
             $this->record = $record;
         } else {
@@ -335,15 +334,16 @@ class janus_room {
     /**
      * Unassign room from task
      *
-     * @param task $task Remove room assignment from task
+     * @param string $component Component
+     * @param int $itemid Item id
      * @return stdClass
      */
-    public static function remove(task $task) {
+    public static function remove($component, $itemid) {
         global $DB, $USER;
 
         if ($record = $DB->get_record('block_deft_room', [
-            'component' => 'block_deft',
-            'itemid' => $task->get('id'),
+            'component' => $component,
+            'itemid' => $itemid,
         ])) {
             $record->itemid = null;
             $record->component = '';

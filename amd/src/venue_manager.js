@@ -113,7 +113,7 @@ export default class VenueManager {
             audio: {
                 autoGainControl: this.autogaincontrol,
                 echoCancellation: this.echocancellation,
-                noiseSuppression:this. noisesuppression,
+                noiseSuppression: this.noisesuppression,
                 sampleRate: this.samplerate
             },
             video: false

@@ -142,7 +142,7 @@ class task extends persistent {
             ($this->get('type') == 'venue')
             && ('peer' != $config->connection ?? 'peer')
         ) {
-            janus_room::remove($this);
+            janus_room::remove('block_deft', $this->get('id'));
         }
 
         $DB->delete_records('block_deft_response', ['task' => $id]);
