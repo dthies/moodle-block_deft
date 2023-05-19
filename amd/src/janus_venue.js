@@ -188,7 +188,7 @@ export default class JanusManager extends VenueManager {
                                 video.parentNode.insertBefore(newfeed, video);
                                 video.remove();
                                 newfeed.classList.add('w-100');
-                                newfeed.id ='deft_venue_remote_video';
+                                newfeed.id = 'deft_venue_remote_video';
                                 newfeed.setAttribute('controls', true);
                                 newfeed.setAttribute('autoplay', true);
                             });
