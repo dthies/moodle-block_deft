@@ -25,10 +25,10 @@
 defined('MOODLE_INTERNAL') || die();
 
 $plugin->component = 'block_deft';
-$plugin->release = '1.2 Beta 2 for Moodle 4.2+';
-$plugin->version = 2023042901;
+$plugin->release = '1.2';
+$plugin->version = 2023042902;
 $plugin->requires = 2023042400;
-$plugin->maturity = MATURITY_BETA;
+$plugin->maturity = MATURITY_STABLE;
 $plugin->dependencies = [
     'mod_lti' => 2021051700,
 ];

@@ -84,6 +84,7 @@ class summary extends text implements renderable, templatable {
                 $counts = new chart_series($result->response, [$result->count]);
                 $chart->add_series($counts);
             }
+            $chart->set_labels([' ']);
         }
 
         return [
