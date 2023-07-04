@@ -261,15 +261,33 @@ class venue_manager implements renderable, templatable {
      * @param \core\event\base $event
      */
     public static function logout(\core\event\base $event) {
-        global $SESSION;
+        global $DB;
 
-        if (!empty($SESSION->deft_session) && $record = $DB->get_record('block_deft_peer', [
-            'id' => $SESSION->deft->peerid,
-            'status' => 0,
-        ])) {
-            $eventdata = $event->get_data();
-            $record->status = 1;
-            $DB->update_record('block_deft_peer', $record);
+        $eventdata = $event->get_data();
+        $sid = $eventdata['other']['sessionid'];
+        $records = $DB->get_records_sql(
+            'SELECT p.*, t.instance
+                 FROM {block_deft_peer} p
+                 JOIN {block_deft} t ON t.id = p.taskid
+            LEFT JOIN {sessions} s ON s.id = p.sessionid
+                WHERE s.id IS NULL AND p.status = 0',
+            []
+        );
+        foreach ($records as $record) {
+            $context = context_block::instance($record->instance);
+            $params = [
+                'context' => $context,
+                'objectid' => $record->id,
+                'userid' => $record->userid,
+            ];
+            $event = \block_deft\event\venue_ended::create($params);
+            $event->trigger();
+            self::close_peer($record->id);
+        }
+        foreach (array_unique(array_column($records, 'instance')) as $instance) {
+            $context = context_block::instance($record->instance);
+            $socket = new socket($context);
+            $socket->dispatch();
         }
     }
 
