@@ -87,10 +87,29 @@ class summary extends text implements renderable, templatable {
             $chart->set_labels([' ']);
         }
 
+        $colorset = ['#f3c300', '#875692', '#f38400', '#a1caf1', '#be0032', '#c2b280', '#7f180d', '#008856',
+            '#e68fac', '#0067a5'];
+        $results = $this->results['responses'];
+        $max = max(array_column($this->results['responses'], 'count'));
+        $total = array_sum(array_column($this->results['responses'], 'count'));
+        $i = 0;
+        $sum = 0;
+        $height = (count($results) * 50 + 10);
+        foreach ($results as $result) {
+            $result->height = $result->count / $max * $height;
+            $result->fill = $colorset[$i % count($colorset)];
+            $result->x = $i++ * 50 + 10;
+            $result->y = $height + 40 - $result->height;
+            $result->sum = $sum;
+            $result->px = 90 + 45 * sin(2 * pi() * $sum / $total);
+            $result->py = 60 - 45 * cos(2 * pi() * $sum / $total);
+            $result->path = (int) ($sum < $total / 2);
+            $sum += $result->count;
+        }
         return [
             'chart' => $output->render_chart($chart, false),
             'lastmodified' => $this->results['timecreated'],
-            'results' => $this->results['responses'],
+            'results' => $results,
             'task' => $this->task->id,
         ];
     }

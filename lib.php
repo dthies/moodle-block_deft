@@ -177,13 +177,8 @@ function block_deft_output_fragment_choose($args) {
     $cache = cache::make('block_deft', 'results');
     if ($cache->get($id . 'x' . $USER->id) === $config->option[$option]) {
         return '';
-    } else if ($option == '') {
-        $DB->delete_records('block_deft_response', [
-            'task' => $id,
-            'userid' => $USER->id,
-        ]);
     } else if ($record = $DB->get_record('block_deft_response', ['task' => $id, 'userid' => $USER->id])) {
-        $record->response = $config->option[$option];
+        $record->response = $config->option[$option] ?? '';
         $record->timemodified = $timenow;
         $DB->update_record('block_deft_response', $record);
     } else {

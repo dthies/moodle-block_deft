@@ -254,7 +254,13 @@ class janus_room {
             'allowed' => [$this->token],
         ];
         $response = $this->audiobridge_send($allow);
+        if (!empty($response->plugindata->data->error)) {
+            throw new \moodle_exception($response->plugindata->data->error);
+        }
         $response = $this->videoroom_send($allow);
+        if (!empty($response->plugindata->data->error)) {
+            throw new \moodle_exception($response->plugindata->data->error);
+        }
     }
 
     /**

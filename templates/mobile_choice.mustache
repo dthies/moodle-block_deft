@@ -69,10 +69,32 @@
         </div>
     </div>
     <%# summary %>
+        <svg
+            width="240" height="180" version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+            viewBox="10 5 <% width %> <% height %>" xml:space="preserve" preserveAspectRatio="xMinYMid meet"
+        >
+             <%# results %>
+                  <%^ pie %>
+                      <rect width="40" height="<% height %>" x="<% x %>" y="<% y %>" fill="<% fill %>"/>
+                  <%/ pie %>
+                  <%# pie %>
+                      <%# count %>
+                          <%# sum %>
+                              <path d="M 90 15
+                                  A 45 45, 0, <% path %>, 0, <% px %> <% py %>
+                                  L 90 60 Z" fill="<% fill %>"/>
+                          <%/ sum %>
+                          <%^ sum %>
+                              <circle r="45" cx="90" cy="60" fill="<% fill %>"/>
+                          <%/ sum %>
+                      <%/ count %>
+                  <%/ pie %>
+             <%/ results %>
+        </svg>
         <table class="table" style="width: 100%">
             <tr><th>{{ 'plugin.block_deft.response' | translate }}</th><th>{{ 'plugin.block_deft.count' | translate }}</th></tr>
         <%# results %>
-            <tr><td><% response %></td><td style="text-align: center"><%count%></td></tr>
+            <tr style="color: <% fill %>;"><td><% response %></td><td style="text-align: center"><%count%></td></tr>
         <%/ results %>
         </table>
     <%/ summary %>

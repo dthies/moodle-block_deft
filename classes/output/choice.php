@@ -92,8 +92,12 @@ class choice extends text implements renderable, templatable {
                 'para' => true,
             ]),
             'options' => $options,
+            'pie' => $this->config->charttype,
             'results' => !empty($summary) ? array_values($summary->export_for_template($output)['results']) : null,
             'summary' => !empty($summary) ? $output->render($summary) : null,
+            'timemodified' => $response->timemodified ?? 0,
+            'height' => $this->config->charttype ? 120 : (count($options) * 50 + 10) * 3 / 4,
+            'width' => $this->config->charttype ? 90 : count($options) * 50 + 10,
             'visible' => true,
         ];
     }
