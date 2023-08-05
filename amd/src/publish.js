@@ -120,6 +120,12 @@ export default class Publish {
         Log.debug(publishers);
     }
 
+    /**
+     * Handle Janus plugin message
+     *
+     * @param {String} msg message
+     * @param {String} jsep negotiation
+     */
     onMessage(msg, jsep) {
         Log.debug(msg);
         Janus.debug(" ::: Got a message :::", msg);
@@ -211,6 +217,11 @@ export default class Publish {
         }
     }
 
+    /**
+     * Handle click of button
+     *
+     * @param {Event} e
+     */
     handleClick(e) {
         const button = e.target.closest(
             '[data-roomid="' + this.roomid + '"] [data-action="publish"],  [data-roomid="'
@@ -241,7 +252,8 @@ export default class Publish {
 
                     this.videoInput.then(videoStream => {
                         const tracks = [];
-                        if (videoStream) {
+                        if (videoStream && (this.currentStream !== videoStream)) {
+                            this.currentStream = videoStream;
                             videoStream.getVideoTracks().forEach(track => {
                                 tracks.push({
                                     type: 'video',
@@ -322,50 +334,67 @@ export default class Publish {
         this.janus.destroy();
     }
 
+    /**
+     * Set video source to user camera
+     */
     shareCamera() {
-        if (this.videoInput) {
-            const input = this.videoInput;
-            input.then(videoStream => {
-                if (videoStream) {
-                    videoStream.getTracks().forEach(track => {
-                        track.stop();
-                    });
-                }
-                return videoStream;
-            }).catch(Notification.exception);
-        }
+        const videoInput = this.videoInput;
+
         this.videoInput = navigator.mediaDevices.getUserMedia({
             video: true,
             audio: false
+        }).then(videoStream => {
+            if (videoInput) {
+                videoInput.then(videoStream => {
+                    if (videoStream) {
+                        videoStream.getTracks().forEach(track => {
+                            track.stop();
+                        });
+                    }
+                    return videoStream;
+                }).catch(Notification.exception);
+            }
+
+            return videoStream;
         }).catch((e) => {
             Log.debug(e);
 
-            return false;
+            return videoInput;
         });
     }
 
+    /**
+     * Set video source to display surface
+     */
     shareDisplay() {
-        if (this.videoInput) {
-            const input = this.videoInput;
-            input.then(videoStream => {
-                if (videoStream) {
-                    videoStream.getTracks().forEach(track => {
-                        track.stop();
-                    });
-                }
-                return videoStream;
-            }).catch(Notification.exception);
-        }
+        const videoInput = this.videoInput;
+
         this.videoInput = navigator.mediaDevices.getDisplayMedia({
             video: true,
             audio: false
+        }).then(videoStream => {
+            if (videoInput) {
+                videoInput.then(videoStream => {
+                    if (videoStream) {
+                        videoStream.getTracks().forEach(track => {
+                            track.stop();
+                        });
+                    }
+                    return videoStream;
+                }).catch(Notification.exception);
+            }
+
+            return videoStream;
         }).catch((e) => {
             Log.debug(e);
 
-            return false;
+            return videoInput;
         });
     }
 
+    /**
+     * Publish current video feed
+     */
     publishFeed() {
         if (
             this.videoroom.webrtcStuff.pc
@@ -402,23 +431,25 @@ export default class Publish {
         }
     }
 
+    /**
+     * Stop video feed
+     */
     unpublish() {
         if (this.videoInput) {
-            this.videoInput.then(videoStream => {
-                if (videoStream) {
-                    videoStream.getVideoTracks().forEach(track => {
-                        track.stop();
-                    });
-                }
-                this.videoInput = null;
-
-                return videoStream;
-            }).catch(Notification.exception);
             this.videoroom.send({
                 message: {
                     request: 'unpublish'
                 }
             });
+            this.videoInput = this.videoInput.then(videoStream => {
+                if (videoStream) {
+                    videoStream.getVideoTracks().forEach(track => {
+                        track.stop();
+                    });
+                }
+
+                return videoStream;
+            }).catch(Notification.exception);
         }
         document.querySelectorAll(
             '[data-region="deft-venue"] [data-action="publish"]'
