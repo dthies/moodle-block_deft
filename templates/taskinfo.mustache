@@ -32,8 +32,8 @@
 {{ type }}
 <div class="task-controls pb-3">
     <form onsubmit="return false;">
-    <input type="hidden" name="id" value="{{ id }}" />
-    <input type="hidden" name="type" value="{{ type }}" />
+    <input type="hidden" name="id" value="{{ id }}" >
+    <input type="hidden" name="type" value="{{ type }}" >
     {{# canedit }}
     <button name="action" value="edit" title="{{# str }} edit {{/ str }}" class="icon fa fa-cog border-0"></button>
     <button name="action" value="delete" title="{{# str }} delete {{/ str }}" class="icon fa fa-trash border-0"></button>
