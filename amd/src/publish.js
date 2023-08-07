@@ -140,9 +140,10 @@ export default class Publish {
                         const tracks = [{type: 'data'}];
                         this.webrtcUp = true;
                         this.videoInput.then(videoStream => {
-                            if (!videoStream) {
+                            if (!videoStream || (this.currentStream === videoStream)) {
                                 return videoStream;
                             }
+                            this.currentStream = videoStream;
                             videoStream.getVideoTracks().forEach(track => {
                                 tracks.push({
                                     type: 'video',
@@ -221,6 +222,7 @@ export default class Publish {
      * Handle click of button
      *
      * @param {Event} e
+     * @returns {Bool}
      */
     handleClick(e) {
         const button = e.target.closest(
@@ -320,6 +322,9 @@ export default class Publish {
         return true;
     }
 
+    /**
+     * Handle close of windoww
+     */
     handleClose() {
         if (this.videoInput) {
             this.videoInput.then(videoStream => {
@@ -367,26 +372,49 @@ export default class Publish {
      * Set video source to display surface
      */
     shareDisplay() {
-        const videoInput = this.videoInput;
+        const videoInput = this.videoInput || Promise.resolve(null);
 
         this.videoInput = navigator.mediaDevices.getDisplayMedia({
             video: true,
             audio: false
         }).then(videoStream => {
-            if (videoInput) {
-                videoInput.then(videoStream => {
-                    if (videoStream) {
-                        videoStream.getTracks().forEach(track => {
-                            track.stop();
-                        });
-                    }
-                    return videoStream;
-                }).catch(Notification.exception);
-            }
+            videoInput.then(videoStream => {
+                if (videoStream) {
+                    videoStream.getTracks().forEach(track => {
+                        track.stop();
+                    });
+                }
+                return videoStream;
+            }).catch(Notification.exception);
+
+            videoStream.type = 'display';
 
             return videoStream;
         }).catch((e) => {
             Log.debug(e);
+
+            videoInput.then(videoStream => {
+                document.querySelectorAll(
+                    '[data-region="deft-venue"] [data-action="publish"],  [data-region="deft-venue"] [data-action="unpublish"]'
+                ).forEach(button => {
+                    if (videoStream) {
+                        if (
+                            (button.getAttribute('data-action') == 'unpublish')
+                            || (button.getAttribute('data-type') === 'display')
+                        ) {
+                            button.classList.remove('hidden');
+                        } else {
+                            button.classList.add('hidden');
+                        }
+                    } else {
+                        if (button.getAttribute('data-action') == 'unpublish') {
+                            button.classList.add('hidden');
+                        } else {
+                            button.classList.remove('hidden');
+                        }
+                    }
+                });
+            });
 
             return videoInput;
         });
@@ -441,7 +469,7 @@ export default class Publish {
                     request: 'unpublish'
                 }
             });
-            this.videoInput = this.videoInput.then(videoStream => {
+            this.videoInput.then(videoStream => {
                 if (videoStream) {
                     videoStream.getVideoTracks().forEach(track => {
                         track.stop();
@@ -450,6 +478,7 @@ export default class Publish {
 
                 return videoStream;
             }).catch(Notification.exception);
+            this.videoInput = Promise.resolve(null);
         }
         document.querySelectorAll(
             '[data-region="deft-venue"] [data-action="publish"]'
