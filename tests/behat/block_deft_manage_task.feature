@@ -20,9 +20,6 @@ Feature: The deft response block allows managers and teachers to interact with s
       | user     | course | role    |
       | student1 | C1     | student |
       | teacher1 | C1     | teacher |
-    And the following "blocks" exist:
-      | blockname  | contextlevel | reference | pagetypepattern | defaultregion |
-      | deft       | System       | 1         | site-index      | side-post     |
 
   @javascript
   Scenario: Manager adds text task which is not visible
