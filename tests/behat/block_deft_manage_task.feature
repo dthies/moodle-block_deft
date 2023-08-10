@@ -1,4 +1,4 @@
-@block @block_deft @javascript
+@block @block_deft
 Feature: The deft response block allows managers and teachers to interact with students in polls and chats
   In order to use deft response to interact
   As a manager
@@ -24,6 +24,7 @@ Feature: The deft response block allows managers and teachers to interact with s
       | blockname  | contextlevel | reference | pagetypepattern | defaultregion |
       | deft       | System       | 1         | site-index      | side-post     |
 
+  @javascript
   Scenario: Manager adds text task which is not visible
     Given I log in as "admin"
     And I am on site homepage
@@ -37,6 +38,7 @@ Feature: The deft response block allows managers and teachers to interact with s
     And I am on site homepage
     Then I should not see "Hello World"
 
+  @javascript
   Scenario: Manager adds text task which is visible
     Given I log in as "admin"
     And I am on site homepage
