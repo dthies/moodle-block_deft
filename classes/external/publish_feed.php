@@ -99,7 +99,14 @@ class publish_feed extends external_api {
             'component' => 'block_deft',
         ]);
         $data = json_decode($record->data) ?? new stdClass();
-        if (!$publish && !empty($data->feed) && $data->feed == $id) {
+        if (!$publish && !empty($data->feed) && $DB->get_record_select(
+            'block_deft_peer',
+            "type = 'video' AND id = :feed",
+            ['feed' => $data->feed]
+        )) {
+            $DB->set_field('block_deft_peer', 'status', 1, [
+                'id' => $data->feed,
+            ]);
             $data->feed = 0;
         } else if ($publish) {
             if (
@@ -108,11 +115,21 @@ class publish_feed extends external_api {
                 && $DB->get_record('block_deft_peer', [
                     'id' => $data->feed,
                     'status' => 0,
+                    'type' => 'video',
                 ])
             ) {
                 require_capability('block/deft:moderate', $context);
             }
-            $data->feed = $id;
+            $data->feed = $DB->get_field_select(
+                'block_deft_peer',
+                'id',
+                "status = 0
+                  AND type = 'video'
+                  AND sessionid IN (SELECT id FROM {sessions}
+                                     WHERE sid = ?
+                                           AND status = 0)",
+                [session_id()]
+            );
         } else {
             return [
                 'status' => false,

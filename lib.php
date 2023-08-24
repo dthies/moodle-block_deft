@@ -119,6 +119,7 @@ function block_deft_output_fragment_venue($args) {
     $peer = $DB->get_record('block_deft_peer', [
         'id' => $peerid,
         'status' => 0,
+        'type' => 'venue',
     ]);
     require_capability('block/deft:joinvenue', $context);
 

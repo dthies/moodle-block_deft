@@ -117,5 +117,19 @@ function xmldb_block_deft_upgrade($oldversion) {
         upgrade_block_savepoint(true, 2023040401, 'deft');
     }
 
+    if ($oldversion < 2023042908) {
+
+        // Define field type to be added to block_deft_peer.
+        $table = new xmldb_table('block_deft_peer');
+        $field = new xmldb_field('type', XMLDB_TYPE_CHAR, '40', null, null, null, 'venue', 'status');
+
+        // Conditionally launch add field type.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+        // Deft savepoint reached.
+        upgrade_block_savepoint(true, 2023042908, 'deft');
+    }
+
     return true;
 }
