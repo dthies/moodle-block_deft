@@ -55,23 +55,7 @@ export default class Publish {
                         iceServers: this.iceServers,
                         success: () => {
                             // Attach to video room test plugin
-                            this.janus.attach(
-                                {
-                                    plugin: "janus.plugin.videoroom",
-                                    opaqueId: "videoroom-" + Janus.randomString(12),
-                                    success: pluginHandle => {
-                                        this.videoroom = pluginHandle;
-                                        this.register(pluginHandle);
-                                    },
-                                    error: function(error) {
-                                        Janus.error("  -- Error attaching plugin...", error);
-                                        Notification.alert('', "Error attaching plugin... " + error);
-                                    },
-                                    onlocaltrack: this.onLocalTrack.bind(this),
-                                    onremotetrack: this.onRemoteTrack.bind(this),
-                                    onmessage: this.onMessage.bind(this)
-                                }
-                            );
+                            this.attach();
                         },
                         error: (error) => {
                             this.restart = true;
@@ -104,7 +88,9 @@ export default class Publish {
             contextid: this.contextid,
             fail: Notification.exception,
             methodname: 'block_deft_join_room'
-        }])[0];
+        }])[0].then(response => {
+            this.feed = response.id;
+        }).catch(Notification.exception);
     }
 
     onLocalTrack(track, on) {
@@ -135,7 +121,7 @@ export default class Publish {
             case 'joined':
                 // Successfully joined, negotiate WebRTC now
                 if (msg.id) {
-                    Janus.log("Successfully joined room " + msg.room + " with ID " + this.peerid);
+                    Log.debug("Successfully joined room " + msg.room + " with ID " + this.feed);
                     if (!this.webrtcUp) {
                         const tracks = [{type: 'data'}];
                         this.webrtcUp = true;
@@ -252,6 +238,12 @@ export default class Publish {
                         this.shareCamera();
                     }
 
+                    if (this.unregistered) {
+                        this.attach();
+                        this.unregistered = false;
+                        return;
+                    }
+
                     this.videoInput.then(videoStream => {
                         const tracks = [];
                         if (videoStream && (this.currentStream !== videoStream)) {
@@ -303,9 +295,10 @@ export default class Publish {
                     }
                     this.videoroom.send({
                         message: {
-                            request: 'unpublish'
+                            request: 'leave'
                         }
                     });
+                    this.unregistered = true;
                     return Ajax.call([{
                         args: {
                             id: Number(this.peerid),
@@ -428,24 +421,6 @@ export default class Publish {
             this.videoroom.webrtcStuff.pc
             && this.videoroom.webrtcStuff.pc.iceConnectionState == 'connected'
         ) {
-            setTimeout(() => {
-                this.videoroom.webrtcStuff.pc.getTransceivers().forEach(transceiver => {
-                    const sender = transceiver.sender;
-                    if (
-                        sender.track
-                        && this.selectedTrack
-                        && (sender.track.id == this.selectedTrack.id)
-                    ) {
-                        const message = JSON.stringify({
-                            feed: Number(this.peerid),
-                            mid: transceiver.mid
-                        });
-                        this.videoroom.data({
-                            text: message,
-                            error: Log.debug
-                        });
-                    }
-                });
                 return Ajax.call([{
                     args: {
                         id: Number(this.peerid),
@@ -454,9 +429,32 @@ export default class Publish {
                     contextid: this.contextid,
                     fail: Notification.exception,
                     methodname: 'block_deft_publish_feed'
-                }])[0];
-            });
+                }])[0].then((result) => {
+                    setTimeout(() => {
+                        this.videoroom.webrtcStuff.pc.getTransceivers().forEach(transceiver => {
+                            const sender = transceiver.sender;
+                            if (
+                                sender.track
+                                && this.selectedTrack
+                                && (sender.track.id == this.selectedTrack.id)
+                            ) {
+                                const message = JSON.stringify({
+                                    feed: this.feed,
+                                    mid: transceiver.mid
+                                });
+                                this.videoroom.data({
+                                    text: message,
+                                    error: Log.debug
+                                });
+                            }
+                        });
+                    });
+
+                    return result;
+                }).catch(Notification.exception);
         }
+
+        return Promise.resolve(null);
     }
 
     /**
@@ -466,7 +464,7 @@ export default class Publish {
         if (this.videoInput) {
             this.videoroom.send({
                 message: {
-                    request: 'unpublish'
+                    request: 'leave'
                 }
             });
             this.videoInput.then(videoStream => {
@@ -480,6 +478,7 @@ export default class Publish {
             }).catch(Notification.exception);
             this.videoInput = Promise.resolve(null);
         }
+        this.currentDisplay = null;
         document.querySelectorAll(
             '[data-region="deft-venue"] [data-action="publish"]'
         ).forEach(button => {
@@ -490,5 +489,40 @@ export default class Publish {
         ).forEach(button => {
             button.classList.add('hidden');
         });
+    }
+
+    attach() {
+        this.janus.attach(
+            {
+                plugin: "janus.plugin.videoroom",
+                opaqueId: "videoroom-" + Janus.randomString(12),
+                success: pluginHandle => {
+                    this.videoroom = pluginHandle;
+                    this.register(pluginHandle);
+                },
+                error: function(error) {
+                    Janus.error("  -- Error attaching plugin...", error);
+                    Notification.alert('', "Error attaching plugin... " + error);
+                },
+                ondata: (data) => {
+                    const message = JSON.parse(data);
+                    if (message && message.feed) {
+                        const publish = {
+                            request: 'update',
+                            subscribe: [{
+                                feed: message.feed,
+                                mid: message.mid,
+                            }]
+                        };
+                        this.videoroom.send({
+                            message: publish
+                        });
+                    }
+                },
+                onlocaltrack: this.onLocalTrack.bind(this),
+                onremotetrack: this.onRemoteTrack.bind(this),
+                onmessage: this.onMessage.bind(this)
+            }
+        );
     }
 }

@@ -530,8 +530,9 @@ export default class JanusManager extends VenueManager {
 
             if (this.remoteFeed.current != source) {
                 this.remoteFeed.videoroom.send({message: update});
-                if (this.remoteFeed.current == this.peerid) {
-                    publish.unpublish();
+                if (this.remoteFeed.current == publish.feed) {
+                    publish.handleClose();
+                    publish = null;
                 }
                 this.remoteFeed.current = source;
             }

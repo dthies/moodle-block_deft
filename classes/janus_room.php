@@ -208,11 +208,12 @@ class janus_room {
 
         if (
             ($record = $DB->get_record('block_deft_room', [
-                'roomid' => $response->roomid,
-            ]))
-            || ($record = $DB->get_record('block_deft_room', [
                 'component' => $this->component,
                 'itemid' => $this->itemid,
+            ]))
+            ||
+            ($record = $DB->get_record('block_deft_room', [
+                'roomid' => $response->roomid,
             ]))
         ) {
             $record->secret = $response->secret;
@@ -255,11 +256,13 @@ class janus_room {
         ];
         $response = $this->audiobridge_send($allow);
         if (!empty($response->plugindata->data->error)) {
-            throw new \moodle_exception($response->plugindata->data->error);
+            debugging($response->plugindata->data->error);
+            return;
         }
         $response = $this->videoroom_send($allow);
         if (!empty($response->plugindata->data->error)) {
-            throw new \moodle_exception($response->plugindata->data->error);
+            debugging($response->plugindata->data->error);
+            return;
         }
     }
 

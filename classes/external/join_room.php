@@ -69,7 +69,7 @@ class join_room extends external_api {
      * @return array
      */
     public static function execute($handle, $id, $plugin, $ptype, $room, $session, $feed): array {
-        global $DB, $SESSION;
+        global $DB, $SESSION, $USER;
 
         $params = self::validate_parameters(self::execute_parameters(), [
             'handle' => $handle,
@@ -107,7 +107,6 @@ class join_room extends external_api {
                 $id = $janus->transaction_identifier();
             }
             $message = [
-                'id' => $ptype ? $id : $id . 'subscriber',
                 'ptype' => $ptype ? 'publisher' : 'subscriber',
                 'request' => 'join',
                 'room' => $room,
@@ -121,6 +120,21 @@ class join_room extends external_api {
                 ];
             } else {
                 require_capability('block/deft:sharevideo', $context);
+                $DB->set_field('block_deft_peer', 'status', 1, [
+                    'type' => 'video',
+                    'taskid' => $task->id,
+                ]);
+                $feedid = $DB->insert_record('block_deft_peer', [
+                    'sessionid' => $DB->get_field('sessions', 'id', [
+                        'sid' => session_id(),
+                    ]),
+                    'taskid' => $task->id,
+                    'timecreated' => time(),
+                    'timemodified' => time(),
+                    'type' => 'video',
+                    'userid' => $USER->id,
+                ]);
+                $message['id'] = $feedid;
             }
         } else {
             $message = [
@@ -142,6 +156,7 @@ class join_room extends external_api {
 
         return [
             'status' => true,
+            'id' => (int) $feedid ?? 0,
         ];
     }
 
@@ -153,6 +168,7 @@ class join_room extends external_api {
     public static function execute_returns(): external_single_structure {
         return new external_single_structure([
             'status' => new external_value(PARAM_BOOL, 'Whether successful'),
+            'id' => new external_value(PARAM_INT, 'New video session id'),
         ]);
     }
 }
