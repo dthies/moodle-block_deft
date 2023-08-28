@@ -562,6 +562,7 @@ export default class JanusManager extends VenueManager {
 
         if (publish) {
             publish.handleClose();
+            publish.unpublish();
             publish = null;
         }
         document.querySelector('body').removeEventListener('click', handleClick);

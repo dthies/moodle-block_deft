@@ -38,6 +38,16 @@ export default class Publish {
 
         document.querySelector('body').removeEventListener('venueclosed', this.handleClose.bind(this));
         document.querySelector('body').addEventListener('venueclosed', this.handleClose.bind(this));
+        document.querySelectorAll(
+            '[data-region="deft-venue"] [data-action="publish"]'
+        ).forEach(button => {
+            button.classList.remove('hidden');
+        });
+        document.querySelectorAll(
+            '[data-region="deft-venue"] [data-action="unpublish"]'
+        ).forEach(button => {
+            button.classList.add('hidden');
+        });
     }
 
     /**
@@ -129,14 +139,19 @@ export default class Publish {
                             if (!videoStream || (this.currentStream === videoStream)) {
                                 return videoStream;
                             }
-                            this.currentStream = videoStream;
                             videoStream.getVideoTracks().forEach(track => {
+                                track.addEventListener('ended', () => {
+                                    if (this.selectedTrack != track.id) {
+                                        this.unpublish();
+                                    }
+                                });
                                 tracks.push({
                                     type: 'video',
                                     capture: track,
                                     recv: false
                                 });
                             });
+                            this.currentStream = videoStream;
                             this.videoroom.createOffer({
                                 tracks: tracks,
                                 success: (jsep) => {
@@ -238,17 +253,29 @@ export default class Publish {
                         this.shareCamera();
                     }
 
-                    if (this.unregistered) {
-                        this.attach();
-                        this.unregistered = false;
-                        return;
-                    }
-
                     this.videoInput.then(videoStream => {
                         const tracks = [];
                         if (videoStream && (this.currentStream !== videoStream)) {
-                            this.currentStream = videoStream;
+                            const transceiver = this.getTransceiver();
                             videoStream.getVideoTracks().forEach(track => {
+                                track.addEventListener('ended', () => {
+                                    if (this.selectedTrack != track.id) {
+                                        this.unpublish();
+                                    }
+                                });
+                                if (transceiver) {
+                                    this.videoroom.replaceTracks({
+                                        tracks: [{
+                                            type: 'video',
+                                            mid: transceiver.mid,
+                                            capture: track
+                                        }],
+                                        error: Notification.exception
+                                    });
+
+                                    this.selectedTrack = track;
+                                    return;
+                                }
                                 tracks.push({
                                     type: 'video',
                                     capture: track,
@@ -256,6 +283,9 @@ export default class Publish {
                                 });
                                 this.selectedTrack = track;
                             });
+                            if (!tracks.length) {
+                                return videoStream;
+                            }
                             this.videoroom.createOffer({
                                 tracks: tracks,
                                 success: (jsep) => {
@@ -293,22 +323,7 @@ export default class Publish {
                             return videoStream;
                         }).catch(Notification.exception);
                     }
-                    this.videoroom.send({
-                        message: {
-                            request: 'leave'
-                        }
-                    });
-                    this.unregistered = true;
-                    return Ajax.call([{
-                        args: {
-                            id: Number(this.peerid),
-                            publish: false,
-                            room: this.roomid
-                        },
-                        contextid: this.contextid,
-                        fail: Notification.exception,
-                        methodname: 'block_deft_publish_feed'
-                    }])[0];
+                    this.unpublish();
             }
         }
 
@@ -329,7 +344,19 @@ export default class Publish {
                 return videoStream;
             }).catch(Notification.exception);
         }
+
         this.janus.destroy();
+
+        document.querySelectorAll(
+            '[data-region="deft-venue"] [data-action="publish"]'
+        ).forEach(button => {
+            button.classList.remove('hidden');
+        });
+        document.querySelectorAll(
+            '[data-region="deft-venue"] [data-action="unpublish"]'
+        ).forEach(button => {
+            button.classList.add('hidden');
+        });
     }
 
     /**
@@ -459,36 +486,46 @@ export default class Publish {
 
     /**
      * Stop video feed
+     *
+     * @param {string} kind Track type
+     * $returns {RTCTransceivr}
      */
-    unpublish() {
-        if (this.videoInput) {
-            this.videoroom.send({
-                message: {
-                    request: 'leave'
+    getTransceiver(kind) {
+        let result = null;
+
+        if (
+            this.videoroom.webrtcStuff.pc
+            && this.videoroom.webrtcStuff.pc.iceConnectionState == 'connected'
+        ) {
+            this.videoroom.webrtcStuff.pc.getTransceivers().forEach(transceiver => {
+                const sender = transceiver.sender;
+                if (
+                    sender.track
+                    && sender.track.id
+                    && (sender.track.kind == (kind || 'video'))
+                ) {
+                    result = transceiver;
                 }
             });
-            this.videoInput.then(videoStream => {
-                if (videoStream) {
-                    videoStream.getVideoTracks().forEach(track => {
-                        track.stop();
-                    });
-                }
-
-                return videoStream;
-            }).catch(Notification.exception);
-            this.videoInput = Promise.resolve(null);
         }
-        this.currentDisplay = null;
-        document.querySelectorAll(
-            '[data-region="deft-venue"] [data-action="publish"]'
-        ).forEach(button => {
-            button.classList.remove('hidden');
-        });
-        document.querySelectorAll(
-            '[data-region="deft-venue"] [data-action="unpublish"]'
-        ).forEach(button => {
-            button.classList.add('hidden');
-        });
+
+        return result;
+    }
+
+    /**
+     * Stop video feed
+     */
+    unpublish() {
+        return Ajax.call([{
+            args: {
+                id: Number(this.feed),
+                publish: false,
+                room: this.roomid
+            },
+            contextid: this.contextid,
+            fail: Notification.exception,
+            methodname: 'block_deft_publish_feed'
+        }])[0];
     }
 
     attach() {
