@@ -84,17 +84,6 @@ export default class Subscribe extends Publish {
                                         }
                                         this.remoteStreams[mid] = track;
                                         if (this.remoteStream) {
-                                            const update = {
-                                                request: 'switch',
-                                                streams: [{
-                                                    feed: Number(this.current),
-                                                    mid: mid,
-                                                    "sub_mid": this.remoteStream.mid
-                                                }]
-                                            };
-                                            this.videoroom.send({
-                                                message: update
-                                            });
                                             return;
                                         }
                                         this.remoteStream = new MediaStream([track]);
