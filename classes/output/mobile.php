@@ -100,9 +100,30 @@ class mobile {
 
         $html = $output->render_from_template('block_deft/mobile_view', $data);
         if (get_config('block_deft', 'enableupdating')) {
-            $js = "(function(window){\n" .  file_get_contents(
-                $CFG->dirroot . '/blocks/deft/amd/build/mobile.min.js'
-            ) . "\n})(this);";
+            $js = "
+                var ws = new WebSocket('wss://deftly.us/ws'),
+                    token = this.CONTENT_OTHERDATA.token;
+
+                ws.onopen = function() {
+                    ws.send(token);
+                };
+
+                ws.onclose = () => {
+                    var id = setInterval(() => {
+                        if (navigator.onLine) {
+                            clearInterval(id);
+                            this.refreshContent(false);
+                        }
+                    }, 5000);
+                };
+
+                ws.addEventListener('message', () => {
+                    setTimeout(function() {
+                        if (navigator.onLine) {
+                            this.refreshContent(false);
+                        }
+                    }.bind(this));
+                });";
         } else {
             $js = '';
         }

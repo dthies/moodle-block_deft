@@ -79,20 +79,25 @@ export default class Subscribe extends Publish {
                                           delete this.remoteStreams[mid];
                                             return;
                                         }
-                                        if (this.remoteStreams.hasOwnProperty(mid) || track.kind !== "video") {
-                                            return;
+                                        if (!this.remoteStreams.hasOwnProperty(mid) && track.kind === "video") {
+                                            this.remoteStreams[mid] = track;
+                                            if (this.remoteStream) {
+                                                return;
+                                            }
+                                            this.remoteStream = new MediaStream([track]);
+                                            this.remoteStream.mid = mid;
+                                            Log.debug(this.remoteStream);
+                                            this.attachVideo(this.remoteStream);
+                                        } else if (!this.remoteStreams.hasOwnProperty(mid) && track.kind === "audio") {
+                                            this.remoteStreams[mid] = track;
+                                            if (this.remoteAudioStream) {
+                                                return;
+                                            }
+                                            this.remoteAudioStream = new MediaStream([track]);
+                                            this.remoteAudioStream.mid = mid;
+                                            Log.debug(this.remoteAudioStream);
+                                            this.attachAudio(this.remoteAudioStream);
                                         }
-                                        this.remoteStreams[mid] = track;
-                                        if (this.remoteStream) {
-                                            return;
-                                        }
-                                        this.remoteStream = new MediaStream([track]);
-                                        this.remoteStream.mid = mid;
-                                        Log.debug(this.remoteStream);
-                                        Janus.attachMediaStream(
-                                            this.remoteVideo || document.getElementById('deft_venue_remote_video'),
-                                            this.remoteStream
-                                        );
                                     }
                                 }
                             );
@@ -224,5 +229,19 @@ export default class Subscribe extends Publish {
                 }
             );
         }
+    }
+
+    attachAudio(audioStream) {
+        Janus.attachMediaStream(
+            this.remoteVideo || document.getElementById('deft_venue_remote_audio'),
+            audioStream
+        );
+    }
+
+    attachVideo(videoStream) {
+        Janus.attachMediaStream(
+            this.remoteVideo || document.getElementById('deft_venue_remote_video'),
+            videoStream
+        );
     }
 }
