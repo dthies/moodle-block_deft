@@ -16,7 +16,8 @@ import Subscribe from 'block_deft/subscribe';
 import * as Toast from 'core/toast';
 import VenueManager from "block_deft/venue_manager";
 
-var publish = null,
+var venue = null,
+    publish = null,
     contextid = 0,
     iceServers = '',
     roomid = 0,
@@ -216,6 +217,8 @@ export default class JanusManager extends VenueManager {
 
         document.querySelector('body').removeEventListener('click', handleClick);
         document.querySelector('body').addEventListener('click', handleClick);
+
+        venue = this;
     }
 
     /**
@@ -524,6 +527,11 @@ export default class JanusManager extends VenueManager {
 
             if (!source && this.remoteFeed.current) {
                 delete update.subscribe;
+                document.querySelectorAll(
+                    '[data-region="deft-venue"] video'
+                ).forEach(video => {
+                    video.classList.add('hidden');
+                });
             } else if (source && !this.remoteFeed.current) {
                 delete update.unsubscribe;
             }
@@ -607,5 +615,49 @@ const handleClick = function(e) {
             publish.shareCamera();
         }
         publish.startConnection();
+    }
+
+    if (button) {
+        const action = button.getAttribute('data-action');
+        if (action === 'publish') {
+            if (venue.webrtcUp) {
+                publish.videoInput.then(audioStream => {
+                    // Publish our stream.
+                    const tracks = [];
+                    if (audioStream) {
+                        audioStream.getAudioTracks().forEach(track => {
+                            tracks.push({
+                                type: 'audio',
+                                capture: track,
+                                recv: true
+                            });
+                        });
+                        if (tracks.length) {
+                            venue.audioBridge.createOffer({
+                                // We only want bidirectional audio
+                                tracks: tracks,
+                                customizeSdp: function(jsep) {
+                                    if (stereo && jsep.sdp.indexOf("stereo=1") == -1) {
+                                        // Make sure that our offer contains stereo too
+                                        jsep.sdp = jsep.sdp.replace("useinbandfec=1", "useinbandfec=1;stereo=1");
+                                    }
+                                },
+                                success: (jsep) => {
+                                    Janus.debug("Got SDP!", jsep);
+                                    const publish = {request: "configure", muted: false};
+                                    venue.audioBridge.send({message: publish, jsep: jsep});
+                                },
+                                error: function(error) {
+                                    Janus.error("WebRTC error:", error);
+                                    Notification.alert("WebRTC error... ", error.message);
+                                }
+                            });
+                        }
+                    }
+
+                    return audioStream;
+                }).catch(Notification.exception);
+            }
+        }
     }
 };

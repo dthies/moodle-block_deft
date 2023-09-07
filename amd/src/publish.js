@@ -38,16 +38,6 @@ export default class Publish {
 
         document.querySelector('body').removeEventListener('venueclosed', this.handleClose.bind(this));
         document.querySelector('body').addEventListener('venueclosed', this.handleClose.bind(this));
-        document.querySelectorAll(
-            '[data-region="deft-venue"] [data-action="publish"]'
-        ).forEach(button => {
-            button.classList.remove('hidden');
-        });
-        document.querySelectorAll(
-            '[data-region="deft-venue"] [data-action="unpublish"]'
-        ).forEach(button => {
-            button.classList.add('hidden');
-        });
     }
 
     /**
@@ -100,6 +90,8 @@ export default class Publish {
             methodname: 'block_deft_join_room'
         }])[0].then(response => {
             this.feed = response.id;
+
+            return response;
         }).catch(Notification.exception);
     }
 
@@ -133,47 +125,8 @@ export default class Publish {
                 if (msg.id) {
                     Log.debug("Successfully joined room " + msg.room + " with ID " + this.feed);
                     if (!this.webrtcUp) {
-                        const tracks = [{type: 'data'}];
                         this.webrtcUp = true;
-                        this.videoInput.then(videoStream => {
-                            if (!videoStream || (this.currentStream === videoStream)) {
-                                return videoStream;
-                            }
-                            videoStream.getVideoTracks().forEach(track => {
-                                track.addEventListener('ended', () => {
-                                    if (this.selectedTrack != track.id) {
-                                        this.unpublish();
-                                    }
-                                });
-                                tracks.push({
-                                    type: 'video',
-                                    capture: track,
-                                    recv: false
-                                });
-                            });
-                            this.currentStream = videoStream;
-                            this.videoroom.createOffer({
-                                tracks: tracks,
-                                success: (jsep) => {
-                                    Janus.debug("Got SDP!", jsep);
-                                    const publish = {
-                                        request: "configure",
-                                        video: true,
-                                        audio: false
-                                    };
-                                    this.videoroom.send({
-                                        message: publish,
-                                        jsep: jsep
-                                    });
-                                },
-                                error: function(error) {
-                                    this.restart = true;
-                                    Janus.error("WebRTC error:", error);
-                                    Notification.alert("WebRTC error... ", error.message);
-                                }
-                            });
-                            return videoStream;
-                        }).catch(Notification.exception);
+                        this.processStream([{type: 'data'}]);
                     }
                 }
                 break;
@@ -253,62 +206,7 @@ export default class Publish {
                         this.shareCamera();
                     }
 
-                    this.videoInput.then(videoStream => {
-                        const tracks = [];
-                        if (videoStream && (this.currentStream !== videoStream)) {
-                            const transceiver = this.getTransceiver();
-                            videoStream.getVideoTracks().forEach(track => {
-                                track.addEventListener('ended', () => {
-                                    if (this.selectedTrack != track.id) {
-                                        this.unpublish();
-                                    }
-                                });
-                                if (transceiver) {
-                                    this.videoroom.replaceTracks({
-                                        tracks: [{
-                                            type: 'video',
-                                            mid: transceiver.mid,
-                                            capture: track
-                                        }],
-                                        error: Notification.exception
-                                    });
-
-                                    this.selectedTrack = track;
-                                    return;
-                                }
-                                tracks.push({
-                                    type: 'video',
-                                    capture: track,
-                                    recv: false
-                                });
-                                this.selectedTrack = track;
-                            });
-                            if (!tracks.length) {
-                                return videoStream;
-                            }
-                            this.videoroom.createOffer({
-                                tracks: tracks,
-                                success: (jsep) => {
-                                    Janus.debug("Got SDP!", jsep);
-                                    const publish = {
-                                        request: "configure",
-                                        video: true,
-                                        audio: false
-                                    };
-                                    this.videoroom.send({
-                                        message: publish,
-                                        jsep: jsep
-                                    });
-                                },
-                                error: function(error) {
-                                    Janus.error("WebRTC error:", error);
-                                    Notification.alert("WebRTC error... ", error.message);
-                                }
-                            });
-                        }
-
-                        return videoStream;
-                    }).catch(Notification.exception);
+                    this.processStream([]);
                     break;
                 case 'unpublish':
                     if (this.videoInput) {
@@ -434,7 +332,9 @@ export default class Publish {
                         }
                     }
                 });
-            });
+
+                return videoStream;
+            }).catch(Notification.exception);
 
             return videoInput;
         });
@@ -442,6 +342,8 @@ export default class Publish {
 
     /**
      * Publish current video feed
+     *
+     * @returns {Promise}
      */
     publishFeed() {
         if (
@@ -488,7 +390,7 @@ export default class Publish {
      * Stop video feed
      *
      * @param {string} kind Track type
-     * $returns {RTCTransceivr}
+     * @returns {RTCTransceivr}
      */
     getTransceiver(kind) {
         let result = null;
@@ -514,8 +416,20 @@ export default class Publish {
 
     /**
      * Stop video feed
+     *
+     * @returns {Promise}
      */
     unpublish() {
+        document.querySelectorAll(
+            '[data-region="deft-venue"] [data-action="publish"]'
+        ).forEach(button => {
+            button.classList.remove('hidden');
+        });
+        document.querySelectorAll(
+            '[data-region="deft-venue"] [data-action="unpublish"]'
+        ).forEach(button => {
+            button.classList.add('hidden');
+        });
         return Ajax.call([{
             args: {
                 id: Number(this.feed),
@@ -561,5 +475,63 @@ export default class Publish {
                 onmessage: this.onMessage.bind(this)
             }
         );
+    }
+
+    processStream(tracks) {
+        this.videoInput.then(videoStream => {
+            if (videoStream && (this.currentStream !== videoStream)) {
+                const transceiver = this.getTransceiver();
+                videoStream.getVideoTracks().forEach(track => {
+                    track.addEventListener('ended', () => {
+                        if (this.selectedTrack.id != track.id) {
+                            this.unpublish();
+                        }
+                    });
+                    if (transceiver) {
+                        this.videoroom.replaceTracks({
+                            tracks: [{
+                                type: 'video',
+                                mid: transceiver.mid,
+                                capture: track
+                            }],
+                            error: Notification.exception
+                        });
+
+                        this.selectedTrack = track;
+                        return;
+                    }
+                    tracks.push({
+                        type: 'video',
+                        capture: track,
+                        recv: false
+                    });
+                    this.selectedTrack = track;
+                });
+                if (!tracks.length) {
+                    return videoStream;
+                }
+                this.videoroom.createOffer({
+                    tracks: tracks,
+                    success: (jsep) => {
+                        Janus.debug("Got SDP!", jsep);
+                        const publish = {
+                            request: "configure",
+                            video: true,
+                            audio: false
+                        };
+                        this.videoroom.send({
+                            message: publish,
+                            jsep: jsep
+                        });
+                    },
+                    error: function(error) {
+                        Janus.error("WebRTC error:", error);
+                        Notification.alert("WebRTC error... ", error.message);
+                    }
+                });
+            }
+
+            return videoStream;
+        }).catch(Notification.exception);
     }
 }

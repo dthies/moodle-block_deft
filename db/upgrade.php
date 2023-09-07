@@ -117,7 +117,7 @@ function xmldb_block_deft_upgrade($oldversion) {
         upgrade_block_savepoint(true, 2023040401, 'deft');
     }
 
-    if ($oldversion < 2023042908) {
+    if ($oldversion < 2023042606) {
 
         // Define field type to be added to block_deft_peer.
         $table = new xmldb_table('block_deft_peer');
@@ -128,7 +128,7 @@ function xmldb_block_deft_upgrade($oldversion) {
             $dbman->add_field($table, $field);
         }
         // Deft savepoint reached.
-        upgrade_block_savepoint(true, 2023042908, 'deft');
+        upgrade_block_savepoint(true, 2023042606, 'deft');
     }
 
     return true;

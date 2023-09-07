@@ -197,9 +197,11 @@ class janus_room {
         ));
 
         if (!$response) {
-            throw new moodle_exception('noresponse');
+            debugging('noresponse');
+            return;
         } else if (empty($response->roomid)) {
-            throw new moodle_exception('noroomavailable');
+            debugging('noroomavailable');
+            return;
         }
 
         $this->secret = $response->secret;
@@ -221,6 +223,7 @@ class janus_room {
             $record->server = $response->server;
             $record->itemid = $this->itemid;
             $record->component = $this->component;
+            $record->plugindata = '{}';
             $record->timemodified = time();
             $DB->update_record('block_deft_room', $record);
             $this->record = $record;
@@ -231,6 +234,7 @@ class janus_room {
             $this->record->roomid = $response->roomid;
             $this->record->itemid = $this->itemid;
             $this->record->component = $this->component;
+            $this->record->plugindata = '{}';
             $this->record->timecreated = time();
             $this->record->timemodified = $this->record->timecreated;
             $this->record->usermodified = $USER->id;
