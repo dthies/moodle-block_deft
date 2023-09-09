@@ -89,7 +89,9 @@ export default class Publish {
             fail: Notification.exception,
             methodname: 'block_deft_join_room'
         }])[0].then(response => {
-            this.feed = response.id;
+            if (pluginHandle.plugin == 'janus.plugin.videoroom') {
+                this.feed = response.id;
+            }
 
             return response;
         }).catch(Notification.exception);
@@ -212,7 +214,7 @@ export default class Publish {
                     if (this.videoInput) {
                         this.videoInput.then(videoStream => {
                             if (videoStream) {
-                                videoStream.getVideoTracks().forEach(track => {
+                                videoStream.getTracks().forEach(track => {
                                     track.stop();
                                 });
                             }
@@ -294,7 +296,7 @@ export default class Publish {
 
         this.videoInput = navigator.mediaDevices.getDisplayMedia({
             video: true,
-            audio: false
+            audio: true,
         }).then(videoStream => {
             videoInput.then(videoStream => {
                 if (videoStream) {
@@ -442,6 +444,9 @@ export default class Publish {
         }])[0];
     }
 
+    /**
+     * Attach video plugin
+     */
     attach() {
         this.janus.attach(
             {
@@ -477,13 +482,18 @@ export default class Publish {
         );
     }
 
+    /**
+     * Find track changes and begin negotiation
+     *
+     * @param {array} tracks Additonal tracks
+     */
     processStream(tracks) {
         this.videoInput.then(videoStream => {
             if (videoStream && (this.currentStream !== videoStream)) {
                 const transceiver = this.getTransceiver();
                 videoStream.getVideoTracks().forEach(track => {
                     track.addEventListener('ended', () => {
-                        if (this.selectedTrack.id != track.id) {
+                        if (this.selectedTrack.id == track.id) {
                             this.unpublish();
                         }
                     });

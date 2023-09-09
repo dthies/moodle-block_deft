@@ -11,7 +11,7 @@ import {get_string as getString} from 'core/str';
 import Janus from 'block_deft/janus-gateway';
 import Log from "core/log";
 import Notification from "core/notification";
-import Publish from 'block_deft/publish';
+import PublishBase from 'block_deft/publish';
 import Subscribe from 'block_deft/subscribe';
 import * as Toast from 'core/toast';
 import VenueManager from "block_deft/venue_manager";
@@ -594,6 +594,29 @@ const handleClick = function(e) {
     );
     if (publish) {
         publish.handleClick(e);
+        if (button && button.getAttribute('data-action') === 'publish') {
+            if (publish.audioBridge) {
+                publish.processAudioStream();
+            } else {
+                publish.janus.attach({
+                    plugin: "janus.plugin.audiobridge",
+                    opaqueId: "audiobridge-" + Janus.randomString(12),
+                    success: pluginHandle => {
+                        publish.audioBridge = pluginHandle;
+                        publish.register(pluginHandle).then(response => {
+                            publish.processAudioStream();
+
+                            return response;
+                        }).catch(Notification.exception);
+                    },
+                    error: function(error) {
+                        Janus.error("  -- Error attaching plugin...", error);
+                        Notification.alert('', "Error attaching plugin... " + error);
+                    },
+                    onmessage: publish.onAudioMessage.bind(publish)
+                });
+            }
+        }
     } else if (button) {
         const action = button.getAttribute('data-action'),
             type = button.getAttribute('data-type');
@@ -661,3 +684,160 @@ const handleClick = function(e) {
         }
     }
 };
+
+class Publish extends PublishBase {
+    /**
+     * Register the room or publish audio
+     *
+     * @param {object} pluginHandle
+     * @return {Promise}
+     */
+    register(pluginHandle) {
+        return super.register(pluginHandle).then(result => {
+            if (pluginHandle.plugin == 'janus.plugin.audiobridge') {
+                return result;
+            }
+            this.peerid = this.feed;
+            this.janus.attach({
+                plugin: "janus.plugin.audiobridge",
+                opaqueId: "audiobridge-" + Janus.randomString(12),
+                success: pluginHandle => {
+                    this.audioBridge = pluginHandle;
+                    this.register(pluginHandle);
+                },
+                error: function(error) {
+                    Janus.error("  -- Error attaching plugin...", error);
+                    Notification.alert('', "Error attaching plugin... " + error);
+                },
+                onmessage: this.onAudioMessage.bind(this)
+            });
+
+            return result;
+        });
+    }
+
+    /**
+     * Handle plugin message
+     *
+     * @param {object} msg msg
+     * @param {string} jsep
+     */
+    onAudioMessage(msg, jsep) {
+        const event = msg.audiobridge;
+        Log.debug(event);
+        if (event) {
+            if (event === "joined") {
+                // Successfully joined, negotiate WebRTC now
+                if (msg.id) {
+                    Log.debug("Successfully joined room " + msg.room + " with ID " + msg.id);
+                    if (!this.audioWebrtcUp) {
+                        this.audioWebrtcUp = true;
+                        this.processAudioStream();
+                    }
+                }
+            } else if (event === "destroyed") {
+                // The room has been destroyed
+                Janus.warn("The room has been destroyed!");
+                Notification.alert('', "The room has been destroyed");
+            } else if (event === "event") {
+                if (msg.error) {
+                    if (msg.error_code === 485) {
+                        // This is a "no such room" error: give a more meaningful description
+                        Notification.alert(
+                            "<p>Room <code>" + this.roomid + "</code> is not configured."
+                        );
+                    } else {
+                        Notification.alert(msg.error_code, msg.error);
+                    }
+                    return;
+                }
+            }
+        }
+        if (jsep) {
+            Janus.debug("Handling SDP as well...", jsep);
+            this.audioBridge.handleRemoteJsep({jsep: jsep});
+        }
+    }
+
+    /**
+     * Find track changes and begin negotiation
+     */
+    processAudioStream() {
+        this.videoInput.then(audioStream => {
+            // Publish our stream.
+            const tracks = [];
+            let transceiver = null;
+
+            if (
+                this.audioBridge.webrtcStuff.pc
+                && this.audioBridge.webrtcStuff.pc.iceConnectionState == 'connected'
+            ) {
+                this.audioBridge.webrtcStuff.pc.getTransceivers().forEach(x => {
+                    const sender = x.sender;
+                    if (
+                        sender.track
+                        && sender.track.id
+                        && (sender.track.kind == 'audio')
+                    ) {
+                        transceiver = x;
+                    }
+                });
+            }
+
+            if (transceiver && (!audioStream || !audioStream.getAudioTracks().length)) {
+                this.audioBridge.detach();
+                this.audioBridge = null;
+
+                return audioStream;
+            } else if (audioStream) {
+                audioStream.getAudioTracks().forEach(track => {
+                    if (transceiver) {
+                        this.videoroom.replaceTracks({
+                            tracks: [{
+                                type: 'audio',
+                                mid: transceiver.mid,
+                                capture: track
+                            }],
+                            error: Notification.exception
+                        });
+                        track.enabled = true;
+
+                        return;
+                    }
+                    tracks.push({
+                        type: 'audio',
+                        capture: track,
+                        recv: true
+                    });
+                });
+            }
+            if (!tracks.length) {
+                return audioStream;
+            }
+            this.audioBridge.createOffer({
+                // We only want bidirectional audio
+                tracks: tracks,
+                customizeSdp: function(jsep) {
+                    if (stereo && jsep.sdp.indexOf("stereo=1") == -1) {
+                        // Make sure that our offer contains stereo too
+                        jsep.sdp = jsep.sdp.replace("useinbandfec=1", "useinbandfec=1;stereo=1");
+                    }
+                },
+                success: (jsep) => {
+                    if (transceiver) {
+                        return;
+                    }
+                    Janus.debug("Got SDP!", jsep);
+                    const publish = {request: "configure", muted: false};
+                    this.audioBridge.send({message: publish, jsep: jsep});
+                },
+                error: function(error) {
+                    Janus.error("WebRTC error:", error);
+                    Notification.alert("WebRTC error... ", error.message);
+                }
+            });
+
+            return audioStream;
+        }).catch(Notification.exception);
+    }
+}
