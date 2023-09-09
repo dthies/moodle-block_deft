@@ -99,8 +99,31 @@ class mobile {
         $data->instanceid = $args['instanceid'];
 
         $html = $output->render_from_template('block_deft/mobile_view', $data);
+
+        return [
+            'templates' => [
+                [
+                    'id' => 'main',
+                    'html' => '<div>'.$html.'</div>',
+                ],
+            ],
+            'javascript' => self::template_js(),
+            'otherdata' => [
+                'contextid' => $data->contextid,
+                'token' => $data->token,
+                'uniqid' => $data->uniqid,
+            ] + $choice,
+        ];
+    }
+
+    /**
+     * Return the js for template
+     *
+     * @return string Javascript
+     */
+    public static function template_js(): string {
         if (get_config('block_deft', 'enableupdating')) {
-            $js = "
+            return "
                 var ws = new WebSocket('wss://deftly.us/ws'),
                     token = this.CONTENT_OTHERDATA.token;
 
@@ -119,29 +142,14 @@ class mobile {
 
                 ws.addEventListener('message', () => {
                     setTimeout(function() {
-                        if (navigator.onLine) {
+                        if (navigator.onLine && !document.querySelector('textarea:focus')) {
                             this.refreshContent(false);
                         }
                     }.bind(this));
                 });";
         } else {
-            $js = '';
+            return '';
         }
-
-        return [
-            'templates' => [
-                [
-                    'id' => 'main',
-                    'html' => '<div>'.$html.'</div>',
-                ],
-            ],
-            'javascript' => $js,
-            'otherdata' => [
-                'contextid' => $data->contextid,
-                'token' => $data->token,
-                'uniqid' => $data->uniqid,
-            ] + $choice,
-        ];
     }
 
     /**
@@ -184,13 +192,6 @@ class mobile {
             'task' => $task->get('id'),
         ];
 
-        if (get_config('block_deft', 'enableupdating')) {
-            $js = "(function(window){\n" .  file_get_contents(
-                $CFG->dirroot . '/blocks/deft/amd/build/mobile.min.js'
-            ) . "\n})(this);";
-        } else {
-            $js = '';
-        }
         $output = $PAGE->get_renderer('block_deft');
         $instancedata = (object) $instance->export_for_template($output);
 
@@ -201,7 +202,7 @@ class mobile {
                     'html' => $output->render_from_template('block_deft/mobile_comments', $data),
                 ],
             ],
-            'javascript' => $js,
+            'javascript' => self::template_js(),
             'otherdata' => [
                 'contextid' => $instancedata->contextid,
                 'token' => $instancedata->token,
