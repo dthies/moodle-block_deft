@@ -127,6 +127,7 @@ function xmldb_block_deft_upgrade($oldversion) {
         if (!$dbman->field_exists($table, $field)) {
             $dbman->add_field($table, $field);
         }
+
         // Deft savepoint reached.
         upgrade_block_savepoint(true, 2023042606, 'deft');
     }
