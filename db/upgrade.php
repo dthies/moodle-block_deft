@@ -132,5 +132,29 @@ function xmldb_block_deft_upgrade($oldversion) {
         upgrade_block_savepoint(true, 2023042908, 'deft');
     }
 
+    if ($oldversion < 2023042910) {
+
+        // Define field token to be added to block_deft_room.
+        $table = new xmldb_table('block_deft_room');
+        $field = new xmldb_field('token', XMLDB_TYPE_CHAR, '40', null, null, null, null, 'data');
+
+        // Conditionally launch add field token.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Define field uuid to be added to block_deft_peer.
+        $table = new xmldb_table('block_deft_peer');
+        $field = new xmldb_field('uuid', XMLDB_TYPE_CHAR, '40', null, null, null, null, 'type');
+
+        // Conditionally launch add field uuid.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Deft savepoint reached.
+        upgrade_block_savepoint(true, 2023042910, 'deft');
+    }
+
     return true;
 }

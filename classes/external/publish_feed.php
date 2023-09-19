@@ -48,7 +48,7 @@ class publish_feed extends external_api {
         return new external_function_parameters(
             [
                 'id' => new external_value(PARAM_INT, 'Peer id for user session'),
-                'publish' => new external_value(PARAM_BOOL, 'Whhether to publish or not', VALUE_DEFAULT, true),
+                'publish' => new external_value(PARAM_BOOL, 'Whether to publish or not', VALUE_DEFAULT, true),
                 'room' => new external_value(PARAM_INT, 'Room id being joined'),
             ]
         );

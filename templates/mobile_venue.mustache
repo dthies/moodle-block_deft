@@ -1,4 +1,5 @@
-{{!
+{{=<% %>=}}
+<%!
     This file is part of Moodle - http://moodle.org/
 
     Moodle is free software: you can redistribute it and/or modify
@@ -13,8 +14,8 @@
 
     You should have received a copy of the GNU General Public License
     along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
-}}
-{{!
+%>
+<%!
     @template block_deft/mobile_venue
 
     This template renders the view for the venue task
@@ -22,22 +23,88 @@
     Example context (json):
     {
         "name": "Welcome",
-        "content": "hello"
+        "intro": "hello",
+        "mute": true,
+        "task": 17
     }
-}}
-<div>
-    <h5>{{ name }}</h5>
-    {{# content }}
-        <div class="block_deft_venue p-3">{{{ content }}}</div>
-             <ion-button href="{{ url }}" data-open-in="browser" target="_blank" class="card-link m-0" data-action="join" title="{{# str }} join, block_deft {{/ str }}"><i class="icon fa fa-sign-in"></i>join</ion-button>
-            {{# active }}
-            <ion-button href="#" class="card-link m-0" data-action="close" title="{{# str }} close, block_deft {{/ str }}">{{# str }} close, block_deft {{/ str }}</ion-button>
-            {{^ mute }}
-                <ion-button href="#" class="card-link m-0" data-action="mute" title="{{# str }} mute, block_deft {{/ str }}">{{# str }} mute, block_deft {{/ str }}</ion-button>
-            {{/ mute }}
-            {{# mute }}
-                <ion-button href="#" class="card-link m-0 p-0 bg-warning rounded-circle" data-action="unmute" title="{{# str }} unmute, block_deft {{/ str }}">{{# str }} unmute, block_deft {{/ str }}</ion-button>
-            {{/ mute }}
-            {{/ active }}
-    {{/ content }}
-</div>
+%>
+<ion-list>
+    <ion-list-header>
+        <ion-label>
+            <% name %>
+        </ion-label>
+    </ion-list-header>
+    <%# intro %>
+        <ion-item>
+            <ion-label>
+                <core-format-text text="<% intro %>" component="block_deft" componentId="<% task %>"></core-format-text>
+            </ion-label>
+        </ion-item>
+    <%/ intro %>
+    <audio id="roomaudio" autoplay style="display: none;"></audio>
+    <ion-item>
+        <video id="roomvideo" autoplay style="width: 100%; display: none;"></video>
+    </ion-item>
+    <core-navbar-buttons slot="start">
+    <ion-button
+        class="card-link m-0"
+        core-site-plugins-call-ws
+        data-action="mute"
+        (onSuccess)="DeftVenue.switchMute(true);"
+        name="block_deft_venue_settings"
+        [params]="{mute: true, status: false, uuid: this.Device.uuid}"
+        [preSets]="{getFromCache: 0, saveToCache: 0}"
+        <%# mute %>
+            style="display: none;"
+        <%/ mute %>
+        title="{{ 'plugin.block_deft.mute' | translate }}"
+    >
+        <ion-icon name="mic-outline"></ion-icon>
+    </ion-button>
+    <ion-button
+        core-site-plugins-call-ws
+        class="card-link m-0 p-0 rounded-circle"
+        data-action="unmute"
+        (onSuccess)="DeftVenue.switchMute(false);"
+        name="block_deft_venue_settings"
+        [params]="{mute: false, status: false, uuid: this.Device.uuid}"
+        [preSets]="{getFromCache: 0, saveToCache: 0}"
+        <%^ mute %>
+            style="display: none;"
+        <%/ mute %>
+        title="{{ 'plugin.block_deft.unmute' | translate }}"
+    >
+        <ion-icon color="warning" name="mic-off-circle-outline"></ion-icon>
+    </ion-button>
+    </core-navbar-buttons>
+    <core-navbar-buttons slot="end">
+    <ion-button
+        class="card-link m-0"
+        data-action="raisehand"
+        core-site-plugins-call-ws
+        name="block_deft_raise_hand"
+        (onSuccess)="DeftVenue.raiseHand(true);"
+        [params]="{status: true, uuid: this.Device.uuid}"
+        [preSets]="{getFromCache: 0, saveToCache: 0}"
+        title="{{ 'plugin.block_deft.raisehand' | translate }}">
+        <ion-icon name="person-outline" data-role="mute"></ion-icon>
+    </ion-button>
+    <ion-button
+        class="card-link m-0"
+        core-site-plugins-call-ws
+        data-action="lowerhand"
+        name="block_deft_raise_hand"
+        (onSuccess)="DeftVenue.raiseHand(false);"
+        [preSets]="{getFromCache: 0, saveToCache: 0}"
+        style="display: none;"
+        [params]="{status: false, uuid: this.Device.uuid}"
+        [preSets]="{getFromCache: 0, saveToCache: 0}"
+        title="{{ 'plugin.block_deft.lowerhand' | translate }}"
+    >
+        <ion-icon color="success" name="hand-left-outline"></ion-icon>
+    </ion-button>
+    </core-navbar-buttons>
+    <ion-item>
+        <ion-list id="participants"> </ion-list>
+    </ion-item>
+</ion-list>

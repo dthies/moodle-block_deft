@@ -444,6 +444,8 @@ export default class VenueManager {
     handleMessage(peerid, e) {
         const message = JSON.parse(e.data);
         if (message.hasOwnProperty('raisehand')) {
+            Log.debug(peerid);
+            Log.debug(message);
             document.querySelectorAll('[data-peerid="' + peerid + '"] [data-action="raisehand"]').forEach(button => {
                 if (message.raisehand) {
                     button.classList.add('hidden');

@@ -45,6 +45,7 @@ class raise_hand extends external_api {
         return new external_function_parameters(
             [
                 'status' => new external_value(PARAM_BOOL, 'Whether hand should be raised'),
+                'uuid' => new external_value(PARAM_TEXT, 'Unique identifier for app users', VALUE_DEFAULT, ''),
             ]
         );
     }
@@ -52,26 +53,33 @@ class raise_hand extends external_api {
     /**
      * Log action
      *
-     * @param int $status Whether to raise hand
+     * @param bool $status Whether to raise hand
+     * @param string $uuid Device id for mobile app
      * @return array Status indicator
      */
-    public static function execute($status): array {
+    public static function execute($status, $uuid): array {
         global $DB, $SESSION;
 
         $params = self::validate_parameters(self::execute_parameters(), [
             'status' => $status,
+            'uuid' => $uuid,
         ]);
 
-        if (empty($SESSION->deft_session)) {
+        if (
+            (empty($SESSION->deft_session) || !$task = $DB->get_record_select(
+                'block_deft',
+                'id IN (SELECT taskid FROM {block_deft_peer} WHERE id = ? AND status = 0)',
+                [$SESSION->deft_session->peerid]
+            )) && (empty($uuid) || !$task = $DB->get_record_select(
+                'block_deft',
+                'id IN (SELECT taskid FROM {block_deft_peer} WHERE uuid = ? AND status = 0)',
+                [$uuid]
+            ))
+        ) {
             return [
                 'status' => false,
             ];
         }
-        $task = $DB->get_record_select(
-            'block_deft',
-            'id IN (SELECT taskid FROM {block_deft_peer} WHERE id = ?)',
-            [$SESSION->deft_session->peerid]
-        );
 
         $context = context_block::instance($task->instance);
         self::validate_context($context);

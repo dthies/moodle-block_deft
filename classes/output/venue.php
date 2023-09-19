@@ -86,9 +86,10 @@ class venue implements renderable, templatable {
             $peers = $DB->get_records_sql('
                 SELECT p.id AS peerid, p.mute, u.*
                   FROM {block_deft_peer} p
-                  JOIN {sessions} s ON p.sessionid = s.id
+             LEFT JOIN {sessions} s ON p.sessionid = s.id
                   JOIN {user} u ON p.userid = u.id
                  WHERE p.status = 0
+                       AND (s.id IS NOT NULL OR p.uuid IS NOT NULL)
                        AND p.taskid = ?',
                 [$this->task->id]
             );

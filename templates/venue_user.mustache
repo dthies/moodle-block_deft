@@ -46,12 +46,12 @@
                 <div class="card-text text-center">
                     <p class="p-0 m-0">
                         {{# manage }}
-                            <a href="#" class="card-link m-0" data-action="mute" title="{{# str }} mute, block_deft {{/ str }}"><i class="icon fa fa-microphone p-2 bg-secondary rounded-circle"></i></a>
+                            <a href="#" class="card-link m-0 {{# mute }} hidden {{/ mute }}" data-action="mute" title="{{# str }} mute, block_deft {{/ str }}"><i class="icon fa fa-microphone p-2 bg-secondary rounded-circle"></i></a>
                         {{/ manage }}
                         {{^ manage }}
-                            <span class="card-link m-0" data-action="mute" title="{{# str }} mute, block_deft {{/ str }}"><i class="icon fa fa-microphone p-2 rounded-circle"></i></span>
+                            <span class="card-link m-0 {{# mute }} hidden {{/ mute }}" data-action="mute" title="{{# str }} mute, block_deft {{/ str }}"><i class="icon fa fa-microphone p-2 rounded-circle"></i></span>
                         {{/ manage }}
-                        <span class="card-link hidden m-0" data-action="unmute" title="{{# str }} unmute, block_deft {{/ str }}"><i class="icon fa fa-microphone-slash p-2 bg-warning rounded-circle"></i></span>
+                        <span class="card-link {{^ mute }}hidden{{/ mute }} m-0" data-action="unmute" title="{{# str }} unmute, block_deft {{/ str }}"><i class="icon fa fa-microphone-slash p-2 bg-warning rounded-circle"></i></span>
                         <span class="card-link m-0" data-action="raisehand" title="{{# str }} raisehand, block_deft {{/ str }}"><i class="icon fa fa-hand-grab-o m-0 p-2 rounded-circle"></i></span><span class="card-link m-0 hidden" data-action="lowerhand" title="{{# str }} lowerhand, block_deft {{/ str }}"><i class="icon fa fa-hand-stop-o m-0 p-2 bg-success rounded-circle"></i></span>
                     </p>
                 </div>

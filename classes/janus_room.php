@@ -135,6 +135,7 @@ class janus_room {
         $this->roomid = $record->roomid ?? 0;
         $this->secret = $record->secret ?? '';
         $this->server = $record->server ?? '';
+        $this->token = $record->token ?? '';
         $this->session = new janus();
         $this->textroom = $this->session->attach('janus.plugin.textroom');
 
@@ -197,10 +198,8 @@ class janus_room {
         ));
 
         if (!$response) {
-            debugging('noresponse');
             return;
         } else if (empty($response->roomid)) {
-            debugging('noroomavailable');
             return;
         }
 
@@ -250,7 +249,16 @@ class janus_room {
      * Assign token for venue
      */
     protected function set_token() {
-        $this->token = $this->session->transaction_identifier();
+        global $DB;
+
+        if (empty($this->token)) {
+            $this->token = $this->session->transaction_identifier();
+
+            $DB->set_field('block_deft_room', 'token', $this->token, [
+                'roomid' => $this->roomid,
+            ]);
+        }
+
         $allow = [
             'request' => 'allowed',
             'room' => $this->roomid,
@@ -260,12 +268,10 @@ class janus_room {
         ];
         $response = $this->audiobridge_send($allow);
         if (!empty($response->plugindata->data->error)) {
-            debugging($response->plugindata->data->error);
             return;
         }
         $response = $this->videoroom_send($allow);
         if (!empty($response->plugindata->data->error)) {
-            debugging($response->plugindata->data->error);
             return;
         }
     }

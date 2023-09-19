@@ -1,4 +1,5 @@
-{{!
+{{=<% %>=}}
+<%!
     This file is part of Moodle - http://moodle.org/
 
     Moodle is free software: you can redistribute it and/or modify
@@ -13,8 +14,8 @@
 
     You should have received a copy of the GNU General Public License
     along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
-}}
-{{!
+%>
+<%!
     @template block_deft/mobile_view
 
     This template renders tasks in the content for the deft response block.
@@ -25,30 +26,40 @@
         "tasks": [
         ]
     }
-}}
-<div id="deft-view-{{uniqid}}"
+%>
+<div id="deft-view-<%uniqid%>"
     data-region="deft-view"
 >
     <div data-region="deft-view-content">
         <ion-list>
-        {{# tasks }}
-           <ion-item>
-           <div data-task="{{ id }}">
-               {{# choice }} {{> block_deft/mobile_choice }} {{/ choice }}
-               {{# comments }}
-                   <ion-label>
-                   <h5>{{ name }}</h5>
-                       <ion-button expand="block" color="light" core-site-plugins-new-content title="{{ label }}"
-                           component="block_deft" method="mobile_comments_view" [args]="{task: {{ id }}}">
-                           {{ label }} ({{ count }})
-                       </ion-button>
-                   </ion-label>
-               {{/ comments }}
-               {{# text }} {{> block_deft/mobile_text }} {{/ text }}
-               {{# venue }} {{> block_deft/mobile_venue }} {{/ venue }}
-           </div>
-           </ion-item>
-        {{/ tasks }}
+        <%# tasks %>
+            <ion-item>
+            <div data-task="<% id %>">
+                <%# choice %> <%> block_deft/mobile_choice %> <%/ choice %>
+                <%# comments %>
+                    <ion-label>
+                    <h5><% name %></h5>
+                        <ion-button expand="block" color="light" core-site-plugins-new-content title="<% label %>"
+                            component="block_deft" method="mobile_comments_view" [args]="{task: <% id %>}">
+                            <% label %> (<% count %>)
+                        </ion-button>
+                    </ion-label>
+                <%/ comments %>
+                <%# text %> <%> block_deft/mobile_text %> <%/ text %>
+                <%# venue %> 
+                    <ion-label><h5><% name %></h5></ion-label>
+                   <ion-button expand="block" core-site-plugins-new-content title="{{ 'plugin.block_deft.join' | translate }}"
+                       [args]="{task: <% id %>, uuid: this.Device.uuid}"
+                       component="block_deft"
+                       method="mobile_venue_view"
+                       [preSets]="{getFromCache: false, saveToCache: false, reusePending: false}"
+                   >
+                       {{ 'plugin.block_deft.join' | translate }} <% label %> (<% count %>)<ion-icon name="enter-outline" slot="start"></ion-icon>
+                   </ion-button>
+                <%/ venue %>
+            </div>
+            </ion-item>
+        <%/ tasks %>
         </ion-list>
     </div>
 </div>
