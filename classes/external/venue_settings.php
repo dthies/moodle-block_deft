@@ -47,6 +47,7 @@ class venue_settings extends external_api {
                 'mute' => new external_value(PARAM_BOOL, 'Whether audio should be muted'),
                 'status' => new external_value(PARAM_BOOL, 'Whether the connection should be closed'),
                 'peerid' => new external_value(PARAM_INT, 'Some other peer to change', VALUE_DEFAULT, 0),
+                'uuid' => new external_value(PARAM_TEXT, 'Unique identifier for app users', VALUE_DEFAULT, ''),
             ]
         );
     }
@@ -54,31 +55,37 @@ class venue_settings extends external_api {
     /**
      * Change settings
      *
-     * @param int $mute Whether to mute
-     * @param int $status Whether to close
+     * @param bool $mute Whether to mute
+     * @param bool $status Whether to close
      * @param int $peerid The id of a user's peer changed by manager
+     * @param string $uuid Device id for mobile app
      * @return array Status indicator
      */
-    public static function execute($mute, $status, $peerid): array {
+    public static function execute($mute, $status, $peerid, $uuid): array {
         global $DB, $SESSION;
 
         $params = self::validate_parameters(self::execute_parameters(), [
             'mute' => $mute,
             'status' => $status,
             'peerid' => $peerid,
+            'uuid' => $uuid,
         ]);
 
-        if (empty($SESSION->deft_session)) {
+        if (
+            (empty($SESSION->deft_session) || !$task = $DB->get_record_select(
+                'block_deft',
+                'id IN (SELECT taskid FROM {block_deft_peer} WHERE id = ?)',
+                [$SESSION->deft_session->peerid]
+            )) && (empty($uuid) || !$task = $DB->get_record_select(
+                'block_deft',
+                'id IN (SELECT taskid FROM {block_deft_peer} WHERE uuid = ?)',
+                [$uuid]
+            ))
+        ) {
             return [
                 'status' => false,
             ];
         }
-
-        $task = $DB->get_record_select(
-            'block_deft',
-            'id IN (SELECT taskid FROM {block_deft_peer} WHERE id = ?)',
-            [$peerid ?: $SESSION->deft_session->peerid]
-        );
 
         $context = context_block::instance($task->instance);
         self::validate_context($context);
@@ -89,8 +96,13 @@ class venue_settings extends external_api {
         if (!empty($peerid) && $peerid != $SESSION->deft_session->peerid) {
             require_capability('block/deft:moderate', $context);
             $relateduserid = $DB->get_field('block_deft_peer', 'userid', ['id' => $peerid]);
-        } else {
+        } else if (!empty($SESSION->deft_session->peerid)) {
             $peerid = $SESSION->deft_session->peerid;
+        } else if (!empty($uuid)) {
+            $peerid = $DB->get_field('block_deft_peer', 'id', [
+                'uuid' => $uuid,
+                'status' => false,
+            ]);
         }
 
         if ($record = $DB->get_record('block_deft_peer', [
@@ -121,6 +133,27 @@ class venue_settings extends external_api {
             'context' => $context,
             'objectid' => $task->id,
         ];
+
+        if ($status && $feed = $DB->get_record_sql("
+            SELECT f.*
+              FROM {block_deft_peer} f
+              JOIN {block_deft_peer} p ON p.sessionid = f.sessionid AND p.uuid = f.uuid
+             WHERE f.type = 'video' AND p.id = ?", [$peerid])) {
+            $feed->status = $status;
+            $feed->timemodified = time();
+            $DB->update_record('block_deft_peer', $feed);
+
+            if ($room = $DB->get_record('block_deft_room', [
+                'itemid' => $task->id,
+                'component' => 'block_deft',
+            ])) {
+                $data = json_decode($room->plugindata);
+                $data->feed = 0;
+                $room->plugindata = json_encode($data);
+                $room->timemodified = time();
+                $DB->update_record('block_deft_room', $feed);
+            }
+        }
 
         if ($status) {
             $event = \block_deft\event\venue_ended::create($params);

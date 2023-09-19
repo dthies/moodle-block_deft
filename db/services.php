@@ -79,4 +79,13 @@ $functions = [
         'ajax' => true,
         'services' => array(MOODLE_OFFICIAL_MOBILE_SERVICE),
     ],
+
+    'block_deft_get_participants' => [
+        'classname' => '\\block_deft\\external\\get_participants',
+        'methodname' => 'execute',
+        'description' => 'Get venue participants for mobile',
+        'type' => 'read',
+        'ajax' => true,
+        'services' => array(MOODLE_OFFICIAL_MOBILE_SERVICE),
+    ],
 ];

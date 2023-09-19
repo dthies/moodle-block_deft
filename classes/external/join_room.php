@@ -81,15 +81,10 @@ class join_room extends external_api {
             'feed' => $feed,
         ]);
 
-        if (empty($SESSION->deft_session)) {
-            return [
-                'status' => false,
-            ];
-        }
         $task = $DB->get_record_select(
             'block_deft',
-            'id IN (SELECT taskid FROM {block_deft_peer} WHERE id = ?)',
-            [$SESSION->deft_session->peerid]
+            'id IN (SELECT taskid FROM {block_deft_peer} WHERE id = ? AND status = 0)',
+            [$id]
         );
 
         $context = context_block::instance($task->instance);
@@ -100,12 +95,13 @@ class join_room extends external_api {
 
         $janus = new janus($session);
 
-        $token = $SESSION->deft_session->token;
+        $token = $DB->get_field('block_deft_room', 'token', [
+            'roomid' => $room,
+            'itemid' => $task->id,
+            'component' => 'block_deft',
+        ]);
 
         if ($plugin == 'janus.plugin.videoroom') {
-            if (empty($id)) {
-                $id = $janus->transaction_identifier();
-            }
             $message = [
                 'ptype' => $ptype ? 'publisher' : 'subscriber',
                 'request' => 'join',

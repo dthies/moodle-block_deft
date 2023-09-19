@@ -32,6 +32,7 @@ use renderable;
 use renderer_base;
 use stdClass;
 use templatable;
+use block_deft\janus_room;
 use block_deft\socket;
 use block_deft\task;
 use user_picture;
@@ -83,13 +84,14 @@ class venue_manager implements renderable, templatable {
             'topeer' => $peerid,
         ], 'id');
 
-        $this->sessions = $DB->get_records_sql('
+        $this->sessions = $DB->get_records_sql("
             SELECT p.id AS sessionid, u.*
                FROM {block_deft_peer} p
                JOIN {user} u ON u.id = p.userid
                JOIN {sessions} ss ON p.sessionid = ss.id
               WHERE p.taskid = :taskid
-                    AND p.status = 0', [
+                    AND p.type = 'venue'
+                    AND p.status = 0", [
             'taskid' => $this->task->get('id'),
         ]);
         unset($this->sessions[$peerid]);
@@ -347,14 +349,12 @@ class venue_manager implements renderable, templatable {
         }
 
         try {
-            $room = new \block_deft\janus_room($this->task);
+            $room = new janus_room($this->task);
         } catch (moodle_exception $e) {
             return [0, '', ''];
         }
 
         $token = $room->get_token();
-
-        $SESSION->deft_session->token = $token;
 
         return [$room->get_roomid(), $room->get_token(), $room->get_server()];
     }

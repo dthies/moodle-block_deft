@@ -25,8 +25,8 @@
 defined('MOODLE_INTERNAL') || die();
 
 $plugin->component = 'block_deft';
-$plugin->release = '1.2.3';
-$plugin->version = 2023042606;
+$plugin->release = '1.2.4';
+$plugin->version = 2023042607;
 $plugin->incompatible = 402;
 $plugin->requires = 2021051700;
 $plugin->maturity = MATURITY_STABLE;

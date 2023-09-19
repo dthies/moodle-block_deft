@@ -144,6 +144,7 @@ function block_deft_output_fragment_venue($args) {
     return $OUTPUT->render_from_template('block_deft/venue_user', [
         'peerid' => $peerid,
         'user' => $user,
+        'mute' => $peer->mute,
     ]);
 }
 
