@@ -94,9 +94,14 @@ class comments extends text {
                        AND cmt.commentarea = 'task'
                        $restrictions
               ORDER BY cmt.timecreated ASC",
-                array_merge($contextparams, [CONTEXT_BLOCK, CONTEXT_MODULE, CONTEXT_COURSE,
-                    $modifiedfrom, $this->get_block_name(), CONTEXT_COURSE, 'course-view-%'],
-                $restrictionparams));
+                array_merge($contextparams, [
+                    CONTEXT_BLOCK, CONTEXT_MODULE, CONTEXT_COURSE,
+                    $modifiedfrom,
+                    $this->get_block_name(),
+                    CONTEXT_COURSE,
+                    'course-view-%',
+                ], $restrictionparams)
+        );
     }
 
     /**
@@ -122,7 +127,7 @@ class comments extends text {
      * @param array     $options Options for document creation
      * @return \core_search\document
      */
-    public function get_document($record, $options = array()) {
+    public function get_document($record, $options = []) {
         // Get stdclass object with data from DB.
         $data = json_decode($record->configdata);
 
@@ -148,7 +153,8 @@ class comments extends text {
         return [
             "JOIN {block_deft} bd ON bd.instance = bi.id
              JOIN {comments} cmt ON cmt.itemid = bd.id AND cmt.commentarea = 'task' AND cmt.component = 'block_deft'",
-            'MAX(bd.timemodified, cmt.timecreated) DESC'];
+            'MAX(bd.timemodified, cmt.timecreated) DESC',
+        ];
     }
 
     /**

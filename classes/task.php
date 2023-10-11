@@ -52,7 +52,7 @@ class task extends persistent {
     protected static function define_properties() {
         return [
             'instance' => [
-                'type' => PARAM_INT
+                'type' => PARAM_INT,
             ],
             'type' => [
                 'type' => PARAM_ALPHA,

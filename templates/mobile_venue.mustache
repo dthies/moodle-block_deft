@@ -63,6 +63,7 @@
     </ion-button>
     <ion-button
         core-site-plugins-call-ws
+        successMessage="{{ 'plugin.block_deft.microphoneon' | translate }}"
         class="card-link m-0 p-0 rounded-circle"
         data-action="unmute"
         (onSuccess)="DeftVenue.switchMute(false);"
@@ -87,7 +88,7 @@
         [params]="{status: true, uuid: this.Device.uuid}"
         [preSets]="{getFromCache: 0, saveToCache: 0}"
         title="{{ 'plugin.block_deft.raisehand' | translate }}">
-        <ion-icon name="person-outline" data-role="mute"></ion-icon>
+        <ion-icon name="hand-left-outline" data-role="mute"></ion-icon>
     </ion-button>
     <ion-button
         class="card-link m-0"
@@ -101,10 +102,37 @@
         [preSets]="{getFromCache: 0, saveToCache: 0}"
         title="{{ 'plugin.block_deft.lowerhand' | translate }}"
     >
-        <ion-icon color="success" name="hand-left-outline"></ion-icon>
+        <ion-icon color="success" name="hand-left"></ion-icon>
+    </ion-button>
+    <ion-button
+        data-action="pause"
+        title="{{ 'plugin.block_deft.lowerhand' | translate }}"
+    >
+        <ion-icon color="success" name="pause-outline"></ion-icon>
+    </ion-button>
+    <ion-button
+        data-action="start"
+        style="display: none;"
+        title="{{ 'plugin.block_deft.lowerhand' | translate }}"
+    >
+        <ion-icon color="danger" name="desktop-outline"></ion-icon>
     </ion-button>
     </core-navbar-buttons>
     <ion-item>
-        <ion-list id="participants"> </ion-list>
+        <ion-chip color="light" slot="start">
+            <ion-icon name="people-outline"></ion-icon>
+            <ion-label id="guests">1</ion-label>
+        </ion-chip>
+        <ion-label>
+            {{ 'plugin.block_deft.guests' | translate }}
+        </ion-label>
+        <ion-chip color="success" style="opacity: 0;" slot="end">
+            <ion-icon name="hand-left-outline"></ion-icon>
+            <ion-label id="hands">0</ion-label>
+        </ion-chip>
+    </ion-item>
+    <ion-item>
+        <ion-list id="participants">
+        </ion-list>
     </ion-item>
 </ion-list>

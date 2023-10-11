@@ -80,7 +80,7 @@ class configuration implements renderable, templatable {
         ];
         $jwt = lti_sign_jwt($requestparams, $endpoint, 'none');
         $requestparams = array_merge($requestparams, $jwt);
-        $query = html_entity_decode(http_build_query($requestparams));
+        $query = html_entity_decode(http_build_query($requestparams), ENT_QUOTES | ENT_SUBSTITUTE | ENT_HTML401);
 
         if (!$response = file_get_contents($endpoint . '?' . $query)) {
             throw new moodle_exception('serverinaccessible', 'block_deft');
@@ -117,7 +117,7 @@ class configuration implements renderable, templatable {
             ];
             $jwt = lti_sign_jwt($requestparams, $endpoint, 'none');
             $requestparams = array_merge($requestparams, $jwt);
-            $query = html_entity_decode(http_build_query($requestparams));
+            $query = html_entity_decode(http_build_query($requestparams), ENT_QUOTES | ENT_SUBSTITUTE | ENT_HTML401);
 
             $response = file_get_contents($endpoint . '?' . $query);
 

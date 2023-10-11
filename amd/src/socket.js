@@ -38,7 +38,7 @@ export class Socket {
             this.websocket.send(token);
             this.listeners.forEach((callback) => {
                 this.websocket.addEventListener('message', callback);
-                callback(e);
+                callback.apply(this, [e]);
             });
         };
 

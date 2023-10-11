@@ -307,7 +307,7 @@ function block_deft_pre_user_delete($user) {
  * @return bool
  * @todo MDL-36050 improve capability check on stick blocks, so we can check user capability before sending images.
  */
-function block_deft_pluginfile($course, $birecordorcm, $context, $filearea, $args, $forcedownload, array $options=array()) {
+function block_deft_pluginfile($course, $birecordorcm, $context, $filearea, $args, $forcedownload, array $options = []) {
     global $DB, $CFG, $USER;
 
     if ($context->contextlevel != CONTEXT_BLOCK) {

@@ -49,7 +49,7 @@ if ($parentcontext->contextlevel == CONTEXT_MODULE) {
 
 require_capability('block/deft:joinvenue', $context);
 
-$urlparams = array('task' => $taskid);
+$urlparams = ['task' => $taskid];
 $baseurl = new moodle_url('/blocks/deft/venue.php', $urlparams);
 $PAGE->set_url($baseurl);
 $PAGE->set_pagelayout('popup');

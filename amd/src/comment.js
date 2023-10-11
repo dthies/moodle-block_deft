@@ -20,51 +20,53 @@ export default {
      * @param {object} refresh Interface to update content
      */
     init: function(contextid, selector, refresh) {
-        document.querySelector(selector).addEventListener('click', (e) => {
-            const button = e.target.closest('[data-type="comments"] [data-action]');
-            if (button) {
-                let modalForm;
-                e.preventDefault();
-                e.stopPropagation();
-                switch (button.getAttribute('data-action')) {
-                    case 'addcomment':
-                        modalForm = new ModalForm({
-                            formClass: "block_deft\\form\\add_comment",
-                            args: {
-                                contextid: contextid,
-                                id: button.closest('[data-task]').getAttribute('data-task')
-                            },
-                            modalConfig: {
-                                title: getString('addcomment')
-                            }
-                        });
-                        break;
-                    case 'delete':
-                        modalForm = new ModalForm({
-                            formClass: "block_deft\\form\\delete_comment",
-                            args: {
-                                commentid: button.closest('[data-comment]').getAttribute('data-comment'),
-                                contextid: contextid,
-                                id: button.closest('[data-task]').getAttribute('data-task')
-                            },
-                            modalConfig: {
-                                title: getString('confirm')
-                            }
-                        });
-                        break;
-                    case 'collapse':
-                        button.closest('[data-modified]').setAttribute('data-modified', 0);
-                        button.closest('[data-type]').querySelector('.block_deft_comments').classList.remove('expanded');
-                        refresh.update();
-                        return;
-                    case 'expand':
-                        button.closest('[data-modified]').setAttribute('data-modified', 0);
-                        button.closest('[data-type]').querySelector('.block_deft_comments').classList.add('expanded');
-                        refresh.update();
-                        return;
+        document.querySelectorAll(selector).forEach(block => {
+            block.addEventListener('click', (e) => {
+                const button = e.target.closest('[data-type="comments"] [data-action]');
+                if (button) {
+                    let modalForm;
+                    e.preventDefault();
+                    e.stopPropagation();
+                    switch (button.getAttribute('data-action')) {
+                        case 'addcomment':
+                            modalForm = new ModalForm({
+                                formClass: "block_deft\\form\\add_comment",
+                                args: {
+                                    contextid: contextid,
+                                    id: button.closest('[data-task]').getAttribute('data-task')
+                                },
+                                modalConfig: {
+                                    title: getString('addcomment')
+                                }
+                            });
+                            break;
+                        case 'delete':
+                            modalForm = new ModalForm({
+                                formClass: "block_deft\\form\\delete_comment",
+                                args: {
+                                    commentid: button.closest('[data-comment]').getAttribute('data-comment'),
+                                    contextid: contextid,
+                                    id: button.closest('[data-task]').getAttribute('data-task')
+                                },
+                                modalConfig: {
+                                    title: getString('confirm')
+                                }
+                            });
+                            break;
+                        case 'collapse':
+                            button.closest('[data-modified]').setAttribute('data-modified', 0);
+                            button.closest('[data-type]').querySelector('.block_deft_comments').classList.remove('expanded');
+                            refresh.update();
+                            return;
+                        case 'expand':
+                            button.closest('[data-modified]').setAttribute('data-modified', 0);
+                            button.closest('[data-type]').querySelector('.block_deft_comments').classList.add('expanded');
+                            refresh.update();
+                            return;
+                    }
+                    modalForm.show();
                 }
-                modalForm.show();
-            }
+            });
         });
     }
 };

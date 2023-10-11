@@ -87,8 +87,10 @@ class summary extends text implements renderable, templatable {
             $chart->set_labels([' ']);
         }
 
-        $colorset = ['#f3c300', '#875692', '#f38400', '#a1caf1', '#be0032', '#c2b280', '#7f180d', '#008856',
-            '#e68fac', '#0067a5'];
+        $colorset = [
+            '#f3c300', '#875692', '#f38400', '#a1caf1', '#be0032', '#c2b280',
+            '#7f180d', '#008856', '#e68fac', '#0067a5',
+        ];
         $results = $this->results['responses'];
         $max = max(array_column($this->results['responses'], 'count'));
         $total = array_sum(array_column($this->results['responses'], 'count'));

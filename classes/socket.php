@@ -93,7 +93,7 @@ class socket {
     public function dispatch(): ?stdClass {
 
         return $this->execute([
-            'action' => 'update'
+            'action' => 'update',
         ]);
     }
 
@@ -124,7 +124,7 @@ class socket {
 
         $requestparams = array_merge($requestparams, $jwt);
 
-        $query = html_entity_decode(http_build_query($requestparams));
+        $query = html_entity_decode(http_build_query($requestparams), ENT_QUOTES | ENT_SUBSTITUTE | ENT_HTML401);
 
         return json_decode(file_get_contents(
             self::ENDPOINT . '?' . $query

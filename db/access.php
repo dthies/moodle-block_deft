@@ -76,7 +76,7 @@ $capabilities = [
         'archetypes' => [
             'student' => CAP_ALLOW,
             'teacher' => CAP_ALLOW,
-            'editingteacher' => CAP_ALLOW
+            'editingteacher' => CAP_ALLOW,
         ],
         'clonepermissionsfrom' => 'mod/choice:choose',
     ],
@@ -87,7 +87,7 @@ $capabilities = [
         'archetypes' => [
             'student' => CAP_ALLOW,
             'teacher' => CAP_ALLOW,
-            'editingteacher' => CAP_ALLOW
+            'editingteacher' => CAP_ALLOW,
         ],
         'clonepermissionsfrom' => 'mod/chat:chat',
     ],
@@ -97,7 +97,7 @@ $capabilities = [
         'contextlevel' => CONTEXT_BLOCK,
         'archetypes' => [
             'teacher' => CAP_ALLOW,
-            'editingteacher' => CAP_ALLOW
+            'editingteacher' => CAP_ALLOW,
         ],
     ],
 
@@ -106,7 +106,7 @@ $capabilities = [
         'contextlevel' => CONTEXT_BLOCK,
         'archetypes' => [
             'teacher' => CAP_ALLOW,
-            'editingteacher' => CAP_ALLOW
+            'editingteacher' => CAP_ALLOW,
         ],
     ],
 ];

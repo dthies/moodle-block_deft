@@ -87,7 +87,7 @@ class provider implements
                    AND userid = :userid";
         $params = [
             'component' => 'block_deft',
-            'userid' => $userid
+            'userid' => $userid,
         ];
 
         $contextlist->add_from_sql($sql, $params);
@@ -100,7 +100,7 @@ class provider implements
                    AND userid = :userid";
         $params = [
             'contextlevel' => CONTEXT_BLOCK,
-            'userid' => $userid
+            'userid' => $userid,
         ];
 
         $contextlist->add_from_sql($sql, $params);

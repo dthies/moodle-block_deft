@@ -239,6 +239,9 @@ export default class Subscribe extends Publish {
     }
 
     attachVideo(videoStream) {
+        document.querySelectorAll('[data-region="deft-venue"] video').forEach(video => {
+            video.classList.remove('hidden');
+        });
         Janus.attachMediaStream(
             this.remoteVideo || document.getElementById('deft_venue_remote_video'),
             videoStream

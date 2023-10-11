@@ -50,7 +50,7 @@ if (!$managetasks) {
     require_capability('block/deft:manage', $context);
 }
 
-$urlparams = array('id' => $id);
+$urlparams = ['id' => $id];
 $extraparams = '';
 if ($returnurl) {
     $urlparams['returnurl'] = $returnurl;
