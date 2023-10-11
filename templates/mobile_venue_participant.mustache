@@ -16,6 +16,7 @@
     along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 %>
 <%!
+{{!
     @template block_deft/mobile_venue_participant
 
     This template renders the view for the venue task
@@ -25,9 +26,10 @@
         "pictureurl": "https://secure.gravatar.com/avatar/a364748976a89aebc69cba6f1736bbe2?s=36&d=mm",
         "fullname": "Daniel Thies"
     }
+}}
 %>
 <ion-avatar slot="start">
-    <img src="<% pictureurl %>" />
+    <img src="<% pictureurl %>" alt="<% fullname %>">
 </ion-avatar>
 <ion-label>
     <% fullname %>
