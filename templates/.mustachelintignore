@@ -1,1 +1,4 @@
 mobile_comments.mustache
+mobile_venue.mustache
+mobile_venue_participants.mustache
+mobile_view.mustache

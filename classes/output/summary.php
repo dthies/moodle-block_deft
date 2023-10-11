@@ -97,16 +97,18 @@ class summary extends text implements renderable, templatable {
         $i = 0;
         $sum = 0;
         $height = (count($results) * 50 + 10);
-        foreach ($results as $result) {
-            $result->height = $result->count / $max * $height;
-            $result->fill = $colorset[$i % count($colorset)];
-            $result->x = $i++ * 50 + 10;
-            $result->y = $height + 40 - $result->height;
-            $result->sum = $sum;
-            $result->px = 90 + 45 * sin(2 * pi() * $sum / $total);
-            $result->py = 60 - 45 * cos(2 * pi() * $sum / $total);
-            $result->path = (int) ($sum < $total / 2);
-            $sum += $result->count;
+        if ($max) {
+            foreach ($results as $result) {
+                $result->height = $result->count / $max * $height;
+                $result->fill = $colorset[$i % count($colorset)];
+                $result->x = $i++ * 50 + 10;
+                $result->y = $height + 40 - $result->height;
+                $result->sum = $sum;
+                $result->px = 90 + 45 * sin(2 * pi() * $sum / $total);
+                $result->py = 60 - 45 * cos(2 * pi() * $sum / $total);
+                $result->path = (int) ($sum < $total / 2);
+                $sum += $result->count;
+            }
         }
         return [
             'chart' => $output->render_chart($chart, false),
