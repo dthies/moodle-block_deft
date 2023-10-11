@@ -95,7 +95,7 @@ class delete_comment extends add_comment {
             !empty((int) $this->_ajaxformdata['id'])
             && $task = $this->get_task($this->_ajaxformdata['id'])
         ) {
-            $comment = $DB->get_record('comments', array('id' => $this->_ajaxformdata['commentid']), '*', MUST_EXIST);
+            $comment = $DB->get_record('comments', ['id' => $this->_ajaxformdata['commentid']], '*', MUST_EXIST);
             $configdata = (array) $task->get_config();
             $mform->setDefault('id', $task->get('id'));
             $mform->setDefault('contextid', $this->get_context_for_dynamic_submission()->id);

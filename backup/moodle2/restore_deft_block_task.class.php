@@ -59,7 +59,7 @@ class restore_deft_block_task extends restore_block_task {
      * @return array.
      */
     public function get_fileareas() {
-        return array();
+        return [];
     }
 
     /**
@@ -68,7 +68,7 @@ class restore_deft_block_task extends restore_block_task {
      * @return array;
      */
     public function get_configdata_encoded_attributes() {
-        return array();
+        return [];
     }
 
     /**
@@ -77,7 +77,7 @@ class restore_deft_block_task extends restore_block_task {
      * @return array.
      */
     public static function define_decode_contents() {
-        $contents = array();
+        $contents = [];
 
         // Define the contents.
 
@@ -90,7 +90,7 @@ class restore_deft_block_task extends restore_block_task {
      * @return array.
      */
     public static function define_decode_rules() {
-        $rules = array();
+        $rules = [];
 
         // Define the rules, if any.
 

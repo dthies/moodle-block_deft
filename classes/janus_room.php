@@ -105,7 +105,10 @@ class janus_room {
     public function __construct (task $task) {
         global $DB, $USER;
 
-        if (!get_config('block_deft', 'enablebridge')) {
+        if (
+            !get_config('block_deft', 'enablebridge')
+            || ($task->get_config()->connection !== 'mixed')
+        ) {
             return;
         }
 
@@ -191,7 +194,7 @@ class janus_room {
 
         $requestparams = array_merge($requestparams, $jwt);
 
-        $query = html_entity_decode(http_build_query($requestparams));
+        $query = html_entity_decode(http_build_query($requestparams), ENT_QUOTES | ENT_SUBSTITUTE | ENT_HTML401);
 
         $response = json_decode(file_get_contents(
             self::ENDPOINT . '?' . $query
@@ -370,5 +373,17 @@ class janus_room {
             $record->usermodified = $USER->id;
             $DB->update_record('block_deft_room', $record);
         }
+    }
+
+    /**
+     * Query server for participants
+     *
+     * @return stdClass
+     */
+    public function list_participants() {
+        return $this->audiobridge_send([
+            'request' => 'listparticipants',
+            'room' => $this->roomid,
+        ]);
     }
 }

@@ -132,7 +132,7 @@ function xmldb_block_deft_upgrade($oldversion) {
         upgrade_block_savepoint(true, 2023042606, 'deft');
     }
 
-    if ($oldversion < 2023042607) {
+    if ($oldversion < 2023042609) {
 
         // Define field token to be added to block_deft_room.
         $table = new xmldb_table('block_deft_room');
@@ -142,6 +142,27 @@ function xmldb_block_deft_upgrade($oldversion) {
         if (!$dbman->field_exists($table, $field)) {
             $dbman->add_field($table, $field);
         }
+
+        // Define key sessionid (foreign) to be dropped form block_deft_peer.
+        $table = new xmldb_table('block_deft_peer');
+        $key = new xmldb_key('sessionid', XMLDB_KEY_FOREIGN, ['sessionid'], 'sessions', ['id']);
+
+        // Launch drop key sessionid.
+        $dbman->drop_key($table, $key);
+
+        // Changing nullability of field sessionid on table block_deft_peer to null.
+        $table = new xmldb_table('block_deft_peer');
+        $field = new xmldb_field('sessionid', XMLDB_TYPE_INTEGER, '10', null, null, null, null, 'taskid');
+
+        // Launch change of nullability for field sessionid.
+        $dbman->change_field_notnull($table, $field);
+
+        // Define key sessionid (foreign) to be added to block_deft_peer.
+        $table = new xmldb_table('block_deft_peer');
+        $key = new xmldb_key('sessionid', XMLDB_KEY_FOREIGN, ['sessionid'], 'sessions', ['id']);
+
+        // Launch add key sessionid.
+        $dbman->add_key($table, $key);
 
         // Define field uuid to be added to block_deft_peer.
         $table = new xmldb_table('block_deft_peer');
@@ -153,7 +174,7 @@ function xmldb_block_deft_upgrade($oldversion) {
         }
 
         // Deft savepoint reached.
-        upgrade_block_savepoint(true, 2023042607, 'deft');
+        upgrade_block_savepoint(true, 2023042609, 'deft');
     }
 
     return true;

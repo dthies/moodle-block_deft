@@ -32,7 +32,7 @@ $functions = [
         'description' => 'Regiter entry in Janus room',
         'type' => 'write',
         'ajax' => true,
-        'services' => array(MOODLE_OFFICIAL_MOBILE_SERVICE),
+        'services' => [MOODLE_OFFICIAL_MOBILE_SERVICE],
     ],
 
     'block_deft_publish_feed' => [
@@ -41,7 +41,7 @@ $functions = [
         'description' => 'Offer video feed',
         'type' => 'write',
         'ajax' => true,
-        'services' => array(MOODLE_OFFICIAL_MOBILE_SERVICE),
+        'services' => [MOODLE_OFFICIAL_MOBILE_SERVICE],
     ],
 
     'block_deft_renew_token' => [
@@ -50,7 +50,7 @@ $functions = [
         'description' => 'Get new token to access message service',
         'type' => 'read',
         'ajax' => true,
-        'services' => array(MOODLE_OFFICIAL_MOBILE_SERVICE),
+        'services' => [MOODLE_OFFICIAL_MOBILE_SERVICE],
     ],
 
     'block_deft_send_signal' => [
@@ -59,7 +59,7 @@ $functions = [
         'description' => 'Send WebRTC signal to peer',
         'type' => 'write',
         'ajax' => true,
-        'services' => array(MOODLE_OFFICIAL_MOBILE_SERVICE),
+        'services' => [MOODLE_OFFICIAL_MOBILE_SERVICE],
     ],
 
     'block_deft_venue_settings' => [
@@ -68,7 +68,7 @@ $functions = [
         'description' => 'Modify WebRTC settigs',
         'type' => 'write',
         'ajax' => true,
-        'services' => array(MOODLE_OFFICIAL_MOBILE_SERVICE),
+        'services' => [MOODLE_OFFICIAL_MOBILE_SERVICE],
     ],
 
     'block_deft_raise_hand' => [
@@ -77,7 +77,7 @@ $functions = [
         'description' => 'Log hand raising action',
         'type' => 'write',
         'ajax' => true,
-        'services' => array(MOODLE_OFFICIAL_MOBILE_SERVICE),
+        'services' => [MOODLE_OFFICIAL_MOBILE_SERVICE],
     ],
 
     'block_deft_get_participants' => [
@@ -86,6 +86,6 @@ $functions = [
         'description' => 'Get venue participants for mobile',
         'type' => 'read',
         'ajax' => true,
-        'services' => array(MOODLE_OFFICIAL_MOBILE_SERVICE),
+        'services' => [MOODLE_OFFICIAL_MOBILE_SERVICE],
     ],
 ];

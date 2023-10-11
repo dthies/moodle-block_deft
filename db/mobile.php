@@ -44,8 +44,10 @@ $addons = [
             ['close', 'block_deft'],
             ['count', 'block_deft'],
             ['delete', 'moodle'],
+            ['guests', 'block_deft'],
             ['join', 'block_deft'],
             ['lowerhand', 'block_deft'],
+            ['microphoneon', 'block_deft'],
             ['mute', 'block_deft'],
             ['post', 'moodle'],
             ['raisehand', 'block_deft'],
@@ -53,6 +55,5 @@ $addons = [
             ['select', 'moodle'],
             ['unmute', 'block_deft'],
         ],
-        'version' => 2,
     ],
 ];

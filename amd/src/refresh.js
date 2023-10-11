@@ -26,15 +26,18 @@ export default class {
         if (!token) {
             return;
         }
+
+        const socket = new Socket(contextid, token);
+
+        socket.subscribe(() => {
+            this.update();
+        });
+
         this.contextid = contextid;
         this.selector = selector;
         this.throttle = throttle;
         this.throttled = false;
         this.lastupdate = 0;
-        let socket = new Socket(contextid, token);
-        socket.subscribe(() => {
-            this.update();
-        });
     }
 
     /**
@@ -42,58 +45,60 @@ export default class {
      *
      */
     update() {
-        let content = document.querySelector(this.selector).parentNode,
-            component = content.closest('[data-component]')
-                && content.closest('[data-component]').getAttribute('data-component')
-                || 'block_deft',
-            data = {};
-        if (!content) {
-            return;
-        }
+        if (document.querySelector(this.selector)) {
+            let content = document.querySelector(this.selector).parentNode,
+                component = content.closest('[data-component]')
+                    && content.closest('[data-component]').getAttribute('data-component')
+                    || 'block_deft',
+                data = {};
+            if (!content) {
+                return;
+            }
 
-        if (
-            (this.lastupdate + this.throttle > Date.now())
-            || (document.activeElement.closest(this.selector) && document.activeElement.closest('select'))
-        ) {
             if (
-                !this.throttled
-                || (this.lastupdate + this.throttle < Date.now())
+                (this.lastupdate + this.throttle > Date.now())
+                || (document.activeElement.closest(this.selector) && document.activeElement.closest('select'))
             ) {
-                setTimeout(() => {
-                    this.update();
-                }, Math.max(this.lastupdate + this.throttle - Date.now(), 40));
-                this.throttled = true;
+                if (
+                    !this.throttled
+                    || (this.lastupdate + this.throttle < Date.now())
+                ) {
+                    setTimeout(() => {
+                        this.update();
+                    }, Math.max(this.lastupdate + this.throttle - Date.now(), 40));
+                    this.throttled = true;
+                }
+
+                return;
             }
 
-            return;
+            document.querySelector(this.selector)
+                .querySelectorAll('[data-type="comments"] .block_deft_comments.expanded')
+                .forEach((opencomments) => {
+                    data.opencomments = data.opencomments || [];
+                    data.opencomments.push(opencomments.closest('[data-task]').getAttribute('data-task'));
+                });
+
+            if (document.querySelector(this.selector).closest('[data-modified]')) {
+                data.lastmodified = document.querySelector(this.selector).closest('[data-modified]').getAttribute('data-modified');
+            }
+
+            Fragment.loadFragment(
+                component,
+                'content',
+                this.contextid,
+                {
+                    jsondata: JSON.stringify(data)
+                }
+            ).done((html, js) => {
+                if (html) {
+                    this.replace(content, html, js);
+                }
+            }).catch(Log.debug);
+
+            this.throttled = false;
+            this.lastupdate = Date.now();
         }
-
-        document.querySelector(this.selector)
-            .querySelectorAll('[data-type="comments"] .block_deft_comments.expanded')
-            .forEach((opencomments) => {
-                data.opencomments = data.opencomments || [];
-                data.opencomments.push(opencomments.closest('[data-task]').getAttribute('data-task'));
-            });
-
-        if (document.querySelector(this.selector).closest('[data-modified]')) {
-            data.lastmodified = document.querySelector(this.selector).closest('[data-modified]').getAttribute('data-modified');
-        }
-
-        Fragment.loadFragment(
-            component,
-            'content',
-            this.contextid,
-            {
-                jsondata: JSON.stringify(data)
-            }
-        ).done((html, js) => {
-            if (html) {
-                this.replace(content, html, js);
-            }
-        }).catch(Log.debug);
-
-        this.throttled = false;
-        this.lastupdate = Date.now();
     }
 
     /**

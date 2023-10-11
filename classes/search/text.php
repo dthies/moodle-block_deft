@@ -91,9 +91,11 @@ class text extends \core_search\base_block {
                        AND bd.type = 'text'
                        $restrictions
               ORDER BY bd.timemodified ASC",
-                array_merge($contextparams, [CONTEXT_BLOCK, CONTEXT_MODULE, CONTEXT_COURSE,
-                    $modifiedfrom, $this->get_block_name(), CONTEXT_COURSE, 'course-view-%'],
-                $restrictionparams));
+                array_merge($contextparams, [
+                    CONTEXT_BLOCK, CONTEXT_MODULE, CONTEXT_COURSE,
+                    $modifiedfrom, $this->get_block_name(), CONTEXT_COURSE, 'course-view-%',
+                ], $restrictionparams)
+        );
     }
 
     /**
@@ -119,7 +121,7 @@ class text extends \core_search\base_block {
      * @param array     $options Options for document creation
      * @return \core_search\document
      */
-    public function get_document($record, $options = array()) {
+    public function get_document($record, $options = []) {
         // Create empty document.
         $doc = \core_search\document_factory::instance($record->id,
                 $this->componentname, $this->areaname);

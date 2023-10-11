@@ -16,7 +16,7 @@
 
 namespace block_deft\event;
 
-use \core\event\base;
+use core\event\base;
 
 /**
  * The video ended event

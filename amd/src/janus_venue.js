@@ -454,9 +454,6 @@ export default class JanusManager extends VenueManager {
                 }
                 if (response.peers.includes(Number(response.feed))) {
                     this.subscribeTo(response.feed);
-                    document.querySelectorAll('[data-region="deft-venue"] video').forEach(video => {
-                        video.classList.remove('hidden');
-                    });
                 } else {
                     this.subscribeTo(0);
                     document.querySelectorAll('[data-region="deft-venue"] video').forEach(video => {
@@ -533,6 +530,11 @@ export default class JanusManager extends VenueManager {
                     video.classList.add('hidden');
                 });
             } else if (source && !this.remoteFeed.current) {
+                document.querySelectorAll(
+                    '[data-region="deft-venue"] video'
+                ).forEach(video => {
+                    video.classList.remove('hidden');
+                });
                 delete update.unsubscribe;
             }
 

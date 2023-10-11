@@ -30,11 +30,12 @@
 <div id="deft-view-<%uniqid%>"
     data-region="deft-view"
 >
+<ion-label><h5><% title %></h5></ion-label>
     <div data-region="deft-view-content">
         <ion-list>
         <%# tasks %>
-            <ion-item>
-            <div data-task="<% id %>">
+            <ion-item data-task="<% id %>">
+            <ion-label>
                 <%# choice %> <%> block_deft/mobile_choice %> <%/ choice %>
                 <%# comments %>
                     <ion-label>
@@ -46,18 +47,29 @@
                     </ion-label>
                 <%/ comments %>
                 <%# text %> <%> block_deft/mobile_text %> <%/ text %>
-                <%# venue %> 
+                <%# venue %>
                     <ion-label><h5><% name %></h5></ion-label>
-                   <ion-button expand="block" core-site-plugins-new-content title="{{ 'plugin.block_deft.join' | translate }}"
-                       [args]="{task: <% id %>, uuid: this.Device.uuid}"
-                       component="block_deft"
-                       method="mobile_venue_view"
-                       [preSets]="{getFromCache: false, saveToCache: false, reusePending: false}"
-                   >
-                       {{ 'plugin.block_deft.join' | translate }} <% label %> (<% count %>)<ion-icon name="enter-outline" slot="start"></ion-icon>
-                   </ion-button>
+                    <%# mixed %>
+                    <ion-button expand="block" core-site-plugins-new-content title="<% name %>"
+                        [args]="{task: <% id %>, uuid: this.Device.uuid}"
+                        component="block_deft"
+                        method="mobile_venue_view"
+                        [preSets]="{getFromCache: false, saveToCache: false, reusePending: false}"
+                    >
+                        <ion-label>
+                        {{ 'plugin.block_deft.join' | translate }} (<% count %>)
+                        </ion-label>
+                        <ion-icon name="enter-outline" slot="start"></ion-icon>
+                    </ion-button>
+                    <%/ mixed %>
+                    <%^ mixed %>
+                    <ion-button expand="block" href="<% url %>" data-open-in="browser" target="_blank" class="card-link m-0" data-action="join" title="{{ 'plugin.block_deft.join' | translate }}">
+                        {{ 'plugin.block_deft.join' | translate }} (<% count %>)
+                        <ion-icon name="enter-outline" slot="start"></ion-icon>
+                    </ion-button>
+                    <%/ mixed %>
                 <%/ venue %>
-            </div>
+            </ion-label>
             </ion-item>
         <%/ tasks %>
         </ion-list>

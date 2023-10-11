@@ -108,6 +108,7 @@ class venue implements renderable, templatable {
             'peers' => array_values($peers),
             'lastmodified' => max($lastmodified, $this->task->timemodified, $settings->timemodified ?? 0),
             'limit' => $this->config->limit ?? 0,
+            'mixed' => $this->config->connection ?? '' === 'mixed',
             'mute' => !empty($settings->mute),
             'name' => !empty($this->state->showtitle) ? $this->config->name : '',
             'content' => format_text($this->config->content, FORMAT_MOODLE, [

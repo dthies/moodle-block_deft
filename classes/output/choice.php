@@ -68,10 +68,12 @@ class choice extends text implements renderable, templatable {
         }
         $cache = cache::make('block_deft', 'results');
         $response = $cache->get($this->task->id . 'x' . $USER->id);
-        $options = [[
-            'key' => '',
-            'value' => '',
-        ]];
+        $options = [
+            [
+                'key' => '',
+                'value' => '',
+            ],
+        ];
         foreach (array_filter($this->config->option) as $key => $option) {
             $options[] = [
                 'key' => $key,

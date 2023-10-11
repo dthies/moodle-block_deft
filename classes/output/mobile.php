@@ -32,6 +32,7 @@ require_once($CFG->dirroot . '/lib/blocklib.php');
 
 use block_deft\task;
 use block_deft\comment;
+use block_deft\event\venue_started;
 use stdClass;
 
 /**
@@ -97,6 +98,10 @@ class mobile {
         }
         $data->contextlevel = $args['contextlevel'];
         $data->instanceid = $args['instanceid'];
+        $data->title = format_string(
+            $instance->config->title ?: $instance->title,
+            ['context' => $instance->context]
+        );
 
         $html = $output->render_from_template('block_deft/mobile_view', $data);
 
@@ -274,8 +279,16 @@ class mobile {
                 'status' => 0,
                 'sessionid' => null,
                 'type' => 'venue',
-                'uuid' => $args['uuid']
+                'uuid' => $args['uuid'],
             ]);
+        } else {
+            $params = [
+                'context' => $context,
+                'objectid' => $taskid,
+            ];
+
+            $event = venue_started::create($params);
+            $event->trigger();
         }
         $peerid = $DB->insert_record('block_deft_peer', [
             'userid' => $USER->id,
@@ -293,11 +306,12 @@ class mobile {
             var DeftVenue = this.DeftVenue,
                 Janus = this.Janus,
                 observer = new MutationObserver(DeftVenue.observe.bind(DeftVenue));
-console.log(this);
             observer.observe(document.body, {
                 childList: true,
                 subtree: true
             });
+
+            DeftVenue.addListeners();
 
             DeftVenue.roomid = $roomid;
             DeftVenue.peerid = $peerid;
@@ -306,7 +320,7 @@ console.log(this);
             DeftVenue.taskid = " . $args['task'] . ";
 
             var ws = new WebSocket('wss://deftly.us/ws'),
-                token = this.CONTENT_OTHERDATA.token;
+                token = '$instancedata->token';
 
             DeftVenue.ws = ws;
             ws.onopen = function() {
@@ -341,12 +355,13 @@ console.log(this);
                 DeftVenue.janus.destroy();
                 DeftVenue.janus = null;
                 DeftVenue.audioBridge = null;
+                DeftVenue.textroom = null;
                 DeftVenue.currentFeed = 0;
                 DeftVenue.remoteStream = null;
                 DeftVenue.creatingSubscription = false;
             }
             setTimeout(() => {
-                this.webrtcUp = false;
+                DeftVenue.webrtcUp = false;
                 this.Janus.init({
                     debug: 'none',
                     callback: () => {
@@ -355,236 +370,8 @@ console.log(this);
                             iceServers: {$iceservers},
                             success: () => {
                                 // Attach audiobridge plugin.
-                                DeftVenue.janus.attach({
-                                    plugin: 'janus.plugin.audiobridge',
-                                    opaqueId: 'audioroom-' + this.Janus.randomString(12),
-                                    success: pluginHandle => {
-                                        this.audioBridge = pluginHandle;
-                                        DeftVenue.audioBridge = pluginHandle;
-                                        DeftVenue.register(pluginHandle);
-                                    },
-                                    error: function(error) {
-                                        alert(error);
-                                    },
-                                    onmessage: (msg, jsep) => {
-                                        const event = msg.audiobridge;
-                                        if (event) {
-                                            if (event === 'joined') {
-                                                // Successfully joined, negotiate WebRTC now
-                                                if (msg.id) {
-                                                    DeftVenue.updateParticipants();
-                                                    if (!this.webrtcUp) {
-                                                        this.webrtcUp = true;
-                                                            const tracks = [];
-                                                                tracks.push({
-                                                                    type: 'audio',
-                                                                    recv: true
-                                                                });
-                                                        navigator.mediaDevices.getUserMedia({
-                                                            audio:true,
-                                                            video:false
-                                                        }).catch((e) => {
-                                                            console.log(e);
-                                                            document.querySelectorAll(
-                                                                '[data-action=\"unmute\"]'
-                                                            ).forEach(button => {
-                                                                button.style.display = 'none';
-                                                            });
-                                                            return null;
-                                                        }).then(audioStream => {
-                                                            // Publish our stream.
-                                                            const tracks = [];
-                                                            if (audioStream) {
-                                                                audioStream.getAudioTracks().forEach(track => {
-                                                                    tracks.push({
-                                                                        type: 'audio',
-                                                                        capture: track,
-                                                                        recv: true
-                                                                    });
-                                                                    DeftVenue.audioTrack = track;
-                                                                    track.enabled = false;
-                                                                    DeftVenue.monitorVolume(audioStream);
-                                                                });
-                                                            }
-                                                            this.audioBridge.createOffer({
-                                                                // We only want bidirectional audio
-                                                                tracks: tracks,
-                                                                customizeSdp: function(jsep) {
-/*
-                                                                    if (stereo && jsep.sdp.indexOf('stereo=1') == -1) {
-                                                                        // Make sure that our offer contains stereo too
-                                                                        jsep.sdp = jsep.sdp.replace(
-                                                                            'useinbandfec=1', 'useinbandfec=1;stereo=1'
-                                                                        );
-                                                                    }
-*/
-                                                                },
-                                                                success: (jsep) => {
-                                                                    this.Janus.debug('Got SDP!', jsep);
-                                                                    const publish = {request: 'configure', muted: false};
-                                                                    this.audioBridge.send({message: publish, jsep: jsep});
-                                                                },
-                                                                error: function(error) {
-                                                                    alert('WebRTC error... '+ error.message);
-                                                                }
-                                                            });
-
-                                                            return audioStream;
-                                                        }).catch(console.log);
-                                                    }
-                                                }
-                                            } else if (event === 'destroyed') {
-                                                // The room has been destroyed
-                                                this.Janus.warn('The room has been destroyed!');
-                                                alert('The room has been destroyed');
-                                            } else if (event === 'event') {
-                                                if (msg.participants) {
-                                                    DeftVenue.updateParticipants(participants);
-                                                } else if (msg.error) {
-                                                    if (msg.error_code === 485) {
-                                                        // This is a 'no such room' error: give a more meaningful description
-                                                        alert(
-                                                            '<p>Room <code>' + $roomid + '</code> is not configured.'
-                                                        );
-                                                    } else {
-                                                        alert(msg.error_code + '-' + msg.error);
-                                                    }
-                                                    return;
-                                                }
-                                                if (msg.leaving) {
-                                                    // One of the participants has gone away?
-                                                    const leaving = msg.leaving;
-                                                    this.Janus.log(
-                                                        'Participant left: ' + leaving
-                                                    );
-                                                    document.querySelectorAll(
-                                                        '#deft_audio [peerid=\"' + leaving + '\"]'
-                                                    ).forEach(peer => {
-                                                        peer.remove();
-                                                    });
-                                                }
-                                            }
-                                        }
-                                        if (jsep) {
-                                            this.Janus.debug('Handling SDP as well...', jsep);
-                                            this.audioBridge.handleRemoteJsep({jsep: jsep});
-                                        }
-                                    },
-                                    onremotetrack: (track, mid, on, metadata) => {
-                                        this.Janus.debug(
-                                            'Remote track (mid=' + mid + ') ' +
-                                            (on ? 'added' : 'removed') +
-                                            (metadata ? ' (' + metadata.reason + ') ' : '') + ':', track
-                                        );
-                                        if (this.remoteStream || track.kind !== 'audio') {
-                                            return;
-                                        }
-                                        if (!on) {
-                                            // Track removed, get rid of the stream and the rendering
-                                            this.remoteStream = null;
-                                            return;
-                                        }
-                                        this.remoteStream = new MediaStream([track]);
-                                        this.Janus.attachMediaStream(document.getElementById('roomaudio'), this.remoteStream);
-                                    },
-                                    error: alert
-                                });
-                                DeftVenue.janus.attach( {
-                                    plugin: 'janus.plugin.textroom',
-                                    opaqueId: 'textroom-' + Janus.randomString(12),
-                                    success: pluginHandle => {
-                                        this.textroom = pluginHandle;
-                                        DeftVenue.textroom = pluginHandle;
-                                        Janus.log('Plugin attached! (' + this.textroom.getPlugin()
-                                            + ', id=' + this.textroom.getId() + ')');
-                                        // Setup the DataChannel
-                                        const body = {request: 'setup'};
-                                        Janus.debug('Sending message:', body);
-                                        this.textroom.send({message: body});
-                                    },
-                                    error: function(error) {
-                                        alert('  -- Error attaching plugin... ' + error);
-                                        Janus.error('  -- Error attaching plugin...', error);
-                                    },
-                                    onmessage: (msg, jsep) => {
-                                        Janus.debug(' ::: Got a message :::', msg);
-                                        if (msg.error) {
-                                            alert(msg.error_code + msg.error);
-                                        }
-
-                                        if (jsep) {
-                                            // Answer
-                                            this.textroom.createAnswer(
-                                                {
-                                                    jsep: jsep,
-                                                    // We only use datachannels
-                                                    tracks: [
-                                                        {type: 'data'}
-                                                    ],
-                                                    success: (jsep) => {
-                                                        Janus.debug('Got SDP!', jsep);
-                                                        const body = {request: 'ack'};
-                                                        this.textroom.send({message: body, jsep: jsep});
-                                                    },
-                                                    error: function(error) {
-                                                        Janus.error('WebRTC error:', error);
-                                                    }
-                                                }
-                                            );
-                                        }
-                                    },
-                                    // eslint-disable-next-line no-unused-vars
-                                    ondataopen: (label, protocol) => {
-                                        const transaction = Janus.randomString(12),
-                                            register = {
-                                                textroom: 'join',
-                                                transaction: transaction,
-                                                room: $roomid,
-                                                username: String($peerid),
-                                                display: '',
-                                            };
-                                        this.textroom.data({
-                                            text: JSON.stringify(register),
-                                            error: function(reason) {
-                                                alert('Error ' + reason);
-                                            }
-                                        });
-                                    },
-                                    ondata: (data) => {
-                                        Janus.debug('We got data from the DataChannel!', data);
-                                        const message = JSON.parse(data),
-                                            event = message.textroom;
-
-                                        if (event === 'message' && message.from != $peerid) {
-                                            //this.handleMessage(message.from, {data: message.text});
-                                            const data = JSON.parse(message.text);
-                                            if (data.hasOwnProperty('raisehand')) {
-                                                document.querySelectorAll(
-                                                    '[data-peerid=\"' + message.from + '\"] [data-role=\"raisehand\"]'
-                                                ).forEach(button => {
-                                                    button.style.display = data.raisehand ? 'inline' : 'none';
-                                                });
-                                            };
-                                            if (data.hasOwnProperty('volume')) {
-                                                document.querySelectorAll(
-                                                    '#participants ion-item[data-peerid=\"' + message.from + '\"]'
-                                                ).forEach(indicator => {
-                                                    indicator.querySelector('.indicator').style.opacity
-                                                        = (data.volume.high + data.volume.mid + data.volume.high) / 3;
-                                                    indicator.setAttribute('data-volume', data.volume.smooth);
-                                                });
-                                            }
-                                        }
-                                        if (event === 'error') {
-                                            alert(error);
-                                        }
-                                        if (event === 'join') {
-                                            DeftVenue.sendMessage(JSON.stringify({
-                                                'raisehand': DeftVenue.raisehand
-                                            }));
-                                        }
-                                    }
-                                });
+                                DeftVenue.attachAudioBridge();
+                                DeftVenue.attachTextRoom();
                             },
                             error: alert
                         });
@@ -617,355 +404,17 @@ console.log(this);
     public static function init($args): array {
         global $CFG;
 
-        $js = "var result = {DeftVenue: {
-            raiseHand: function(state) {
-                this.raisehand = state;
-                document.querySelectorAll(
-                    '[data-action=\"lowerhand\"], [data-action=\"raisehand\"]'
-                ).forEach(function(button) {
-                    if (state == (button.getAttribute('data-action') == 'raisehand')) {
-                        button.style.display = 'none';
-                    } else {
-                        button.style.display = null;
-                    }
-                });
-                this.sendMessage(JSON.stringify({
-                    'raisehand': state
-                }));
-            },
+        $js = "var result = {};
 
-            switchMute: function(state) {
-                if (!this.audioTrack) {
-                    return;
-                }
-                this.audioTrack.enabled = !state;
-                document.querySelectorAll(
-                    '[data-action=\"mute\"], [data-action=\"unmute\"]'
-                ).forEach(function(button) {
-                    if (state == (button.getAttribute('data-action') == 'unmute')) {
-                        button.style.display = null;
-                    } else {
-                        button.style.display = 'none';
-                    }
-                });
-            },
+        " . file_get_contents("$CFG->dirroot/blocks/deft/mobile/venue.js") . "
+        " . file_get_contents("$CFG->dirroot/blocks/deft/mobile/adapter.js") . "
+        " . file_get_contents("$CFG->dirroot/blocks/deft/mobile/janus.js") . "
 
-            sendMessage: function(text) {
-                if (text && text !== '' && this.textroom) {
-                    const message = {
-                        textroom: 'message',
-                        room: this.roomid,
-                        transaction: Janus.randomString(12),
-                        text: text
-                    };
-                    this.textroom.data({
-                        text: JSON.stringify(message),
-                        error: alert
-                    });
-                }
-            },
+        result = {
+            DeftVenue: DeftVenue,
+            Janus: Janus
+        };
 
-            updateParticipants: function(list) {
-                this.CoreSitesProvider.getSite(this.CoreSitesProvider.currentSite.id).then(site => {
-
-                    site.read('block_deft_get_participants', {
-                        taskid: this.taskid
-                    }, {getFromCache: false, saveToCache: false, reusePending: false}).then(response => {
-                        response.participants.forEach(participant => {
-                            if (participant.id == this.peerid) {
-                               this.switchMute(participant.mute);
-                            } else if (participant.status) {
-                                document.querySelectorAll(
-                                    '#participants [data-peerid=\"' + participant.id + '\"]'
-                                ).forEach(item => {
-                                    item.remove();
-                                });
-                            } else {
-                                if (!document.querySelector('#participants [data-peerid=\"' + participant.id + '\"]')) {
-                                    const item = document.createElement('ion-item');
-                                    item.setAttribute('data-peerid', participant.id);
-                                    item.innerHTML = participant.content;
-                                    document.getElementById('participants').appendChild(item);
-                                }
-                            }
-                            document.querySelectorAll(
-                                '[data-peerid=\"' + participant.id + '\"] .indicator'
-                            ).forEach(button => {
-                                button.style.display = !participant.mute ? 'inline' : 'none';
-                            });
-                            document.querySelectorAll(
-                                '[data-peerid=\"' + participant.id + '\"] [data-role=\"mute\"]'
-                            ).forEach(button => {
-                                button.style.display = participant.mute ? 'inline' : 'none';
-                            });
-                        });
-
-                        this.subscribeTo(Number(response.feed));
-                        return response;
-                    }).catch(alert);
-                    return site;
-                });
-            },
-
-            /**
-             * Process audio to provide visual feedback
-             *
-             * @param {MediaStream} audioStream Audio from user's microphone
-             * @returns {MediaStream}
-             */
-            monitorVolume: function(audioStream) {
-                if (audioStream) {
-                    const audioContext = new AudioContext(),
-                        source = audioContext.createMediaStreamSource(audioStream),
-                        analyser = new AnalyserNode(audioContext, {
-                            maxDecibels: -50,
-                            minDecibels: -90,
-                            fftSize: 2048,
-                            smoothingTimeConstant: 0.3
-                        }),
-                        smoothanalyser = new AnalyserNode(audioContext, {
-                            maxDecibels: -50,
-                            minDecibels: -90,
-                            fftSize: 2048,
-                            smoothingTimeConstant: 0.6
-                        }),
-                        bufferLength = analyser.frequencyBinCount,
-                        data = new Uint8Array(bufferLength),
-                        smootheddata = new Uint8Array(bufferLength);
-                    source.connect(analyser);
-                    source.connect(smoothanalyser);
-                    clearInterval(this.meterId);
-                    this.meterId = setInterval(() => {
-                        analyser.getByteFrequencyData(data);
-                        smoothanalyser.getByteFrequencyData(smootheddata);
-                        const volume = {
-                            low: Math.min(1, data.slice(0, 16).reduce((a, b) => a + b, 0) / 2000),
-                            mid: Math.min(1, data.slice(17, 31).reduce((a, b) => a + b, 0) / 1000),
-                            high: Math.min(1, data.slice(32).reduce((a, b) => a + b, 0) / 4000),
-                            smooth: Math.min(1, smootheddata.slice(0, 16).reduce((a, b) => a + b, 0) / 2000)
-                                + Math.min(1, smootheddata.slice(17, 31).reduce((a, b) => a + b, 0) / 1000)
-                                + Math.min(1, smootheddata.slice(32).reduce((a, b) => a + b, 0) / 4000)
-                        },
-                            message = JSON.stringify({volume: volume}),
-                            peers = [];
-                        document.querySelectorAll('.volume_indicator[data-peerid=\"' + this.peerid + '\"]').forEach(indicator => {
-                            indicator.querySelectorAll('.low').forEach(low => {
-                                low.style.opacity = volume.low;
-                            });
-                            indicator.querySelectorAll('.mid').forEach(mid => {
-                                mid.style.opacity = volume.mid;
-                            });
-                            indicator.querySelectorAll('.high').forEach(high => {
-                                high.style.opacity = volume.high;
-                            });
-                        });
-                        this.sendMessage(message);
-                        document.querySelectorAll('#participants > ion-item').forEach(peer => {
-                            peers.push(peer);
-                        });
-                        peers.sort((a, b) => {
-                            let volume = 0;
-                            volume += -Number(a.getAttribute('data-volume'));
-                            volume += Number(b.getAttribute('data-volume'));
-                            return volume;
-                        });
-                        peers.forEach(peer => {
-                            document.querySelector('#participants').appendChild(peer);
-                        });
-                    }, 500);
-                }
-
-                return audioStream;
-            },
-
-            register: function(pluginHandle) {
-                const args = {
-                    handle: pluginHandle.getId(),
-                    id: Number(this.peerid),
-                    plugin: pluginHandle.plugin,
-                    room: this.roomid,
-                    session: pluginHandle.session.getSessionId()
-                };
-
-                if (pluginHandle.plugin === 'janus.plugin.videoroom') {
-                    args.ptype = false;
-                    args.feed = this.currentFeed;
-                }
-
-                this.CoreSitesProvider.getSite(this.CoreSitesProvider.currentSite.id).then(site => {
-                    site.read('block_deft_join_room', args, {getFromCache: false, saveToCache: false, reusePending: false});
-                });
-            },
-
-            subscribeTo: function(source) {
-                if (!this.janus || !this.audioBridge || this.creatingSubscription || source === this.currentFeed) {
-                    return;
-                }
-
-                if (this.remoteStream) {
-                    this.videoroom.detach();
-                    this.videoroom = null;
-                    this.remoteStreams = {};
-                    this.remoteStream = null;
-                    this.creatingSubscription = false;
-                }
-
-                if (!source) {
-                    document.getElementById('roomvideo').style.display = 'none';
-                    return;
-                }
-
-                this.creatingSubscription = true;
-
-                this.currentFeed = source;
-
-                this.janus.attach(
-                    {
-                        plugin: 'janus.plugin.videoroom',
-                        opaqueId: 'videoroom-' + Janus.randomString(12),
-                        success: pluginHandle => {
-                            this.videoroom = pluginHandle;
-                            this.register(pluginHandle);
-                        },
-                        error: alert,
-                        onmessage: this.onMessage.bind(this),
-                        onremotetrack: (track, mid, on, metadata) => {
-                            Janus.debug(
-                                'Remote track (mid=' + mid + ') ' +
-                                (on ? 'added' : 'removed') +
-                                (metadata ? ' (' + metadata.reason + ') ' : '') + ':', track
-                            );
-                            if (!on) {
-                                // Track removed, get rid of the stream and the rendering
-                                delete this.remoteStreams[mid];
-                                return;
-                            }
-                            if (!this.remoteStreams.hasOwnProperty(mid) && track.kind === 'video') {
-                                this.remoteStreams[mid] = track;
-                                if (this.remoteStream) {
-                                    return;
-                                }
-                                this.remoteStream = new MediaStream([track]);
-                                this.remoteStream.mid = mid;
-                                this.attachVideo(this.remoteStream);
-                            }
-                        }
-                    }
-                );
-            },
-
-            observe: function(records, observer) {
-                if (!this.janus || document.querySelector('audio')) {
-                    return;
-                }
-
-                this.janus.destroy();
-
-                this.janus = null;
-
-                if (this.ws) {
-                    this.ws.close();
-                }
-
-                if (this.audioTrack) {
-                    this.audioTrack.stop();
-                }
-                this.audioTrack = null;
-                clearInterval(this.meterId);
-
-                this.remoteStream = null;
-                this.remoteStreams = {};
-                this.currentFeed = 0;
-                this.creatingSubscription = false;
-
-                this.raisehand = null;
-
-                observer.disconnect();
-
-                this.CoreSitesProvider.getSite(this.CoreSitesProvider.currentSite.id).then(site => {
-                    site.read('block_deft_venue_settings', {
-                        mute: true,
-                        peerid: this.peerid,
-                        status: true,
-                        uuid: this.Device.uuid
-                    }).catch(alert);
-
-                    return site;
-                });
-            },
-
-            onMessage: function(msg, jsep) {
-                const event = msg.videoroom,
-                    pluginHandle = this.videoroom;
-                Janus.debug(' ::: Got a message :::', msg);
-                Janus.debug('Event: ' + event);
-                switch (event) {
-                    case 'destroyed':
-                        // The room has been destroyed
-                        Janus.warn('The room has been destroyed!');
-                        Notification.alert('', 'The room has been destroyed', function() {
-                            window.close();
-                        });
-                        break;
-                    case 'attached':
-                        this.creatingSubscription = false;
-                        this.updateParticipants();
-                        break;
-                    case 'event':
-                        if (msg.error) {
-                            if (msg.error_code === 485) {
-                                // This is a 'no such room' error: give a more meaningful description
-                                alert(
-                                    '<p>Apparently room <code>' + this.roomid + '</code> is not configured</p>'
-                                );
-                            } else {
-                                alert(msg.error_code + ' ' + msg.error);
-                            }
-                            return;
-                        }
-                        break;
-                }
-                if (jsep) {
-                    Janus.debug('Handling SDP as well...', jsep);
-                    // Answer and attach
-                    pluginHandle.createAnswer(
-                        {
-                            jsep: jsep,
-                            tracks: [
-                                {type: 'data'}
-                            ],
-                            success: function(jsep) {
-                                Janus.debug('Got SDP!');
-                                Janus.debug(jsep);
-                                let body = {request: 'start', room: this.roomid};
-                                pluginHandle.send({message: body, jsep: jsep});
-                            },
-                            error: function(error) {
-                                Janus.error('WebRTC error:', error);
-                                alert('WebRTC error... ' + error.message);
-                            }
-                        }
-                    );
-                }
-            },
-
-            attachVideo: function(videoStream) {
-                document.getElementById('roomvideo').style.display = 'block';
-                Janus.attachMediaStream(
-                    document.getElementById('roomvideo'),
-                    videoStream
-                );
-            },
-
-            CoreSitesProvider: this.CoreSitesProvider,
-
-            Device: this.Device
-        }};
-
-        " . file_get_contents("$CFG->dirroot/blocks/deft/lib/adapter.js") . "
-        " . file_get_contents("$CFG->dirroot/blocks/deft/lib/janus.js") . "
-
-        result.Janus = Janus;
         result;";
 
         return [

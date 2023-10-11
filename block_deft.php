@@ -50,7 +50,7 @@ class block_deft extends block_base {
 
         $this->content = (object) [
             'text' => $renderer->render($renderable),
-            'footer' => ''
+            'footer' => '',
         ];
 
         return $this->content;
@@ -95,11 +95,11 @@ class block_deft extends block_base {
      * @return string[] Array of pages and permissions.
      */
     public function applicable_formats() {
-        return array(
+        return [
             'course' => true,
             'mod' => true,
             'site' => true,
-        );
+        ];
     }
 
     /**

@@ -91,9 +91,11 @@ class venue extends text {
                        AND bd.type = 'venue'
                        $restrictions
               ORDER BY bd.timemodified ASC",
-                array_merge($contextparams, [CONTEXT_BLOCK, CONTEXT_MODULE, CONTEXT_COURSE,
-                    $modifiedfrom, $this->get_block_name(), CONTEXT_COURSE, 'course-view-%'],
-                $restrictionparams));
+                array_merge($contextparams, [
+                    CONTEXT_BLOCK, CONTEXT_MODULE, CONTEXT_COURSE,
+                    $modifiedfrom, $this->get_block_name(), CONTEXT_COURSE, 'course-view-%',
+                ], $restrictionparams)
+        );
     }
 
     /**
@@ -119,7 +121,7 @@ class venue extends text {
      * @param array     $options Options for document creation
      * @return \core_search\document
      */
-    public function get_document($record, $options = array()) {
+    public function get_document($record, $options = []) {
         $doc = parent::get_document($record, $options);
 
         // Get stdclass object with data from DB.
@@ -161,7 +163,7 @@ class venue extends text {
      * @return array
      */
     public function get_search_fileareas() {
-        $fileareas = array('intro'); // Fileareas.
+        $fileareas = ['intro']; // Fileareas.
 
         return $fileareas;
     }

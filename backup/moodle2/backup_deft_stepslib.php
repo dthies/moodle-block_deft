@@ -42,9 +42,9 @@ class backup_deft_block_structure_step extends backup_block_structure_step {
         $userinfo = $this->get_setting_value('users');
 
         // Define structure.
-        $root = new backup_nested_element('tasks', array('id'), null);
+        $root = new backup_nested_element('tasks', ['id'], null);
 
-        $task = new backup_nested_element('task', array('id'), [
+        $task = new backup_nested_element('task', ['id'], [
             'instance',
             'configdata',
             'statedata',

@@ -57,7 +57,7 @@ class backup_deft_block_task extends backup_block_task {
      * @return string[] File area names.
      */
     public function get_fileareas() {
-        return array();
+        return [];
     }
 
     /**
@@ -66,7 +66,7 @@ class backup_deft_block_task extends backup_block_task {
      * @return string[] Config elements.
      */
     public function get_configdata_encoded_attributes() {
-        return array();
+        return [];
     }
 
     /**

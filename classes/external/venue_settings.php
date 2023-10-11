@@ -93,11 +93,13 @@ class venue_settings extends external_api {
         require_login();
         require_capability('block/deft:joinvenue', $context);
 
-        if (!empty($peerid) && $peerid != $SESSION->deft_session->peerid) {
-            require_capability('block/deft:moderate', $context);
-            $relateduserid = $DB->get_field('block_deft_peer', 'userid', ['id' => $peerid]);
-        } else if (!empty($SESSION->deft_session->peerid)) {
-            $peerid = $SESSION->deft_session->peerid;
+        if (!empty($SESSION->deft_session->peerid)) {
+            if (!empty($peerid) && $peerid != $SESSION->deft_session->peerid) {
+                require_capability('block/deft:moderate', $context);
+                $relateduserid = $DB->get_field('block_deft_peer', 'userid', ['id' => $peerid]);
+            } else {
+                $peerid = $SESSION->deft_session->peerid;
+            }
         } else if (!empty($uuid)) {
             $peerid = $DB->get_field('block_deft_peer', 'id', [
                 'uuid' => $uuid,
