@@ -1,10 +1,18 @@
 <?xml version="1.0"?>
 <libraries>
     <library>
+        <location>mobile/adapter.js</location>
+        <name>WebRTC Adapter</name>
+        <license>MIT</license>
+        <version>8.2.3</version>
+        <licenseversion></licenseversion>
+    </library>
+    <library>
         <location>amd/src/janus-gateway.js</location>
+        <location>mobile/janus.js</location>
         <name>Janus gateway javascript API</name>
         <license>MIT</license>
-        <version>[v1.1.3] - 2023-03-06</version>
+        <version>v1.2.1</version>
         <licenseversion></licenseversion>
     </library>
 </libraries>
