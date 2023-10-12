@@ -74,12 +74,13 @@ export default class VenueManager {
                             mute: false,
                             "status": true
                         },
+                        done: (status) => {
+                            window.close();
+                            return status;
+                        },
                         fail: Notification.exception,
                         methodname: 'block_deft_venue_settings'
-                    }])[0].then((status) => {
-                        window.close();
-                        return status;
-                    });
+                    }]);
                 });
 
                 return notice;
@@ -305,11 +306,11 @@ export default class VenueManager {
         this.makingOffer.add(String(peerid));
 
         return pc.setLocalDescription().then(() => {
-            return pc.setLocalDescription().then(() => {
-                return this.sendSignal(peerid, 'audio-offer', pc.localDescription);
-            }).catch(Log.debug).finally(() => {
-                this.makingOffer.delete(String(peerid));
-            });
+            return pc.setLocalDescription();
+        }).then(() => {
+            return this.sendSignal(peerid, 'audio-offer', pc.localDescription);
+        }).catch(Log.debug).finally(() => {
+            this.makingOffer.delete(String(peerid));
         });
     }
 
@@ -364,7 +365,8 @@ export default class VenueManager {
             this.ignoreOffer.delete(String(signal.frompeer));
             pc.setRemoteDescription(description).then(() => {
                 Log.debug('Set Remote');
-                return this.audioInput.then(audioStream => {
+                return this.audioInput;
+            }).then(audioStream => {
                     if (audioStream) {
                         Log.debug('audio stream');
                         if (pc.getTransceivers().length < 2) {
@@ -375,13 +377,15 @@ export default class VenueManager {
                     }
                     Log.debug('Create answer');
                     if (description.type == 'offer') {
-                        pc.setLocalDescription().then(() => {
-                            Log.debug('Set local');
-                            return this.sendSignal(signal.frompeer, 'audio-answer', pc.localDescription);
-                        }).catch(Log.debug);
+                        Log.debug('Set local');
+                        return pc.setLocalDescription();
                     }
                     return audioStream;
-                }).catch(Notification.exception);
+            }).then(() => {
+                if (description.type == 'offer') {
+                    return this.sendSignal(signal.frompeer, 'audio-answer', pc.localDescription);
+                }
+                return pc;
             }).catch(Log.debug);
         } else if (signal.type === 'new-ice-candidate') {
             const pc = this.peerConnections[String(signal.frompeer)] || null;
@@ -547,6 +551,35 @@ export default class VenueManager {
     }
 
     /**
+     * Request audio device to share in venue
+     */
+    shareAudio() {
+        this.audioInput = navigator.mediaDevices.getUserMedia({
+            audio: {
+                autoGainControl: this.autogaincontrol,
+                echoCancellation: this.echocancellation,
+                noiseSuppression: this.noisesuppression,
+                sampleRate: this.samplerate
+            },
+            video: false
+        }).then(audioStream => {
+
+            Ajax.call([{
+                args: {
+                    mute: false,
+                    "status": false
+                },
+                fail: Notification.exception,
+                methodname: 'block_deft_venue_settings'
+            }]);
+
+            this.monitorVolume(audioStream);
+
+            return audioStream;
+        }).catch(Log.debug);
+    }
+
+    /**
      * Handle click for mute
      *
      * @param {Event} e Button click
@@ -573,29 +606,7 @@ export default class VenueManager {
                             methodname: 'block_deft_venue_settings'
                         }]);
                     } else if (action == 'unmute') {
-                        this.audioInput = navigator.mediaDevices.getUserMedia({
-                            audio: {
-                                autoGainControl: this.autogaincontrol,
-                                echoCancellation: this.echocancellation,
-                                noiseSuppression: this.noisesuppression,
-                                sampleRate: this.samplerate
-                            },
-                            video: false
-                        }).then(audioStream => {
-
-                            Ajax.call([{
-                                args: {
-                                    mute: false,
-                                    "status": false
-                                },
-                                fail: Notification.exception,
-                                methodname: 'block_deft_venue_settings'
-                            }]);
-
-                            this.monitorVolume(audioStream);
-
-                            return audioStream;
-                        }).catch(Log.debug);
+                        this.shareAudio();
                     }
 
                     return audioStream;

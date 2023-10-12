@@ -260,6 +260,25 @@ export default class Publish {
     }
 
     /**
+     * Stop stream
+     *
+     * @param {Promise|null} input Stream request
+     */
+    stopStream(input) {
+        if (input) {
+            input.then(videoStream => {
+                if (videoStream) {
+                    videoStream.getTracks().forEach(track => {
+                        track.stop();
+                    });
+                }
+
+                return videoStream;
+            }).catch(Notification.exception);
+        }
+    }
+
+    /**
      * Set video source to user camera
      */
     shareCamera() {
@@ -269,16 +288,7 @@ export default class Publish {
             video: true,
             audio: false
         }).then(videoStream => {
-            if (videoInput) {
-                videoInput.then(videoStream => {
-                    if (videoStream) {
-                        videoStream.getTracks().forEach(track => {
-                            track.stop();
-                        });
-                    }
-                    return videoStream;
-                }).catch(Notification.exception);
-            }
+            this.stopStream(videoInput);
 
             return videoStream;
         }).catch((e) => {
@@ -298,47 +308,35 @@ export default class Publish {
             video: true,
             audio: true,
         }).then(videoStream => {
-            videoInput.then(videoStream => {
-                if (videoStream) {
-                    videoStream.getTracks().forEach(track => {
-                        track.stop();
-                    });
-                }
-                return videoStream;
-            }).catch(Notification.exception);
-
-            videoStream.type = 'display';
+            this.stopStream(videoInput);
 
             return videoStream;
         }).catch((e) => {
             Log.debug(e);
-
-            videoInput.then(videoStream => {
-                document.querySelectorAll(
-                    '[data-region="deft-venue"] [data-action="publish"],  [data-region="deft-venue"] [data-action="unpublish"]'
-                ).forEach(button => {
-                    if (videoStream) {
-                        if (
-                            (button.getAttribute('data-action') == 'unpublish')
-                            || (button.getAttribute('data-type') === 'display')
-                        ) {
-                            button.classList.remove('hidden');
-                        } else {
-                            button.classList.add('hidden');
-                        }
-                    } else {
-                        if (button.getAttribute('data-action') == 'unpublish') {
-                            button.classList.add('hidden');
-                        } else {
-                            button.classList.remove('hidden');
-                        }
-                    }
-                });
-
-                return videoStream;
-            }).catch(Notification.exception);
-
             return videoInput;
+        }).then(videoStream => {
+            document.querySelectorAll(
+                '[data-region="deft-venue"] [data-action="publish"],  [data-region="deft-venue"] [data-action="unpublish"]'
+            ).forEach(button => {
+                if (videoStream) {
+                    if (
+                        (button.getAttribute('data-action') == 'unpublish')
+                        || (button.getAttribute('data-type') === 'display')
+                    ) {
+                        button.classList.remove('hidden');
+                    } else {
+                        button.classList.add('hidden');
+                    }
+                } else {
+                    if (button.getAttribute('data-action') == 'unpublish') {
+                        button.classList.add('hidden');
+                    } else {
+                        button.classList.remove('hidden');
+                    }
+                }
+            });
+
+            return videoStream;
         });
     }
 

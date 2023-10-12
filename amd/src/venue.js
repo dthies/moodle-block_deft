@@ -69,19 +69,19 @@ const handleClick = (e) => {
                                 methodname: 'block_deft_venue_settings'
                             }]);
                         });
-                        Fragment.loadFragment(
+                        modal.show();
+
+                        return Fragment.loadFragment(
                             'block_deft',
                             'venue_manager',
                             contextid,
                             {
                                 taskid: task
                             }
-                        ).done((html, js) => {
-                            Templates.replaceNodeContents(root[0].querySelector('.modal-content .modal-body'), html, js);
-                        }).catch(Notification.exception);
-                        modal.show();
-
-                        return modal;
+                        );
+                    }).done((html, js) => {
+                        const root = venue.getRoot();
+                        Templates.replaceNodeContents(root[0].querySelector('.modal-content .modal-body'), html, js);
                     }).fail(Notification.exception);
                 } else {
                     document.querySelector('body').classList.remove('block_deft_venue_page');
