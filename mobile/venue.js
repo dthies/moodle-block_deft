@@ -58,45 +58,35 @@ const DeftVenue = {
                                     this.audioBridge.createOffer({
                                         // We only want bidirectional audio
                                         tracks: tracks,
-                                        customizeSdp: (jsep) => {
-/*
-                                            if (stereo && jsep.sdp.indexOf('stereo=1') == -1) {
-                                                // Make sure that our offer contains stereo too
-                                                jsep.sdp = jsep.sdp.replace(
-                                                    'useinbandfec=1', 'useinbandfec=1;stereo=1'
-                                                );
-                                            }
-*/
-                                        },
                                         success: (jsep) => {
                                             Janus.debug('Got SDP!', jsep);
                                             const publish = {request: 'configure', muted: false};
                                             this.audioBridge.send({message: publish, jsep: jsep});
                                         },
                                         error: function(error) {
-                                            alert('WebRTC error... ' + error.message);
+                                            Janus.error('WebRTC error... ', error.message);
                                         }
                                     });
 
                                     return audioStream;
-                                }).catch(console.log);
+                                }).catch(Janus.warn);
                             }
                         }
                     } else if (event === 'destroyed') {
                         // The room has been destroyed
                         Janus.warn('The room has been destroyed!');
-                        alert('The room has been destroyed');
                     } else if (event === 'event') {
                         if (msg.participants) {
                             this.updateParticipants();
                         } else if (msg.error) {
                             if (msg.error_code === 485) {
                                 // This is a 'no such room' error: give a more meaningful description
-                                alert(
+                                Janus.error(
+                                    'Error:',
                                     '<p>Room <code>' + this.roomid + '</code> is not configured.'
                                 );
                             } else {
-                                alert(msg.error_code + '-' + msg.error);
+                                Janus.error(msg.error_code, msg.error);
                             }
                             return;
                         }
@@ -161,7 +151,7 @@ const DeftVenue = {
             onmessage: (msg, jsep) => {
                 Janus.debug(' ::: Got a message :::', msg);
                 if (msg.error) {
-                    alert(msg.error_code + msg.error);
+                    Janus.error(msg.error_code, msg.error);
                 }
 
                 if (jsep) {
@@ -198,7 +188,7 @@ const DeftVenue = {
                 this.textroom.data({
                     text: JSON.stringify(register),
                     error: function(reason) {
-                        alert('Error ' + reason);
+                        Janus.error('Error ', reason);
                     }
                 });
             },
@@ -239,7 +229,7 @@ const DeftVenue = {
                     }
                 }
                 if (event === 'error') {
-                    alert('data: ' + message.error);
+                    Janus.error('data: ', message.error);
                 }
                 if (event === 'join') {
                     this.sendMessage(JSON.stringify({
@@ -351,7 +341,9 @@ const DeftVenue = {
             };
             this.textroom.data({
                 text: JSON.stringify(message),
-                error: alert
+                error: reason => {
+                    Janus.error('Error: ', reason);
+                }
             });
         }
     },
@@ -364,49 +356,47 @@ const DeftVenue = {
             button.style.display = ((button.getAttribute('data-action') === 'start') === !!this.paused) ? null : 'none';
         });
         this.CoreSitesProvider.getSite(this.CoreSitesProvider.currentSite.id).then(site => {
-            site.read('block_deft_get_participants', {
+            return site.read('block_deft_get_participants', {
                 taskid: this.taskid
-            }, {getFromCache: false, saveToCache: false, reusePending: false}).then(response => {
-                response.participants.forEach(participant => {
-                    if (participant.id == this.peerid) {
-                       this.switchMute(participant.mute);
-                    }
-                    if (participant.status) {
-                        document.querySelectorAll(
-                            '#participants [data-peerid="' + participant.id + '"]'
-                        ).forEach(item => {
-                            item.remove();
-                        });
-                    } else {
-                        if (!document.querySelector('#participants [data-peerid="' + participant.id + '"]')) {
-                            const item = document.createElement('ion-item');
-                            item.setAttribute('data-peerid', participant.id);
-                            item.innerHTML = participant.content;
-                            document.getElementById('participants').appendChild(item);
-                        }
-                    }
+            }, {getFromCache: false, saveToCache: false, reusePending: false});
+        }).then(response => {
+            response.participants.forEach(participant => {
+                if (participant.id == this.peerid) {
+                   this.switchMute(participant.mute);
+                }
+                if (participant.status) {
                     document.querySelectorAll(
-                        '[data-peerid="' + participant.id + '"] .indicator'
-                    ).forEach(button => {
-                        button.style.display = !participant.mute ? 'inline' : 'none';
+                        '#participants [data-peerid="' + participant.id + '"]'
+                    ).forEach(item => {
+                        item.remove();
                     });
-                    document.querySelectorAll(
-                        '[data-peerid="' + participant.id + '"] [data-role="mute"]'
-                    ).forEach(button => {
-                        button.style.display = participant.mute ? 'inline' : 'none';
-                    });
+                } else {
+                    if (!document.querySelector('#participants [data-peerid="' + participant.id + '"]')) {
+                        const item = document.createElement('ion-item');
+                        item.setAttribute('data-peerid', participant.id);
+                        item.innerHTML = participant.content;
+                        document.getElementById('participants').appendChild(item);
+                    }
+                }
+                document.querySelectorAll(
+                    '[data-peerid="' + participant.id + '"] .indicator'
+                ).forEach(button => {
+                    button.style.display = !participant.mute ? 'inline' : 'none';
                 });
-
-                document.querySelectorAll('#participants ion-item[data-peerid="' + this.peerid + '"] ion-label').forEach(label => {
-                    label.color = 'info';
+                document.querySelectorAll(
+                    '[data-peerid="' + participant.id + '"] [data-role="mute"]'
+                ).forEach(button => {
+                    button.style.display = participant.mute ? 'inline' : 'none';
                 });
+            });
 
-                this.subscribeTo(Number(response.feed));
-                return response;
-            }).catch(alert);
+            document.querySelectorAll('#participants ion-item[data-peerid="' + this.peerid + '"] ion-label').forEach(label => {
+                label.color = 'info';
+            });
 
-            return site;
-        }).catch(alert);
+            this.subscribeTo(Number(response.feed));
+            return response;
+        }).catch(Janus.warn);
     },
 
     /**
@@ -502,7 +492,7 @@ const DeftVenue = {
 
         return this.CoreSitesProvider.getSite(this.CoreSitesProvider.currentSite.id).then(site => {
             return site.read('block_deft_join_room', args, {getFromCache: false, saveToCache: false, reusePending: false});
-        }).catch(alert);
+        }).catch(Janus.warn);
     },
 
     /**
@@ -545,7 +535,7 @@ const DeftVenue = {
                 this.register(pluginHandle);
             },
             error: (error) => {
-                alert('videoroom: ' + error);
+                Janus.error('videoroom: ', error);
             },
             onmessage: this.onMessage.bind(this),
             onremotetrack: (track, mid, on, metadata) => {
@@ -609,15 +599,13 @@ const DeftVenue = {
         observer.disconnect();
 
         this.CoreSitesProvider.getSite(this.CoreSitesProvider.currentSite.id).then(site => {
-            site.read('block_deft_venue_settings', {
+            return site.read('block_deft_venue_settings', {
                 mute: true,
                 peerid: this.peerid,
                 status: true,
                 uuid: this.Device.uuid
-            }).catch(alert);
-
-            return site;
-        }).catch(alert);
+            });
+        }).catch(Janus.warn);
     },
 
     /**
