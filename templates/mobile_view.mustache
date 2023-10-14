@@ -41,17 +41,22 @@
             <ion-label>
                 <%# choice %> <%> block_deft/mobile_choice %> <%/ choice %>
                 <%# comments %>
-                    <ion-label>
                     <h5><% name %></h5>
                         <ion-button expand="block" color="light" core-site-plugins-new-content title="<% label %>"
                             component="block_deft" method="mobile_comments_view" [args]="{task: <% id %>}">
                             <% label %> (<% count %>)
                         </ion-button>
-                    </ion-label>
                 <%/ comments %>
                 <%# text %> <%> block_deft/mobile_text %> <%/ text %>
                 <%# venue %>
                     <ion-label><h5><% name %></h5></ion-label>
+                    <%# content %>
+                        <ion-item class="block_deft_text p-3">
+                            <ion-label>
+                                <div class="ion-text-wrap"><%{ content }%></div>
+                            </ion-label>
+                        </ion-item>
+                    <%/ content %>
                     <%# mixed %>
                     <ion-button expand="block" core-site-plugins-new-content title="<% name %>"
                         [args]="{task: <% id %>, uuid: this.Device.uuid}"
