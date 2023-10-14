@@ -25,9 +25,11 @@
         "content": "hello"
     }
 }}
-<div>
-    <h5>{{ name }}</h5>
-    {{# content }}
-        <div class="block_deft_text p-3">{{{ content }}}</div>
-    {{/ content }}
-</div>
+<h5>{{ name }}</h5>
+{{# content }}
+    <ion-item>
+        <ion-label>
+            <div class="ion-text-wrap">{{{ content }}}</div>
+        </ion-label>
+    </ion-item>
+{{/ content }}
