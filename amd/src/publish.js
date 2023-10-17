@@ -290,6 +290,8 @@ export default class Publish {
         }).then(videoStream => {
             this.stopStream(videoInput);
 
+            this.deviceType = 'camera';
+
             return videoStream;
         }).catch((e) => {
             Log.debug(e);
@@ -309,34 +311,12 @@ export default class Publish {
             audio: true,
         }).then(videoStream => {
             this.stopStream(videoInput);
+            this.deviceType = 'display';
 
             return videoStream;
         }).catch((e) => {
             Log.debug(e);
             return videoInput;
-        }).then(videoStream => {
-            document.querySelectorAll(
-                '[data-region="deft-venue"] [data-action="publish"],  [data-region="deft-venue"] [data-action="unpublish"]'
-            ).forEach(button => {
-                if (videoStream) {
-                    if (
-                        (button.getAttribute('data-action') == 'unpublish')
-                        || (button.getAttribute('data-type') === 'display')
-                    ) {
-                        button.classList.remove('hidden');
-                    } else {
-                        button.classList.add('hidden');
-                    }
-                } else {
-                    if (button.getAttribute('data-action') == 'unpublish') {
-                        button.classList.add('hidden');
-                    } else {
-                        button.classList.remove('hidden');
-                    }
-                }
-            });
-
-            return videoStream;
         });
     }
 
@@ -487,8 +467,30 @@ export default class Publish {
      */
     processStream(tracks) {
         this.videoInput.then(videoStream => {
+            document.querySelectorAll(
+                '[data-region="deft-venue"] [data-action="publish"],  [data-region="deft-venue"] [data-action="unpublish"]'
+            ).forEach(button => {
+                if (this.deviceType) {
+                    if (
+                        (button.getAttribute('data-action') == 'unpublish')
+                        || (button.getAttribute('data-type') !== this.deviceType)
+                    ) {
+                        button.classList.remove('hidden');
+                    } else {
+                        button.classList.add('hidden');
+                    }
+                } else {
+                    if (button.getAttribute('data-action') == 'unpublish') {
+                        button.classList.add('hidden');
+                    } else {
+                        button.classList.remove('hidden');
+                    }
+                }
+            });
+
             if (videoStream && (this.currentStream !== videoStream)) {
                 const transceiver = this.getTransceiver();
+                this.currentStream = videoStream;
                 videoStream.getVideoTracks().forEach(track => {
                     track.addEventListener('ended', () => {
                         if (this.selectedTrack.id == track.id) {
