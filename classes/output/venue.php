@@ -83,14 +83,15 @@ class venue implements renderable, templatable {
             [$this->task->id]
         );
         if (has_capability('block/deft:joinvenue', $this->context)) {
-            $peers = $DB->get_records_sql('
+            $peers = $DB->get_records_sql("
                 SELECT p.id AS peerid, p.mute, u.*
                   FROM {block_deft_peer} p
              LEFT JOIN {sessions} s ON p.sessionid = s.id
                   JOIN {user} u ON p.userid = u.id
                  WHERE p.status = 0
                        AND (s.id IS NOT NULL OR p.uuid IS NOT NULL)
-                       AND p.taskid = ?',
+                       AND p.type = 'venue'
+                       AND p.taskid = ?",
                 [$this->task->id]
             );
             foreach ($peers as $peer) {
