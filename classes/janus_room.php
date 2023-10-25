@@ -243,8 +243,6 @@ class janus_room {
             $this->record->id = $DB->insert_record('block_deft_room', $this->record);
         }
 
-        $this->set_token();
-
         return;
     }
 
@@ -271,10 +269,16 @@ class janus_room {
         ];
         $response = $this->audiobridge_send($allow);
         if (!empty($response->plugindata->data->error)) {
+            $DB->delete_records('block_deft_room', [
+                'id' => $this->record->id,
+            ]);
             return;
         }
         $response = $this->videoroom_send($allow);
         if (!empty($response->plugindata->data->error)) {
+            $DB->delete_records('block_deft_room', [
+                'id' => $this->record->id,
+            ]);
             return;
         }
     }
