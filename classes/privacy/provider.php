@@ -59,6 +59,26 @@ class provider implements
         ], 'privacy:metadata:lti_client');
 
         $collection->add_database_table(
+            'block_deft',
+            [
+                'id' => 'privacy:metadata:block_deft:id',
+                'usermodified' => 'privacy:metadata:block_deft:usermodified',
+                'timemodified' => 'privacy:metadata:block_deft:timemodified',
+            ],
+            'privacy:metadata:block_deft'
+        );
+
+        $collection->add_database_table(
+            'block_deft_room',
+            [
+                'itemid' => 'privacy:metadata:block_deft_room:itemid',
+                'usermodified' => 'privacy:metadata:block_deft_room:usermodified',
+                'timemodified' => 'privacy:metadata:block_deft_room:timemodified',
+            ],
+            'privacy:metadata:block_deft_room'
+        );
+
+        $collection->add_database_table(
             'block_deft_response',
             [
                 'task' => 'privacy:metadata:block_deft_response:task',
@@ -67,6 +87,21 @@ class provider implements
                 'timemodified' => 'privacy:metadata:block_deft_response:timemodified',
             ],
             'privacy:metadata:block_deft_response'
+        );
+
+        $collection->add_database_table(
+            'block_deft_peer',
+            [
+                'task' => 'privacy:metadata:block_deft_peer:task',
+                'userid' => 'privacy:metadata:block_deft_peer:userid',
+                'timecreated' => 'privacy:metadata:block_deft_peer:timecreated',
+                'timemodified' => 'privacy:metadata:block_deft_peer:timemodified',
+                'mute' => 'privacy:metadata:block_deft_peer:mute',
+                'status' => 'privacy:metadata:block_deft_peer:status',
+                'type' => 'privacy:metadata:block_deft_peer:type',
+                'uuid' => 'privacy:metadata:block_deft_peer:uuid',
+            ],
+            'privacy:metadata:block_deft_peer'
         );
 
         return $collection->add_subsystem_link('core_comment', [], 'privacy:metadata:core_comment');
@@ -87,6 +122,45 @@ class provider implements
                    AND userid = :userid";
         $params = [
             'component' => 'block_deft',
+            'userid' => $userid,
+        ];
+
+        $contextlist->add_from_sql($sql, $params);
+
+        $sql = "SELECT c.id
+                  FROM {context} c
+                  JOIN {block_deft} t ON t.instance = c.instanceid
+                 WHERE c.contextlevel = :contextlevel
+                   AND t.usermodified = :userid";
+        $params = [
+            'contextlevel' => CONTEXT_BLOCK,
+            'userid' => $userid,
+        ];
+
+        $contextlist->add_from_sql($sql, $params);
+
+        $sql = "SELECT c.id
+                  FROM {context} c
+                  JOIN {block_deft} t ON t.instance = c.instanceid
+                  JOIN {block_deft_room} r ON t.id = r.itemid
+                 WHERE c.contextlevel = :contextlevel
+                   AND r.component = 'block_deft'
+                   AND r.usermodified = :userid";
+        $params = [
+            'contextlevel' => CONTEXT_BLOCK,
+            'userid' => $userid,
+        ];
+
+        $contextlist->add_from_sql($sql, $params);
+
+        $sql = "SELECT c.id
+                  FROM {context} c
+                  JOIN {block_deft} t ON t.instance = c.instanceid
+                  JOIN {block_deft_peer} p ON t.id = p.taskid
+                 WHERE c.contextlevel = :contextlevel
+                   AND userid = :userid";
+        $params = [
+            'contextlevel' => CONTEXT_BLOCK,
             'userid' => $userid,
         ];
 
@@ -118,7 +192,7 @@ class provider implements
 
         $params = [
             'component' => 'block_deft',
-            'contextlevel' => CONTEXT_BLOCK,
+            'contextid' => $context->id,
         ];
 
         $sql = "SELECT userid as userid
@@ -128,8 +202,47 @@ class provider implements
 
         $userlist->add_from_sql('userid', $sql, $params);
 
+        $sql = "SELECT t.usermodified
+                  FROM {block_deft} t
+                  JOIN {context} c ON t.instance = c.instanceid
+                 WHERE c.contextlevel = :contextlevel
+                   AND c.id = :contextid";
+        $params = [
+            'contextlevel' => CONTEXT_BLOCK,
+            'contextid' => $context->id,
+        ];
+
+        $userlist->add_from_sql('usermodified', $sql, $params);
+
+        $sql = "SELECT p.userid
+                  FROM {block_deft_peer} p
+                  JOIN {block_deft} t ON t.id = p.taskid
+                  JOIN {context} c ON t.instance = c.instanceid
+                 WHERE c.contextlevel = :contextlevel
+                   AND c.id = :contextid";
+        $params = [
+            'contextlevel' => CONTEXT_BLOCK,
+            'contextid' => $context->id,
+        ];
+
+        $userlist->add_from_sql('userid', $sql, $params);
+
+        $sql = "SELECT r.usermodified
+                  FROM {block_deft_room} r
+                  JOIN {block_deft} t ON t.id = r.itemid
+                  JOIN {context} c ON t.instance = c.instanceid
+                 WHERE c.contextlevel = :contextlevel
+                   AND r.component = 'block_deft'
+                   AND c.id = :contextid";
+        $params = [
+            'contextlevel' => CONTEXT_BLOCK,
+            'contextid' => $context->id,
+        ];
+
+        $userlist->add_from_sql('usermodified', $sql, $params);
+
         $sql = "SELECT r.userid
-                  FROM {block_deft_reponse} r
+                  FROM {block_deft_response} r
                   JOIN {block_deft} t ON t.id = r.task
                   JOIN {context} c ON t.instance = c.instanceid
                  WHERE c.contextlevel = :contextlevel
@@ -167,14 +280,49 @@ class provider implements
                     $task->get('id'),
                     []
                 );
+                if ($records = $DB->get_records('block_deft', [
+                    'id' => $task->get('id'),
+                    'usermodified' => $user->id,
+                ], 'id', 'id, usermodified, timemodified')) {
+                    foreach ($records as $record) {
+                        $record->timemodified = \core_privacy\local\request\transform::datetime($record->timemodified);
+                    }
+                    writer::with_context($context)->export_data([
+                        get_string('privacy:tasks', 'block_deft'),
+                    ], (object)$records);
+                }
                 if ($responses = $DB->get_records('block_deft_response', [
                     'task' => $task->get('id'),
                     'userid' => $user->id,
                 ], 'task', 'task, response, timemodified')) {
                     foreach ($responses as $response) {
                         $response->timemodified = \core_privacy\local\request\transform::datetime($response->timemodified);
-                        writer::with_context($context)->export_data([], $response);
                     }
+                    writer::with_context($context)->export_data([
+                        get_string('privacy:responses', 'block_deft'),
+                    ], (object)$responses);
+                }
+                if ($records = $DB->get_records('block_deft_room', [
+                    'itemid' => $task->get('id'),
+                    'component' => 'block_deft',
+                    'usermodified' => $user->id,
+                ], 'itemid', 'itemid, timemodified')) {
+                    foreach ($records as $record) {
+                        $record->timemodified = \core_privacy\local\request\transform::datetime($record->timemodified);
+                    }
+                    writer::with_context($context)->export_data([get_string('privacy:rooms', 'block_deft')], (object)$records);
+                }
+                if ($records = $DB->get_records('block_deft_peer', [
+                    'taskid' => $task->get('id'),
+                    'userid' => $user->id,
+                ], 'taskid', 'id, taskid, mute, status, timecreated, timemodified, type, uuid')) {
+                    foreach ($records as $record) {
+                        $record->timecreated = \core_privacy\local\request\transform::datetime($record->timecreated);
+                        $record->timemodified = \core_privacy\local\request\transform::datetime($record->timemodified);
+                    }
+                    writer::with_context($context)->export_data([
+                        get_string('privacy:connections', 'block_deft'),
+                    ], (object)$records);
                 }
             }
         }
@@ -197,7 +345,21 @@ class provider implements
                   FROM {block_deft} t
                   JOIN {context} c ON t.instance = c.instanceid
                  WHERE c.contextlevel = :contextlevel
-                   AND c.id = :contextid",
+                   AND c.id = :contextid)",
+            [
+                'contextlevel' => CONTEXT_BLOCK,
+                'contextid' => $context->id,
+            ]
+        );
+
+        $DB->delete_records_select(
+            'block_deft_peer',
+            "taskid IN (
+                SELECT t.id
+                  FROM {block_deft} t
+                  JOIN {context} c ON t.instance = c.instanceid
+                 WHERE c.contextlevel = :contextlevel
+                   AND c.id = :contextid)",
             [
                 'contextlevel' => CONTEXT_BLOCK,
                 'contextid' => $context->id,
@@ -220,11 +382,26 @@ class provider implements
         }
 
         $userids = $userlist->get_userids();
-        list($usersql, $userparams) = $DB->get_in_or_equal($userids, SQL_PARAMS_NAMED);
+        list($usersql, $userparams) = $DB->get_in_or_equal($userids, SQL_PARAMS_NAMED, 'params', true, true);
 
         $DB->delete_records_select(
             'block_deft_response',
             "task IN (
+                SELECT t.id
+                  FROM {block_deft} t
+                  JOIN {context} c ON t.instance = c.instanceid
+                 WHERE c.contextlevel = :contextlevel
+                   AND c.id = :contextid
+             ) AND userid $usersql",
+            [
+                'contextlevel' => CONTEXT_BLOCK,
+                'contextid' => $context->id,
+            ] + $userparams
+        );
+
+        $DB->delete_records_select(
+            'block_deft_peer',
+            "taskid IN (
                 SELECT t.id
                   FROM {block_deft} t
                   JOIN {context} c ON t.instance = c.instanceid
@@ -263,6 +440,21 @@ class provider implements
         $DB->delete_records_select(
             'block_deft_response',
             "task IN (
+                 SELECT t.id
+                   FROM {block_deft} t
+                   JOIN {context} c ON t.instance = c.instanceid
+                  WHERE c.contextlevel = :contextlevel
+                    AND c.id $sql
+             ) AND userid = :userid",
+            [
+                'contextlevel' => CONTEXT_BLOCK,
+                'userid' => $userid,
+            ] + $params
+        );
+
+        $DB->delete_records_select(
+            'block_deft_peer',
+            "taskid IN (
                  SELECT t.id
                    FROM {block_deft} t
                    JOIN {context} c ON t.instance = c.instanceid
