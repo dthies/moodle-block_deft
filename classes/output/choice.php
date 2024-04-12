@@ -24,6 +24,7 @@
 namespace block_deft\output;
 
 use cache;
+use context_block;
 use renderable;
 use renderer_base;
 use stdClass;
@@ -36,6 +37,17 @@ use templatable;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class choice extends text implements renderable, templatable {
+    /** @var $config Task configuration */
+    protected $config = null;
+
+    /** @var $context The context of the block */
+    protected $context = null;
+
+    /** @var $state state of task */
+    protected $state = null;
+
+    /** @var $task Task record */
+    protected $task = null;
 
     /**
      * Constructor.

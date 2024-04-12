@@ -37,7 +37,6 @@ use block_deft\socket;
 use block_deft\task;
 use user_picture;
 
-
 /**
  * Class managing venue in Deft response block
  *
@@ -45,6 +44,20 @@ use user_picture;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class venue_manager implements renderable, templatable {
+    /** @var $context The context of the block */
+    protected $context = null;
+
+    /** @var $socket Socket object */
+    protected $socket = null;
+
+    /** @var $task Task configuration */
+    protected $task = null;
+
+    /** @var $messages Stored messages to deliver */
+    protected $messages = null;
+
+    /** @var $sessions Sessions user currently has open */
+    protected $sessions = null;
 
     /**
      * Constructor.

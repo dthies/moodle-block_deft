@@ -59,7 +59,7 @@ export default class JanusManager extends VenueManager {
                                     },
                                     error: function(error) {
                                         Janus.error("  -- Error attaching plugin...", error);
-                                        Notification.alert('', "Error attaching plugin... " + error);
+                                        Notification.alert('', "Error attaching audiobridege plugin... " + error);
                                     },
                                     onmessage: this.onMessage.bind(this),
                                     onremotetrack: (track, mid, on, metadata) => {
@@ -317,6 +317,8 @@ export default class JanusManager extends VenueManager {
                         Notification.alert(
                             "<p>Room <code>" + this.roomid + "</code> is not configured."
                         );
+                    } else if (msg.error_code === 489) {
+                        this.handleClose();
                     } else {
                         Notification.alert(msg.error_code, msg.error);
                     }
@@ -748,6 +750,8 @@ class Publish extends PublishBase {
                         Notification.alert(
                             "<p>Room <code>" + this.roomid + "</code> is not configured."
                         );
+                    } else if (msg.error_code === 489) {
+                        window.close();
                     } else {
                         Notification.alert(msg.error_code, msg.error);
                     }

@@ -41,6 +41,11 @@ use stdClass;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class janus_room {
+    /** @var $task Task configuration */
+    protected $task = null;
+
+    /** @var $record Room database record */
+    protected $record = null;
 
     /**
      * @var Endpoint Server endpoint
@@ -389,5 +394,14 @@ class janus_room {
             'request' => 'listparticipants',
             'room' => $this->roomid,
         ]);
+    }
+
+    /**
+     * Get stored room data
+     *
+     * @return array
+     */
+    public function room_data() {
+        return (array)json_decode($this->record->data);
     }
 }
