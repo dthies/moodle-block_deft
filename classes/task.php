@@ -140,7 +140,7 @@ class task extends persistent {
         $config = $this->get_config();
         if (
             ($this->get('type') == 'venue')
-            && ('peer' != $config->connection ?? 'peer')
+            && ('peer' != ($config->connection ?? 'peer'))
         ) {
             janus_room::remove('block_deft', $this->get('id'));
         }

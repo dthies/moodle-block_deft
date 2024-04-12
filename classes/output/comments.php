@@ -37,6 +37,23 @@ use templatable;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class comments implements renderable, templatable {
+    /** @var $comment Comment objent */
+    protected $comment = null;
+
+    /** @var $config Task configuration */
+    protected $config = null;
+
+    /** @var $context The context of the block */
+    protected $context = null;
+
+    /** @var $options Optional display data */
+    protected $options = null;
+
+    /** @var $state state of task */
+    protected $state = null;
+
+    /** @var $task Task record */
+    protected $task = null;
 
     /**
      * Constructor.

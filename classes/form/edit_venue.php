@@ -174,7 +174,7 @@ class edit_venue extends edit_task {
             if ($data->connection == 'mixed') {
                 $room = new janus_room($task);
             } else {
-                janus_room::remove('blodk_deft', $task->get('id'));
+                janus_room::remove('block_deft', $task->get('id'));
             }
 
             return $returndata;
