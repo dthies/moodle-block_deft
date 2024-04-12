@@ -35,7 +35,7 @@ const submitForm = (e) => {
         if (document.querySelector('[data-id="' + e.detail.id + '"] [data-region="taskinfo"]')) {
             if (e.detail.html) {
                 Templates.replaceNodeContents(
-                    document.querySelector('[data-id="' + e.detail.id + '"] [data-region="taskinfo"]'),
+                    document.querySelector('[data-id="' + e.detail.id + '"] [data-region="taskinfo"]').parentNode,
                     e.detail.html,
                     ''
                 );

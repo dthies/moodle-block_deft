@@ -44,6 +44,17 @@ require_once($CFG->libdir . '/completionlib.php');
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class main implements renderable, templatable {
+    /** @var $context The context of the block */
+    protected $context = null;
+
+    /** @var $config Task configuration */
+    protected $config = null;
+
+    /** @var $socket Socket object */
+    protected $socket = null;
+
+    /** @var $view Content renderable */
+    protected $view = null;
 
     /**
      * Constructor.

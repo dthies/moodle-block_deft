@@ -41,6 +41,20 @@ use templatable;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class summary extends text implements renderable, templatable {
+    /** @var $config Task configuration */
+    protected $config = null;
+
+    /** @var $context The context of the block */
+    protected $context = null;
+
+    /** @var $state state of task */
+    protected $state = null;
+
+    /** @var $task Task record */
+    protected $task = null;
+
+    /** @var $results Result summary */
+    protected $results = null;
 
     /**
      * Constructor.
