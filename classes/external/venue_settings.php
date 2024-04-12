@@ -35,7 +35,6 @@ use core_external\external_value;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class venue_settings extends external_api {
-
     /**
      * Get parameter definition for send_signal.
      *
@@ -107,11 +106,13 @@ class venue_settings extends external_api {
             ]);
         }
 
-        if ($record = $DB->get_record('block_deft_peer', [
+        if (
+            $record = $DB->get_record('block_deft_peer', [
             'id' => $peerid,
             'mute' => $mute,
             'status' => $status,
-        ])) {
+            ])
+        ) {
             // No changes needed.
             return [
                 'status' => false,
@@ -136,19 +137,23 @@ class venue_settings extends external_api {
             'objectid' => $task->id,
         ];
 
-        if ($status && $feed = $DB->get_record_sql("
+        if (
+            $status && $feed = $DB->get_record_sql("
             SELECT f.*
               FROM {block_deft_peer} f
               JOIN {block_deft_peer} p ON p.sessionid = f.sessionid AND p.uuid = f.uuid
-             WHERE f.type = 'video' AND p.id = ?", [$peerid])) {
+             WHERE f.type = 'video' AND p.id = ?", [$peerid])
+        ) {
             $feed->status = $status;
             $feed->timemodified = time();
             $DB->update_record('block_deft_peer', $feed);
 
-            if ($room = $DB->get_record('block_deft_room', [
+            if (
+                $room = $DB->get_record('block_deft_room', [
                 'itemid' => $task->id,
                 'component' => 'block_deft',
-            ])) {
+                ])
+            ) {
                 $data = json_decode($room->plugindata);
                 $data->feed = 0;
                 $room->plugindata = json_encode($data);

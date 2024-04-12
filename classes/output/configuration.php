@@ -25,7 +25,7 @@ namespace block_deft\output;
 
 defined('MOODLE_INTERNAL') || die;
 
-require_once($CFG->dirroot.'/mod/lti/locallib.php');
+require_once($CFG->dirroot . '/mod/lti/locallib.php');
 
 use context_system;
 use moodle_exception;

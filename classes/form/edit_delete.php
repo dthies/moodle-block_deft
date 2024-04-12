@@ -36,7 +36,6 @@ use block_deft\task;
  * @copyright   2022 Daniel Thies <dethies@gmail.com>
  */
 class edit_delete extends edit_task {
-
     /**
      * Form definition
      */

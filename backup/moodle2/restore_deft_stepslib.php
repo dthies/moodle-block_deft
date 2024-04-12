@@ -30,7 +30,6 @@
  * Defines the structure step to restore one deft block.
  */
 class restore_deft_block_structure_step extends restore_structure_step {
-
     /**
      * Defines the structure to be restored.
      */

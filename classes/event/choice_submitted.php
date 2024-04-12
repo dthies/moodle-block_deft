@@ -27,7 +27,6 @@ use core\event\base;
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class choice_submitted extends base {
-
     /**
      * Set all required data properties:
      *
@@ -86,5 +85,4 @@ class choice_submitted extends base {
     public function get_description() {
         return "The user with id '$this->userid' has submitted choice in task with id '$this->objectid'.";
     }
-
 }

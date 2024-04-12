@@ -34,7 +34,6 @@ use core_external\external_api;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class send_signal extends external_api {
-
     /**
      * Get parameter definition for send_signal.
      *

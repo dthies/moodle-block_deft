@@ -28,7 +28,7 @@ defined('MOODLE_INTERNAL') || die();
 // More information about the backup process: {@link https://docs.moodle.org/dev/Backup_API}.
 // More information about the restore process: {@link https://docs.moodle.org/dev/Restore_API}.
 
-require_once($CFG->dirroot.'//blocks/deft/backup/moodle2/restore_deft_stepslib.php');
+require_once($CFG->dirroot . '/blocks/deft/backup/moodle2/restore_deft_stepslib.php');
 
 /**
  * Restore task for block_deft.
@@ -37,7 +37,6 @@ require_once($CFG->dirroot.'//blocks/deft/backup/moodle2/restore_deft_stepslib.p
  * @copyright   2022 Daniel Thies <dethies@gmail.com>
  */
 class restore_deft_block_task extends restore_block_task {
-
     /**
      * Defines particular settings that the block can have.
      */

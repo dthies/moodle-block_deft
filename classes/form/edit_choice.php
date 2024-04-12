@@ -36,7 +36,6 @@ use block_deft\task;
  * @copyright   2022 Daniel Thies <dethies@gmail.com>
  */
 class edit_choice extends edit_task {
-
     /**
      * @var string $type type of task
      */
@@ -87,8 +86,16 @@ class edit_choice extends edit_task {
         $mform->setType('option', PARAM_CLEANHTML);
 
         $repeateloptions = [];
-        $this->repeat_elements($repeatarray, $repeatno,
-        $repeateloptions, 'option_repeats', 'option_add_fields', 3, null, true);
+        $this->repeat_elements(
+            $repeatarray,
+            $repeatno,
+            $repeateloptions,
+            'option_repeats',
+            'option_add_fields',
+            3,
+            null,
+            true
+        );
     }
 
     /**

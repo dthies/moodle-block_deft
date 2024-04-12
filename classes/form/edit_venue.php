@@ -38,7 +38,6 @@ use block_deft\janus_room;
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class edit_venue extends edit_task {
-
     /** @var {string} $type Type of task */
     protected $type = 'venue';
 

@@ -36,7 +36,6 @@ use block_deft\task;
  * @copyright   2022 Daniel Thies <dethies@gmail.com>
  */
 class edit_move extends edit_task {
-
     /**
      * Form definition
      */
@@ -49,7 +48,6 @@ class edit_move extends edit_task {
         $mform->addElement('hidden', 'contextid', $this->get_context_for_dynamic_submission()->id);
         $mform->setType('contextid', PARAM_INT);
         $mform->addElement('hidden', 'position', '', '');
-
     }
 
     /**
@@ -92,7 +90,7 @@ class edit_move extends edit_task {
         $socket->dispatch();
 
         return [
-            'order' => array_map(function($task) {
+            'order' => array_map(function ($task) {
                 return $task->get('id');
             }, $tasks),
         ];

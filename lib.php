@@ -260,7 +260,6 @@ function block_deft_output_fragment_test($args) {
     $socket->dispatch();
 
     return get_string('messagesent', 'block_deft');
-
 }
 
 /**
@@ -342,7 +341,7 @@ function block_deft_pluginfile($course, $birecordorcm, $context, $filearea, $arg
 
     $filename = array_pop($args);
     $taskid = array_shift($args);
-    $filepath = $args ? '/'.implode('/', $args).'/' : '/';
+    $filepath = $args ? '/' . implode('/', $args) . '/' : '/';
 
     if ((!$file = $fs->get_file($context->id, 'block_deft', 'venue', $taskid, $filepath, $filename)) || $file->is_directory()) {
         send_file_not_found();
@@ -415,7 +414,7 @@ function block_deft_output_fragment_venue_manager($args) {
  * @param  array  $args The path (the part after the filearea and before the filename).
  * @return array The itemid and the filepath inside the $args path, for the defined filearea.
  */
-function block_deft_get_path_from_pluginfile(string $filearea, array $args) : array {
+function block_deft_get_path_from_pluginfile(string $filearea, array $args): array {
     // This block stores files in venues that are identified by a task id.
     $taskid = array_shift($args);
 

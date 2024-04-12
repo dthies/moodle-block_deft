@@ -28,14 +28,13 @@ defined('MOODLE_INTERNAL') || die();
 // More information about the backup process: {@link https://docs.moodle.org/dev/Backup_API}.
 // More information about the restore process: {@link https://docs.moodle.org/dev/Restore_API}.
 
-require_once($CFG->dirroot.'//blocks/deft/backup/moodle2/backup_deft_stepslib.php');
+require_once($CFG->dirroot . '/blocks/deft/backup/moodle2/backup_deft_stepslib.php');
 
 /**
  * Provides all the settings and steps to perform a complete backup of block_deft.
  * @package     block_deft
  */
 class backup_deft_block_task extends backup_block_task {
-
     /**
      * Defines particular settings for the plugin.
      */

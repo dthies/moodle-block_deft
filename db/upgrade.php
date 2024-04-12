@@ -35,7 +35,6 @@ function xmldb_block_deft_upgrade($oldversion) {
     $dbman = $DB->get_manager();
 
     if ($oldversion < 2022111414) {
-
         // Define table block_deft_peer to be created.
         $table = new xmldb_table('block_deft_peer');
 
@@ -86,7 +85,6 @@ function xmldb_block_deft_upgrade($oldversion) {
     }
 
     if ($oldversion < 2023040401) {
-
         // Define table block_deft_room to be created.
         $table = new xmldb_table('block_deft_room');
 
@@ -118,7 +116,6 @@ function xmldb_block_deft_upgrade($oldversion) {
     }
 
     if ($oldversion < 2023042908) {
-
         // Define field type to be added to block_deft_peer.
         $table = new xmldb_table('block_deft_peer');
         $field = new xmldb_field('type', XMLDB_TYPE_CHAR, '40', null, null, null, 'venue', 'status');
@@ -133,7 +130,6 @@ function xmldb_block_deft_upgrade($oldversion) {
     }
 
     if ($oldversion < 2023042910) {
-
         // Define field token to be added to block_deft_room.
         $table = new xmldb_table('block_deft_room');
         $field = new xmldb_field('token', XMLDB_TYPE_CHAR, '40', null, null, null, null, 'data');

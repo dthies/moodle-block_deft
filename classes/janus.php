@@ -37,7 +37,6 @@ use stdClass;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class janus {
-
     /**
      * @var Session id
      */
@@ -53,7 +52,7 @@ class janus {
      *
      * @param int|null $session Session handle if previously attached
      */
-    public function __construct (?int $session = null) {
+    public function __construct(?int $session = null) {
         if ($session) {
             $this->session = $session;
         } else {

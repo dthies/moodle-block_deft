@@ -40,7 +40,6 @@ use block_deft\task;
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class comments extends text {
-
     /**
      * Gets recordset of all blocks of this type modified since given time within the given context.
      *
@@ -62,10 +61,10 @@ class comments extends text {
         global $DB;
 
         // Get context restrictions.
-        list ($contextjoin, $contextparams) = $this->get_context_restriction_sql($context, 'bi');
+         [$contextjoin, $contextparams] = $this->get_context_restriction_sql($context, 'bi');
 
         // Get custom restrictions for block type.
-        list ($restrictions, $restrictionparams) = $this->get_indexing_restrictions();
+         [$restrictions, $restrictionparams] = $this->get_indexing_restrictions();
         if ($restrictions) {
             $restrictions = 'AND ' . $restrictions;
         }
@@ -73,7 +72,8 @@ class comments extends text {
         // Query for all entries in block_instances for this type of block, within the specified
         // context. The query is based on the one from get_recordset_by_timestamp and applies the
         // same restrictions.
-        return $DB->get_recordset_sql("
+        return $DB->get_recordset_sql(
+            "
                 SELECT cmt.id, cmt.timecreated AS timemodified, cmt.content, bd.configdata, cmt.userid,
                        c.id AS courseid, x.id AS contextid
                   FROM {block_instances} bi
@@ -94,7 +94,7 @@ class comments extends text {
                        AND cmt.commentarea = 'task'
                        $restrictions
               ORDER BY cmt.timecreated ASC",
-                array_merge($contextparams, [
+            array_merge($contextparams, [
                     CONTEXT_BLOCK, CONTEXT_MODULE, CONTEXT_COURSE,
                     $modifiedfrom,
                     $this->get_block_name(),
@@ -185,7 +185,7 @@ class comments extends text {
      * @param \core_search\document $doc
      * @return \core_search\document_icon
      */
-    public function get_doc_icon(document $doc) : document_icon {
+    public function get_doc_icon(document $doc): document_icon {
         return new document_icon('i/feedback');
     }
 }

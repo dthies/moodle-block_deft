@@ -109,7 +109,7 @@ class mobile {
             'templates' => [
                 [
                     'id' => 'main',
-                    'html' => '<div>'.$html.'</div>',
+                    'html' => '<div>' . $html . '</div>',
                 ],
             ],
             'javascript' => self::template_js(),
@@ -265,14 +265,16 @@ class mobile {
         $socket = new \block_deft\socket($context);
         $iceservers = json_encode($socket->ice_servers());
         $timecreated = time();
-        if ($peerid = $DB->get_field('block_deft_peer', 'id', [
+        if (
+            $peerid = $DB->get_field('block_deft_peer', 'id', [
             'userid' => $USER->id,
             'taskid' => $task->get('id'),
             'status' => 0,
             'sessionid' => null,
             'type' => 'venue',
             'uuid' => $args['uuid'],
-        ])) {
+            ])
+        ) {
             $DB->set_field('block_deft_peer', 'status', 1, [
                 'userid' => $USER->id,
                 'taskid' => $task->get('id'),

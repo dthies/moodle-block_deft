@@ -34,14 +34,17 @@ require_once($CFG->dirroot . '/mod/lti/locallib.php');
  * @copyright Daniel Thies
  */
 class admin_setting_deftoverview extends admin_setting {
-
     /**
      * Calls parent::__construct with specific arguments
      */
     public function __construct() {
         $this->nosave = true;
-        parent::__construct('blockdeftoverviewui',
-            new lang_string('overview', 'block_deft'), '', '');
+        parent::__construct(
+            'blockdeftoverviewui',
+            new lang_string('overview', 'block_deft'),
+            '',
+            ''
+        );
     }
 
     /**
@@ -80,7 +83,7 @@ class admin_setting_deftoverview extends admin_setting {
      * @param string $query
      * @return string
      */
-    public function output_html($data, $query='') {
+    public function output_html($data, $query = '') {
         global $DB, $OUTPUT;
 
         $return = "";

@@ -25,7 +25,6 @@ use block_deft\task;
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class block_deft extends block_base {
-
     /**
      * Initializes class member variables.
      */

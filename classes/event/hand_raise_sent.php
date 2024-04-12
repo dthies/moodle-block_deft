@@ -27,7 +27,6 @@ use core\event\base;
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class hand_raise_sent extends base {
-
     /**
      * Set all required data properties:
      *
@@ -86,5 +85,4 @@ class hand_raise_sent extends base {
     public function get_description() {
         return "The user with id '$this->userid' has raised hand in venue with task id '$this->objectid'.";
     }
-
 }

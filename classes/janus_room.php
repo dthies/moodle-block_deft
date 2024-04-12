@@ -107,7 +107,7 @@ class janus_room {
      *
      * @param task $task Task associated with venue
      */
-    public function __construct (task $task) {
+    public function __construct(task $task) {
         global $DB, $USER;
 
         if (
@@ -121,10 +121,12 @@ class janus_room {
         $this->task = $task;
         $this->itemid = $task->get('id');
 
-        if (!$record = $DB->get_record('block_deft_room', [
+        if (
+            !$record = $DB->get_record('block_deft_room', [
             'component' => $this->component,
             'itemid' => $this->itemid,
-        ])) {
+            ])
+        ) {
             $records = $DB->get_records('block_deft_room', ['itemid' => null]);
             if ($record = reset($records)) {
                 $record->itemid = $this->itemid;
@@ -372,10 +374,12 @@ class janus_room {
     public static function remove($component, $itemid) {
         global $DB, $USER;
 
-        if ($record = $DB->get_record('block_deft_room', [
+        if (
+            $record = $DB->get_record('block_deft_room', [
             'component' => $component,
             'itemid' => $itemid,
-        ])) {
+            ])
+        ) {
             $record->itemid = null;
             $record->component = '';
             $record->timemodified = time();

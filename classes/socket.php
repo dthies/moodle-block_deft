@@ -43,7 +43,6 @@ require_once($CFG->dirroot . '/mod/lti/locallib.php');
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class socket {
-
     /**
      * @var Area
      */
@@ -80,7 +79,7 @@ class socket {
      * @param context $context Context of block
      * @param int|null $itemid Optional item id
      */
-    public function __construct (context $context, ?int $itemid = null) {
+    public function __construct(context $context, ?int $itemid = null) {
         $this->context = $context;
         $this->itemid = $itemid;
     }
@@ -198,7 +197,6 @@ class socket {
         } catch (moodle_exception $e) {
             return;
         }
-
     }
 
     /**
