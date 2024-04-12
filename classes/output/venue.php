@@ -83,18 +83,20 @@ class venue implements renderable, templatable {
         if (!empty($SESSION->deft_session)) {
             $settings = $DB->get_record('block_deft_peer', [
                 'id' => $SESSION->deft_session->peerid,
-                'taskid' => $this->task->id ,
+                'taskid' => $this->task->id,
             ]);
         }
 
-        $lastmodified = $DB->get_field_sql('
+        $lastmodified = $DB->get_field_sql(
+            '
             SELECT MAX(p.timemodified)
               FROM {block_deft_peer} p
              WHERE p.taskid = ?',
             [$this->task->id]
         );
         if (has_capability('block/deft:joinvenue', $this->context)) {
-            $peers = $DB->get_records_sql("
+            $peers = $DB->get_records_sql(
+                "
                 SELECT p.id AS peerid, p.mute, u.*
                   FROM {block_deft_peer} p
              LEFT JOIN {sessions} s ON p.sessionid = s.id

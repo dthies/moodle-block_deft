@@ -35,7 +35,6 @@ use block_deft\janus_room;
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class cleanup extends \core\task\scheduled_task {
-
     /**
      * Name for this task.
      *

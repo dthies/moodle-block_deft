@@ -33,7 +33,6 @@ use plugin_renderer_base;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class renderer extends plugin_renderer_base {
-
     /**
      * Return the main content for the block.
      *
@@ -41,7 +40,9 @@ class renderer extends plugin_renderer_base {
      * @return string HTML string
      */
     public function render_main(main $main) {
-        return $this->render_from_template('block_deft/main',
-            $main->export_for_template($this));
+        return $this->render_from_template(
+            'block_deft/main',
+            $main->export_for_template($this)
+        );
     }
 }

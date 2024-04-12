@@ -44,7 +44,6 @@ use block_deft\task;
  * @copyright   2022 Daniel Thies <dethies@gmail.com>
  */
 class add_comment extends dynamic_form {
-
     /**
      * Form definition
      */

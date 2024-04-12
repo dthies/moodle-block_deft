@@ -40,19 +40,16 @@ use core_privacy\local\request\writer;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class provider implements
-        // The block_deft block stores user provided data.
-        \core_privacy\local\metadata\provider,
-        \core_privacy\local\request\core_userlist_provider,
-        // The block_deft block provides data directly to core.
-        \core_privacy\local\request\plugin\provider {
-
+    \core_privacy\local\request\core_userlist_provider,
+    \core_privacy\local\metadata\provider,
+    \core_privacy\local\request\plugin\provider {
     /**
      * Returns meta data about this system.
      *
      * @param collection $collection
      * @return collection
      */
-    public static function get_metadata(collection $collection) : collection {
+    public static function get_metadata(collection $collection): collection {
 
         $collection->add_external_location_link('lti_client', [
             'context' => 'privacy:metadata:lti_client:context',
@@ -113,7 +110,7 @@ class provider implements
      * @param int $userid
      * @return contextlist
      */
-    public static function get_contexts_for_userid(int $userid) : contextlist {
+    public static function get_contexts_for_userid(int $userid): contextlist {
         $contextlist = new contextlist();
 
         $sql = "SELECT contextid
@@ -280,10 +277,12 @@ class provider implements
                     $task->get('id'),
                     []
                 );
-                if ($records = $DB->get_records('block_deft', [
+                if (
+                    $records = $DB->get_records('block_deft', [
                     'id' => $task->get('id'),
                     'usermodified' => $user->id,
-                ], 'id', 'id, usermodified, timemodified')) {
+                    ], 'id', 'id, usermodified, timemodified')
+                ) {
                     foreach ($records as $record) {
                         $record->timemodified = \core_privacy\local\request\transform::datetime($record->timemodified);
                     }
@@ -291,10 +290,12 @@ class provider implements
                         get_string('privacy:tasks', 'block_deft'),
                     ], (object)$records);
                 }
-                if ($responses = $DB->get_records('block_deft_response', [
+                if (
+                    $responses = $DB->get_records('block_deft_response', [
                     'task' => $task->get('id'),
                     'userid' => $user->id,
-                ], 'task', 'task, response, timemodified')) {
+                    ], 'task', 'task, response, timemodified')
+                ) {
                     foreach ($responses as $response) {
                         $response->timemodified = \core_privacy\local\request\transform::datetime($response->timemodified);
                     }
@@ -302,20 +303,24 @@ class provider implements
                         get_string('privacy:responses', 'block_deft'),
                     ], (object)$responses);
                 }
-                if ($records = $DB->get_records('block_deft_room', [
+                if (
+                    $records = $DB->get_records('block_deft_room', [
                     'itemid' => $task->get('id'),
                     'component' => 'block_deft',
                     'usermodified' => $user->id,
-                ], 'itemid', 'itemid, timemodified')) {
+                    ], 'itemid', 'itemid, timemodified')
+                ) {
                     foreach ($records as $record) {
                         $record->timemodified = \core_privacy\local\request\transform::datetime($record->timemodified);
                     }
                     writer::with_context($context)->export_data([get_string('privacy:rooms', 'block_deft')], (object)$records);
                 }
-                if ($records = $DB->get_records('block_deft_peer', [
+                if (
+                    $records = $DB->get_records('block_deft_peer', [
                     'taskid' => $task->get('id'),
                     'userid' => $user->id,
-                ], 'taskid', 'id, taskid, mute, status, timecreated, timemodified, type, uuid')) {
+                    ], 'taskid', 'id, taskid, mute, status, timecreated, timemodified, type, uuid')
+                ) {
                     foreach ($records as $record) {
                         $record->timecreated = \core_privacy\local\request\transform::datetime($record->timecreated);
                         $record->timemodified = \core_privacy\local\request\transform::datetime($record->timemodified);
@@ -382,7 +387,7 @@ class provider implements
         }
 
         $userids = $userlist->get_userids();
-        list($usersql, $userparams) = $DB->get_in_or_equal($userids, SQL_PARAMS_NAMED, 'params', true, true);
+        [$usersql, $userparams] = $DB->get_in_or_equal($userids, SQL_PARAMS_NAMED, 'params', true, true);
 
         $DB->delete_records_select(
             'block_deft_response',
@@ -435,7 +440,7 @@ class provider implements
         foreach ($contextlist->get_contexts() as $context) {
             $contextids[] = $context->id;
         }
-        list($sql, $params) = $DB->get_in_or_equal( $contextids, SQL_PARAMS_NAMED);
+        [$sql, $params] = $DB->get_in_or_equal($contextids, SQL_PARAMS_NAMED);
 
         $DB->delete_records_select(
             'block_deft_response',

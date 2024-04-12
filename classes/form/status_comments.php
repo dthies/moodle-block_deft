@@ -37,7 +37,6 @@ use block_deft\task;
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class status_comments extends status_task {
-
     /**
      * Form definition
      */

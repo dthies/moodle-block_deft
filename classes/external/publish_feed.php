@@ -38,7 +38,6 @@ use stdClass;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class publish_feed extends external_api {
-
     /**
      * Get parameter definition for raise hand
      *
@@ -99,11 +98,13 @@ class publish_feed extends external_api {
             'component' => 'block_deft',
         ]);
         $data = json_decode($record->data) ?? new stdClass();
-        if (!$publish && !empty($data->feed) && $DB->get_record_select(
-            'block_deft_peer',
-            "type = 'video' AND id = :feed",
-            ['feed' => $data->feed]
-        )) {
+        if (
+            !$publish && !empty($data->feed) && $DB->get_record_select(
+                'block_deft_peer',
+                "type = 'video' AND id = :feed",
+                ['feed' => $data->feed]
+            )
+        ) {
             $DB->set_field('block_deft_peer', 'status', 1, [
                 'id' => $data->feed,
             ]);

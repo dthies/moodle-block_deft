@@ -37,7 +37,6 @@ use block_deft\task;
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class edit_comments extends edit_task {
-
     /** @var {string} $type Type of task */
     protected $type = 'comments';
 

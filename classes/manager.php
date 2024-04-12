@@ -54,7 +54,7 @@ class manager implements renderable, templatable {
      *
      * @param context $context Context of block
      */
-    public function __construct ($context) {
+    public function __construct($context) {
         global $DB;
 
         $this->context = $context;

@@ -40,7 +40,6 @@ use block_deft\task;
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class text extends \core_search\base_block {
-
     /**
      * Gets recordset of all blocks of this type modified since given time within the given context.
      *
@@ -62,10 +61,10 @@ class text extends \core_search\base_block {
         global $DB;
 
         // Get context restrictions.
-        list ($contextjoin, $contextparams) = $this->get_context_restriction_sql($context, 'bi');
+         [$contextjoin, $contextparams] = $this->get_context_restriction_sql($context, 'bi');
 
         // Get custom restrictions for block type.
-        list ($restrictions, $restrictionparams) = $this->get_indexing_restrictions();
+         [$restrictions, $restrictionparams] = $this->get_indexing_restrictions();
         if ($restrictions) {
             $restrictions = 'AND ' . $restrictions;
         }
@@ -73,7 +72,8 @@ class text extends \core_search\base_block {
         // Query for all entries in block_instances for this type of block, within the specified
         // context. The query is based on the one from get_recordset_by_timestamp and applies the
         // same restrictions.
-        return $DB->get_recordset_sql("
+        return $DB->get_recordset_sql(
+            "
                 SELECT bd.id, bd.timemodified, bd.timecreated, bd.configdata,
                        c.id AS courseid, x.id AS contextid
                   FROM {block_instances} bi
@@ -91,7 +91,7 @@ class text extends \core_search\base_block {
                        AND bd.type = 'text'
                        $restrictions
               ORDER BY bd.timemodified ASC",
-                array_merge($contextparams, [
+            array_merge($contextparams, [
                     CONTEXT_BLOCK, CONTEXT_MODULE, CONTEXT_COURSE,
                     $modifiedfrom, $this->get_block_name(), CONTEXT_COURSE, 'course-view-%',
                 ], $restrictionparams)
@@ -123,8 +123,11 @@ class text extends \core_search\base_block {
      */
     public function get_document($record, $options = []) {
         // Create empty document.
-        $doc = \core_search\document_factory::instance($record->id,
-                $this->componentname, $this->areaname);
+        $doc = \core_search\document_factory::instance(
+            $record->id,
+            $this->componentname,
+            $this->areaname
+        );
 
         // Get stdclass object with data from DB.
         $data = json_decode($record->configdata);
@@ -149,8 +152,10 @@ class text extends \core_search\base_block {
         $doc->set('owneruserid', \core_search\manager::NO_OWNER_ID);
 
         // Mark document new if appropriate.
-        if (isset($options['lastindexedtime']) &&
-                ($options['lastindexedtime'] < $record->timecreated)) {
+        if (
+            isset($options['lastindexedtime']) &&
+                ($options['lastindexedtime'] < $record->timecreated)
+        ) {
             // If the document was created after the last index time, it must be new.
             $doc->set_is_new(true);
         }
@@ -199,8 +204,10 @@ class text extends \core_search\base_block {
         } else {
             // The block is at course level. Let's check the page type, although in practice we
             // currently only support the course main page.
-            if ($instance->pagetypepattern === '*' || $instance->pagetypepattern === 'course-*' ||
-                    preg_match('~^course-view-(.*)$~', $instance->pagetypepattern)) {
+            if (
+                $instance->pagetypepattern === '*' || $instance->pagetypepattern === 'course-*' ||
+                    preg_match('~^course-view-(.*)$~', $instance->pagetypepattern)
+            ) {
                 return new \moodle_url('/course/view.php', ['id' => $courseid], $anchor);
             } else if ($instance->pagetypepattern === 'site-index') {
                 return new \moodle_url('/', ['redirect' => 0], $anchor);
@@ -253,8 +260,10 @@ class text extends \core_search\base_block {
         // Check block has not been moved to an unsupported area since it was indexed. (At the
         // moment, only blocks within site and course context are supported, also only certain
         // page types).
-        if (!$instance->courseid ||
-                !self::is_supported_page_type_at_course_context($instance->pagetypepattern)) {
+        if (
+            !$instance->courseid ||
+                !self::is_supported_page_type_at_course_context($instance->pagetypepattern)
+        ) {
             return manager::ACCESS_DELETED;
         }
 
@@ -280,7 +289,7 @@ class text extends \core_search\base_block {
      * @param \core_search\document $doc
      * @return \core_search\document_icon
      */
-    public function get_doc_icon(document $doc) : document_icon {
+    public function get_doc_icon(document $doc): document_icon {
         return new document_icon('f/visual_blocks');
     }
 }

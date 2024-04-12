@@ -38,10 +38,15 @@ if ($hassiteconfig) {
 
         $settings->add(new admin_setting_deftoverview());
 
-        $settings->add(new admin_setting_configtext_with_maxlength('block_deft/throttle',
+        $settings->add(new admin_setting_configtext_with_maxlength(
+            'block_deft/throttle',
             new lang_string('throttle', 'block_deft'),
-            new lang_string('throttle_desc', 'block_deft'), 100, PARAM_INT, null, 10)
-        );
+            new lang_string('throttle_desc', 'block_deft'),
+            100,
+            PARAM_INT,
+            null,
+            10
+        ));
 
         // Venue options heading.
         $settings->add(new admin_setting_heading(
@@ -79,12 +84,13 @@ if ($hassiteconfig) {
             48000 => 48000,
             96000 => 96000,
         ];
-        $settings->add(new admin_setting_configselect('block_deft/samplerate',
+        $settings->add(new admin_setting_configselect(
+            'block_deft/samplerate',
             new lang_string('samplerate', 'block_deft'),
             new lang_string('samplerate_desc', 'block_deft'),
             11025,
-            $options)
-        );
+            $options
+        ));
 
         $link = '<a href="https://deftly.us" target="_blank">deftly.us</a>';
         $settings->add(new admin_setting_configcheckbox(

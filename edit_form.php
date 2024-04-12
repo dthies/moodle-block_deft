@@ -22,7 +22,6 @@
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class block_deft_edit_form extends block_edit_form {
-
     /**
      * Extends the configuration form for block_deft.
      *

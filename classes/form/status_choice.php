@@ -36,7 +36,6 @@ use block_deft\task;
  * @copyright   2022 Daniel Thies <dethies@gmail.com>
  */
 class status_choice extends status_task {
-
     /**
      * Form definition
      */

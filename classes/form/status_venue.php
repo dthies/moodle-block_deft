@@ -32,7 +32,6 @@ namespace block_deft\form;
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class status_venue extends status_task {
-
     /**
      * Form definition
      */
@@ -66,11 +65,11 @@ class status_venue extends status_task {
                 'id, userid'
             );
             $context = $this->get_context_for_dynamic_submission();
-            $peers = array_filter($peers, function($userid) use ($context) {
+            $peers = array_filter($peers, function ($userid) use ($context) {
                 return !has_capability('block/deft:moderate', $context, $userid);
             });
             if (!empty($peers)) {
-                list($sql, $params) = $DB->get_in_or_equal(array_keys($peers));
+                [$sql, $params] = $DB->get_in_or_equal(array_keys($peers));
                 $DB->set_field_select('block_deft_peer', 'status', 1, "id $sql", $params);
                 $params = [
                     'context' => $context,

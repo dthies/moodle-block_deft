@@ -40,7 +40,6 @@ use block_deft\socket;
  * @copyright   2022 Daniel Thies <dethies@gmail.com>
  */
 class status_task extends edit_task {
-
     /** @var config data */
     protected $configdata;
 

@@ -152,7 +152,7 @@ class venue_manager implements renderable, templatable {
         ]);
 
         $config = $this->task->get_config();
-        list($roomid, $roomtoken, $server) = $this->get_room();
+        [$roomid, $roomtoken, $server] = $this->get_room();
 
         return [
             'autogaincontrol' => !empty(get_config('block_deft', 'autogaincontrol')),
@@ -236,7 +236,8 @@ class venue_manager implements renderable, templatable {
             'lastsignal' => $lastsignal,
         ]);
 
-        return $DB->get_records_sql('
+        return $DB->get_records_sql(
+            '
             SELECT s.id, s.frompeer, s.message, s.type
               FROM {block_deft_signal} s
               JOIN {block_deft_peer} p ON p.id = s.frompeer

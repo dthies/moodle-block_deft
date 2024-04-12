@@ -27,7 +27,6 @@ use core\event\base;
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class audiobridge_launched extends base {
-
     /**
      * Set all required data properties:
      *
@@ -86,5 +85,4 @@ class audiobridge_launched extends base {
     public function get_description() {
         return "The user with id '$this->userid' joined audiobridge in venue for task with id '$this->objectid'.";
     }
-
 }
