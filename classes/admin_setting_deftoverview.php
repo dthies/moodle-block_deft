@@ -32,6 +32,7 @@ require_once($CFG->dirroot . '/mod/lti/locallib.php');
  *
  * @package block_deft
  * @copyright Daniel Thies
+ * @license https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class admin_setting_deftoverview extends admin_setting {
     /**
