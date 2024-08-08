@@ -1,6 +1,7 @@
 # Deft response block #
 
-Provides polling and chat that update live without reloading main activity
+Provides polling and chat that update live without reloading main activity as
+well and text, audio and video sharing.
 
 Teachers may configure a number of questions or prompts in the block
 and change the visibilities and other conditions of the items. Comments
