@@ -214,7 +214,7 @@ class task extends persistent {
             'objectid' => $this->get('id'),
         ];
 
-        $event = task_created::create($params);
+        $event = \block_deft\event\task_created::create($params);
         $event->trigger();
     }
 }

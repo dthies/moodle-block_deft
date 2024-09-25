@@ -117,8 +117,12 @@ jobs:
         run: moodle-plugin-ci grunt
 
       - name: PHPUnit tests
-        if: ${{ always() }}
-        run: moodle-plugin-ci phpunit
+        if: ${{ matrix.moodle-branch == 'main' }}
+        run: moodle-plugin-ci phpunit --coverage-text
+
+      - name: PHPUnit tests
+        if: ${{ matrix.moodle-branch != 'main' }}
+        run: moodle-plugin-ci phpunit 
 
       - name: Behat features
         if: ${{ always() }}

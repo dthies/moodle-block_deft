@@ -14,6 +14,8 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
+use block_deft\task;
+
 /**
  * Recently accessed courses block data generator class.
  *
@@ -23,4 +25,33 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class block_deft_generator extends testing_block_generator {
+    /**
+     * Create task
+     *
+     * @param int $instanceid Block instance id
+     * @param array $options
+     * @param array $data
+     * @return task
+     */
+    public function create_task(int $instanceid, $options = [], $data = []): task {
+        global $USER;
+
+        $record = new stdClass();
+        $record->instance = $instanceid;
+        $record->type = $options->type ?? 'text';
+        $record->sortorder = task::count_records(['instance' => $instanceid]);
+        $record->timecreated = $options->timecreated ?? 100;
+        $record->timemodified = $options->timecreated ?? 100;
+        $record->usercreated = $USER->id;
+        $record->usermodified = $USER->id;
+        $record->visible = 0;
+        $record->configdata = json_encode($data);
+        $record->statedata = $options->statedata ?? '{}';
+
+        $task = new task(0, $record);
+
+        $task->create();
+
+        return $task;
+    }
 }
