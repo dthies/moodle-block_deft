@@ -23,8 +23,6 @@
  */
 namespace block_deft\output;
 
-defined('MOODLE_INTERNAL') || die();
-
 use cache;
 use moodle_url;
 use renderable;
@@ -33,9 +31,6 @@ use stdClass;
 use templatable;
 use block_deft\socket;
 use block_deft\task;
-
-require_once($CFG->dirroot . '/course/lib.php');
-require_once($CFG->libdir . '/completionlib.php');
 
 /**
  * Class containing data for deft choice block.

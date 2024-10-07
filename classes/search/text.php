@@ -57,7 +57,7 @@ class text extends \core_search\base_block {
      * @param \context|null $context Context to find blocks within
      * @return false|\moodle_recordset|null
      */
-    public function get_document_recordset($modifiedfrom = 0, \context $context = null) {
+    public function get_document_recordset($modifiedfrom = 0, ?\context $context = null) {
         global $DB;
 
         // Get context restrictions.
