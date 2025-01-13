@@ -17,7 +17,7 @@
 use block_deft\task;
 
 /**
- * Recently accessed courses block data generator class.
+ * Recently Deft response block data generator class.
  *
  * @package    block_deft
  * @category   test
@@ -35,6 +35,8 @@ class block_deft_generator extends testing_block_generator {
      */
     public function create_task(int $instanceid, $options = [], $data = []): task {
         global $USER;
+
+        $options = (object)$options;
 
         $record = new stdClass();
         $record->instance = $instanceid;
