@@ -56,4 +56,23 @@ class block_deft_generator extends testing_block_generator {
 
         return $task;
     }
+
+    /**
+     * Create response
+     *
+     * @param task $task Task
+     * @param int $option Choice
+     * @return string
+     */
+    public function create_response(task $task, int $option) {
+        global $USER;
+
+        $context = \context_block::instance($task->get('instance'));
+
+        return block_deft_output_fragment_choose([
+            'context' => $context,
+            'id' => (string)$task->get('id'),
+            'option' => $option,
+        ]);
+    }
 }

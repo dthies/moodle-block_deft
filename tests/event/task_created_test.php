@@ -28,6 +28,7 @@ use block_deft\task;
  * @package    block_deft
  * @copyright  2024 Daniel Thies <dethies@gmail.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @group      block_deft
  */
 final class task_created_test extends advanced_testcase {
     /**
