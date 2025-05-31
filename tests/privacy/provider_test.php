@@ -37,6 +37,8 @@ use core_privacy\local\request\writer;
  */
 final class provider_test extends provider_testcase {
     /** @var array */
+    protected $tasks = [];
+    /** @var array */
     protected $users = [];
     /** @var array */
     protected $instance = null;
@@ -76,6 +78,7 @@ final class provider_test extends provider_testcase {
                 'Scissors',
             ],
         ]);
+        $this->tasks[1] = $task;
 
         // User 2.
         $this->setUser($this->users[2]);
@@ -169,6 +172,7 @@ final class provider_test extends provider_testcase {
         provider::export_user_data($appctx);
         $this->assertTrue($writer->has_any_data());
         $subcontext = [
+            get_string('privacy:task', 'block_deft', $this->tasks[1]->get('id')),
             get_string('privacy:responses', 'block_deft'),
         ];
         $data = (array)$writer->get_data($subcontext);
@@ -193,6 +197,7 @@ final class provider_test extends provider_testcase {
         provider::export_user_data($appctx);
         $this->assertTrue($writer->has_any_data());
         $subcontext = [
+            get_string('privacy:task', 'block_deft', $this->tasks[1]->get('id')),
             get_string('privacy:responses', 'block_deft'),
         ];
         $data = (array)$writer->get_data($subcontext);

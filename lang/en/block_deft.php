@@ -141,6 +141,7 @@ $string['privacy:metadata:lti_client'] = 'LTI connection to deftly.us';
 $string['privacy:metadata:lti_client:context'] = 'The Deft response block configures an external LTI connection to send messages that user information in a particular Moodle context may have been updated; however, no actual infomation is exported. The block loads a client that connects to the external site to recieve messages, but does not provide information other than establishing the connection.';
 $string['privacy:responses'] = 'Responses';
 $string['privacy:rooms'] = 'Rooms';
+$string['privacy:task'] = 'Task {$a}';
 $string['privacy:tasks'] = 'Tasks';
 $string['raisehand'] = 'Raise hand';
 $string['reconnecting'] = 'Reconnecting';

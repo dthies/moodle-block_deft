@@ -111,7 +111,6 @@ class provider implements
      * @return contextlist
      */
     public static function get_contexts_for_userid(int $userid): contextlist {
-        global $DB;
         $contextlist = new contextlist();
 
         $sql = "SELECT contextid
@@ -276,7 +275,7 @@ class provider implements
                     'block_deft',
                     'task',
                     $task->get('id'),
-                    []
+                    [get_string('privacy:task', 'block_deft', $task->get('id'))]
                 );
                 if (
                     $records = $DB->get_records('block_deft', [
@@ -301,6 +300,7 @@ class provider implements
                         $response->timemodified = \core_privacy\local\request\transform::datetime($response->timemodified);
                     }
                     writer::with_context($context)->export_data([
+                        get_string('privacy:task', 'block_deft', $task->get('id')),
                         get_string('privacy:responses', 'block_deft'),
                     ], (object)$responses);
                 }
@@ -314,7 +314,10 @@ class provider implements
                     foreach ($records as $record) {
                         $record->timemodified = \core_privacy\local\request\transform::datetime($record->timemodified);
                     }
-                    writer::with_context($context)->export_data([get_string('privacy:rooms', 'block_deft')], (object)$records);
+                    writer::with_context($context)->export_data([
+                        get_string('privacy:task', 'block_deft', $task->get('id')),
+                        get_string('privacy:rooms', 'block_deft'),
+                    ], (object)$records);
                 }
                 if (
                     $records = $DB->get_records('block_deft_peer', [
@@ -327,6 +330,7 @@ class provider implements
                         $record->timemodified = \core_privacy\local\request\transform::datetime($record->timemodified);
                     }
                     writer::with_context($context)->export_data([
+                        get_string('privacy:task', 'block_deft', $task->get('id')),
                         get_string('privacy:connections', 'block_deft'),
                     ], (object)$records);
                 }
