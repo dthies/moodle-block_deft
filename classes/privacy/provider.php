@@ -262,14 +262,60 @@ class provider implements
 
         $user = $contextlist->get_user();
         $contexts = $contextlist->get_contexts();
+        $contextids = [];
         foreach ($contexts as $context) {
-            if (
-                $context->contextlevel != CONTEXT_BLOCK
-            ) {
-                continue;
+            if ($context->contextlevel == CONTEXT_BLOCK) {
+                $contextids[] = $context->id;
             }
-            $tasks = task::get_records(['instance' => $context->instanceid]);
-            foreach ($tasks as $task) {
+        }
+
+        if (empty($contextids)) {
+            return;
+        }
+
+        [$sql, $params] = $DB->get_in_or_equal($contextids, SQL_PARAMS_NAMED);
+
+        $tasks = task::get_records_select(
+            "instance IN (
+                SELECT bi.id
+                  FROM {block_instances} bi
+                  JOIN {context} c ON bi.id = c.instanceid
+                 WHERE c.id $sql AND bi.blockname = 'deft'
+            )",
+            $params,
+            'instance, type'
+        );
+        if (empty($tasks)) {
+            return;
+        }
+
+        [$sql, $params] = $DB->get_in_or_equal(array_keys($tasks), SQL_PARAMS_NAMED);
+        $responses = $DB->get_records_select(
+            'block_deft_response',
+            "task $sql AND userid = :userid",
+            $params + [
+                'userid' => $user->id,
+            ],
+            'task',
+            'task, response, timemodified'
+        );
+        $peers = $DB->get_records_select(
+            'block_deft_peer',
+            "taskid $sql AND userid = :userid",
+            $params + [
+                'userid' => $user->id,
+            ],
+            'taskid',
+            'id, taskid, mute, status, timecreated, timemodified, type, uuid'
+        );
+        foreach ($peers as $record) {
+            $record->timecreated = \core_privacy\local\request\transform::datetime($record->timecreated);
+            $record->timemodified = \core_privacy\local\request\transform::datetime($record->timemodified);
+        }
+
+        foreach ($tasks as $task) {
+            $context = \context_block::instance($task->get('instance'));
+            if ($task->get('type') == 'comment') {
                 \core_comment\privacy\provider::export_comments(
                     $context,
                     'block_deft',
@@ -277,63 +323,26 @@ class provider implements
                     $task->get('id'),
                     [get_string('privacy:task', 'block_deft', $task->get('id'))]
                 );
-                if (
-                    $records = $DB->get_records('block_deft', [
-                    'id' => $task->get('id'),
-                    'usermodified' => $user->id,
-                    ], 'id', 'id, usermodified, timemodified')
-                ) {
-                    foreach ($records as $record) {
-                        $record->timemodified = \core_privacy\local\request\transform::datetime($record->timemodified);
-                    }
-                    writer::with_context($context)->export_data([
-                        get_string('privacy:tasks', 'block_deft'),
-                    ], (object)$records);
-                }
-                if (
-                    $responses = $DB->get_records('block_deft_response', [
-                    'task' => $task->get('id'),
-                    'userid' => $user->id,
-                    ], 'task', 'task, response, timemodified')
-                ) {
-                    foreach ($responses as $response) {
-                        $response->timemodified = \core_privacy\local\request\transform::datetime($response->timemodified);
-                    }
-                    writer::with_context($context)->export_data([
-                        get_string('privacy:task', 'block_deft', $task->get('id')),
-                        get_string('privacy:responses', 'block_deft'),
-                    ], (object)$responses);
-                }
-                if (
-                    $records = $DB->get_records('block_deft_room', [
-                    'itemid' => $task->get('id'),
-                    'component' => 'block_deft',
-                    'usermodified' => $user->id,
-                    ], 'itemid', 'itemid, timemodified')
-                ) {
-                    foreach ($records as $record) {
-                        $record->timemodified = \core_privacy\local\request\transform::datetime($record->timemodified);
-                    }
-                    writer::with_context($context)->export_data([
-                        get_string('privacy:task', 'block_deft', $task->get('id')),
-                        get_string('privacy:rooms', 'block_deft'),
-                    ], (object)$records);
-                }
-                if (
-                    $records = $DB->get_records('block_deft_peer', [
-                    'taskid' => $task->get('id'),
-                    'userid' => $user->id,
-                    ], 'taskid', 'id, taskid, mute, status, timecreated, timemodified, type, uuid')
-                ) {
-                    foreach ($records as $record) {
-                        $record->timecreated = \core_privacy\local\request\transform::datetime($record->timecreated);
-                        $record->timemodified = \core_privacy\local\request\transform::datetime($record->timemodified);
-                    }
-                    writer::with_context($context)->export_data([
-                        get_string('privacy:task', 'block_deft', $task->get('id')),
-                        get_string('privacy:connections', 'block_deft'),
-                    ], (object)$records);
-                }
+            } else if (key_exists($task->get('id'), $responses)) {
+                $response = $responses[$task->get('id')];
+                $response->timemodified = \core_privacy\local\request\transform::datetime($response->timemodified);
+                writer::with_context($context)->export_data([
+                    get_string('privacy:task', 'block_deft', $task->get('id')),
+                    get_string('privacy:responses', 'block_deft'),
+                ], (object)$response);
+            } else if ($results = array_filter($peers, function($peer) use ($task) {
+                return $peer->instance == $task->get('instance');
+            })) {
+                writer::with_context($context)->export_data([
+                    get_string('privacy:task', 'block_deft', $task->get('id')),
+                    get_string('privacy:connections', 'block_deft'),
+                ], (object)$results);
+            } else if ($task->get('usermodified') == $user->id) {
+                $record = $task->to_record();
+                $record->timemodified = \core_privacy\local\request\transform::datetime($record->timemodified);
+                writer::with_context($context)->export_data([
+                    get_string('privacy:tasks', 'block_deft'),
+                ], (object)$record);
             }
         }
     }

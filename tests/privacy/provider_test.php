@@ -148,8 +148,8 @@ final class provider_test extends provider_testcase {
         $subcontext = [
             get_string('privacy:tasks', 'block_deft'),
         ];
-        $data = (array)$writer->get_data($subcontext);
-        $this->assertEquals($this->users[1]->id, reset($data)->usermodified);
+        $data = $writer->get_data($subcontext);
+        $this->assertEquals($this->users[1]->id, $data->usermodified);
     }
 
     /**
@@ -175,8 +175,8 @@ final class provider_test extends provider_testcase {
             get_string('privacy:task', 'block_deft', $this->tasks[1]->get('id')),
             get_string('privacy:responses', 'block_deft'),
         ];
-        $data = (array)$writer->get_data($subcontext);
-        $this->assertEquals('Paper', reset($data)->response);
+        $data = $writer->get_data($subcontext);
+        $this->assertEquals('Paper', $data->response);
     }
 
     /**
@@ -200,8 +200,8 @@ final class provider_test extends provider_testcase {
             get_string('privacy:task', 'block_deft', $this->tasks[1]->get('id')),
             get_string('privacy:responses', 'block_deft'),
         ];
-        $data = (array)$writer->get_data($subcontext);
-        $this->assertEquals('Scissors', reset($data)->response);
+        $data = $writer->get_data($subcontext);
+        $this->assertEquals('Scissors', $data->response);
     }
 
     /**
