@@ -25,6 +25,7 @@ use core_external\external_multiple_structure;
 use core_external\external_single_structure;
 use core_external\external_value;
 use core_external\external_api;
+use stdClass;
 
 /**
  * External function for send WebRTC negotiatiion message
@@ -96,9 +97,23 @@ class send_signal extends external_api {
                FROM {block_deft_room} r
                JOIN {block_deft_peer} p ON p.taskid = r.itemid
               WHERE p.id = ?
+                    AND p.status = 0
                     AND r.component = 'block_deft'",
             [$SESSION->deft_session->peerid]
         ));
+        if (get_config('block_deft', 'enablebridge') == 2) {
+            $data = new stdClass();
+            $data->feed = $DB->get_field_sql(
+                "SELECT v.username
+                   FROM {block_deft_peer} v
+                   JOIN {block_deft_peer} p ON p.taskid = v.taskid
+                  WHERE p.id = ?
+                        AND p.status = 0
+                        AND v.status = 0
+                        AND v.type = 'video'",
+                [$SESSION->deft_session->peerid]
+            );
+        }
 
         return [
             'messages' => $messages,
@@ -132,6 +147,7 @@ class send_signal extends external_api {
                     'id' => new external_value(PARAM_INT, 'Current peer id'),
                     'mute' => new external_value(PARAM_BOOL, 'Whether audio should be muted'),
                     'status' => new external_value(PARAM_BOOL, 'Whether connection should be closed'),
+                    'username' => new external_value(PARAM_ALPHANUM, 'User name for media server'),
                 ]),
             ),
         ]);

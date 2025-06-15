@@ -15,4 +15,11 @@
         <version>v1.2.1</version>
         <licenseversion></licenseversion>
     </library>
+    <library>
+        <location>amd/src/jitsi/lib-jitsi-meet.min.js</location>
+        <name>Jitsi Low Level API</name>
+        <license>Apache Licence</license>
+        <version></version>
+        <licenseversion>2.0</licenseversion>
+    </library>
 </libraries>

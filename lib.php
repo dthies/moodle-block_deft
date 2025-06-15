@@ -145,6 +145,7 @@ function block_deft_output_fragment_venue($args) {
         'peerid' => $peerid,
         'user' => $user,
         'mute' => $peer->mute,
+        'username' => $peer->username,
     ]);
 }
 

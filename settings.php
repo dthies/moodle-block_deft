@@ -29,14 +29,24 @@ use block_deft\admin_setting_deftoverview;
 
 if ($hassiteconfig) {
     if ($ADMIN->fulltree) {
-        $settings->add(new admin_setting_configcheckbox(
+        $settings->add(new admin_setting_heading(
+            'block_deft/updatesettings',
+            new lang_string('updatesettings', 'block_deft'),
+            new lang_string('updatesettings_desc', 'block_deft')
+        ));
+
+        $bridges = [
+            new lang_string('none'),
+            new lang_string('deftbridge', 'block_deft'),
+            new lang_string('jitsibridge', 'block_deft'),
+        ];
+        $settings->add(new admin_setting_configselect(
             'block_deft/enableupdating',
             new lang_string('enableupdating', 'block_deft'),
             new lang_string('enableupdating_desc', 'block_deft'),
-            0
+            0,
+            $bridges
         ));
-
-        $settings->add(new admin_setting_deftoverview());
 
         $settings->add(new admin_setting_configtext_with_maxlength(
             'block_deft/throttle',
@@ -52,7 +62,7 @@ if ($hassiteconfig) {
         $settings->add(new admin_setting_heading(
             'block_deft/venuesettings',
             new lang_string('venuesettings', 'block_deft'),
-            ''
+            new lang_string('venuesettings_desc', 'block_deft')
         ));
 
         $settings->add(new admin_setting_configcheckbox(
@@ -70,9 +80,9 @@ if ($hassiteconfig) {
         ));
 
         $settings->add(new admin_setting_configcheckbox(
-            'block_deft/noisesuppresion',
-            new lang_string('noisesuppresion', 'block_deft'),
-            new lang_string('noisesuppresion_desc', 'block_deft'),
+            'block_deft/noisesuppression',
+            new lang_string('noisesuppression', 'block_deft'),
+            new lang_string('noisesuppression_desc', 'block_deft'),
             1
         ));
 
@@ -93,11 +103,12 @@ if ($hassiteconfig) {
         ));
 
         $link = '<a href="https://deftly.us" target="_blank">deftly.us</a>';
-        $settings->add(new admin_setting_configcheckbox(
+        $settings->add(new admin_setting_configselect(
             'block_deft/enablebridge',
             new lang_string('enablebridge', 'block_deft'),
             new lang_string('enablebridge_desc', 'block_deft', $link),
-            0
+            0,
+            $bridges
         ));
 
         $settings->add(new admin_setting_configcheckbox(
@@ -106,5 +117,47 @@ if ($hassiteconfig) {
             new lang_string('enablevideo_desc', 'block_deft', $link),
             0
         ));
+
+        $settings->add(new admin_setting_heading(
+            'block_deft/deftsettings',
+            new lang_string('deftsettings', 'block_deft'),
+            new lang_string('deftsettings_desc', 'block_deft')
+        ));
+        $settings->add(new admin_setting_deftoverview());
+
+        // Jitsi venue settings.
+        $setting = new admin_setting_heading(
+            'block_deft/jitsisetings',
+            new lang_string('jitsisettings', 'block_deft'),
+            new lang_string('jitsisettings_desc', 'block_deft')
+        );
+        $settings->add($setting);
+
+        $setting = new admin_setting_configtext(
+            'block_deft/jitsiserver',
+            new lang_string('server', 'block_deft'),
+            new lang_string('server_desc', 'block_deft'),
+            '',
+            PARAM_HOST
+        );
+        $settings->add($setting);
+
+        $setting = new admin_setting_configtext(
+            'block_deft/appid',
+            new lang_string('appid', 'block_deft'),
+            new lang_string('appid_desc', 'block_deft'),
+            '',
+            PARAM_HOST
+        );
+        $settings->add($setting);
+
+        $setting = new admin_setting_configtext(
+            'block_deft/secret',
+            new lang_string('secret', 'block_deft'),
+            new lang_string('secret_desc', 'block_deft'),
+            '',
+            PARAM_HOST
+        );
+        $settings->add($setting);
     }
 }

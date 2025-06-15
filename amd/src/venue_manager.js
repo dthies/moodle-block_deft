@@ -199,7 +199,6 @@ export default class VenueManager {
      * Transfer signals with signal server
      */
     sendSignals() {
-
         if (this.throttled || !navigator.onLine) {
             return;
         }
@@ -228,6 +227,7 @@ export default class VenueManager {
             },
             contextid: this.contextid,
             done: response => {
+                Log.debug(response);
                 response.settings.forEach(peer => {
                     if (peer.id == Number(this.peerid)) {
                         if (peer.status) {
@@ -473,7 +473,7 @@ export default class VenueManager {
                 indicator.setAttribute('data-volume', message.volume.smooth);
             });
         }
-        this.peerAudioPlayer(peerid);
+        //this.peerAudioPlayer(peerid);
     }
 
     /**

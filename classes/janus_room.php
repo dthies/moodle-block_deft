@@ -31,7 +31,10 @@ require_once($CFG->dirroot . '/mod/lti/locallib.php');
 use cache;
 use context;
 use moodle_exception;
+use renderable;
+use renderer_base;
 use stdClass;
+use templatable;
 
 /**
  * Janus room handler
@@ -40,7 +43,13 @@ use stdClass;
  * @copyright  2023 Daniel Thies <dethies@gmail.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class janus_room {
+class janus_room implements renderable, templatable {
+    /** @var $context The context of the block */
+    protected $context = null;
+
+    /** @var $socket Socket object */
+    protected $socket = null;
+
     /** @var $task Task configuration */
     protected $task = null;
 
@@ -120,6 +129,8 @@ class janus_room {
         $this->session = new janus();
         $this->task = $task;
         $this->itemid = $task->get('id');
+        $this->context = \core\context\block::instance($task->get('instance'));
+        $this->socket = new socket($this->context);
 
         if (
             !$record = $DB->get_record('block_deft_room', [
@@ -407,5 +418,43 @@ class janus_room {
      */
     public function room_data() {
         return (array)json_decode($this->record->data);
+    }
+
+    /**
+     * Export this data so it can be used as the context for a mustache template.
+     *
+     * @param \renderer_base $output
+     * @return array
+     */
+    public function export_for_template(renderer_base $output) {
+        global $SESSION;
+
+        $config = $this->task->get_config();
+
+        return [
+            'autogaincontrol' => !empty(get_config('block_deft', 'autogaincontrol')),
+            'canmanage' => has_capability('block/deft:moderate', $this->context),
+            'contextid' => $this->context->id,
+            'echocancellation' => !empty(get_config('block_deft', 'echocancellation')),
+            'enablevideo' => true,
+            'iceservers' => json_encode($this->socket->ice_servers()),
+            'noisesuppression' => !empty(get_config('block_deft', 'noisesuppression')),
+            'throttle' => get_config('block_deft', 'throttle'),
+            'peerid' => $SESSION->deft_session->peerid,
+            'peers' => '[]',
+            'peerconnection' => ($config->connection ?? 'peer') == 'peer',
+            'samplerate' => get_config('block_deft', 'samplerate'),
+            'roomid' => $this->get_roomid(),
+            'server' => $this->get_server(),
+            'sharevideo' => has_capability('block/deft:sharevideo', $this->context)
+            && !empty($config->connection)
+            && ('peer' != $config->connection)
+            && get_config('block_deft', 'enablebridge')
+            && get_config('block_deft', 'enablevideo'),
+            'taskid' => $this->task->get('id'),
+            'token' => $this->socket->get_token(),
+            'title' => format_string($this->task->get_config()->name),
+            'uniqueid' => uniqid(),
+        ];
     }
 }

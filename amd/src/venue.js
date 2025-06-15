@@ -68,6 +68,8 @@ const handleClick = (e) => {
                                 fail: Notification.exception,
                                 methodname: 'block_deft_venue_settings'
                             }]);
+                            const venueClosed = new CustomEvent('venueclosed', { });
+                            document.body.dispatchEvent(venueClosed);
                         });
                         modal.show();
 
