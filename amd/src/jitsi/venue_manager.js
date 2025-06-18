@@ -29,7 +29,6 @@ import JitsiMeetJS from "block_deft/jitsi/lib-jitsi-meet.min";
 import Log from "core/log";
 import Notification from "core/notification";
 import Socket from "block_deft/jitsi/socket";
-import Templates from "core/templates";
 import VenueManager from "block_deft/venue_manager";
 
 export default class MediaManager extends VenueManager {
@@ -140,81 +139,6 @@ export default class MediaManager extends VenueManager {
     }
 
     /**
-     * Update motions
-     *
-     * @param {int} contextid
-     */
-    async updateMotions(contextid) {
-        const selector = `[data-contextid="${contextid}"][data-region="plenum-motions"]`;
-        const content = document.querySelector(selector);
-        if (content) {
-            const response = await Ajax.call([{
-                args: {
-                    contextid: contextid
-                },
-                contextid: contextid,
-                fail: Notification.exception,
-                methodname: 'plenumform_jitsi2_update_content'
-            }])[0];
-            if (response.motions) {
-                Templates.replaceNodeContents(content, response.motions, response.javascript);
-                this.userinfo = response.userinfo;
-                this.updateMedia();
-            }
-            if (response.controls) {
-                const selector = `[data-contextid="${contextid}"][data-region="plenum-deft-controls"]`;
-                Templates.replaceNodeContents(selector, response.controls, '');
-            }
-            if (!response.sharevideo) {
-                this.room.getLocalTracks().forEach(track => {
-                    track.dispose();
-                });
-            }
-        }
-    }
-
-    /**
-     * Attach or detach media
-     */
-    updateMedia() {
-        return;
-        this.displayedTracks.forEach(async track => {
-            if (!this.userinfo.find(speaker => speaker.id == track.getParticipantId())) {
-                document.querySelectorAll(
-                    `[data-region="slot-${ track.role }"] ${ track.getType() }`
-                ).forEach(player => {
-                    track.detach(player);
-                });
-                delete this.displayedTracks[this.displayedTracks.indexOf(track)];
-            }
-        });
-        this.userinfo.forEach(speaker => {
-            if (this.videoTracks[speaker.id]) {
-                const track = this.videoTracks[speaker.id];
-                if (!this.displayedTracks.includes(track)) {
-                    track.role = speaker.role;
-                    track.attach(document.querySelector(`[data-region="slot-${ speaker.role }"] ${ track.getType() }`));
-                    this.displayedTracks.push(track);
-                }
-            }
-            if (this.audioTracks[speaker.id]) {
-                const track = this.audioTracks[speaker.id];
-                if (!this.displayedTracks.includes(track)) {
-                    track.role = speaker.role;
-                    track.attach(document.querySelector(`[data-region="slot-${ speaker.role }"] ${ track.getType() }`));
-                    this.displayedTracks.push(track);
-                }
-            }
-            document.querySelectorAll(`[data-region="slot-${ speaker.role }"] .card-header`).forEach(function(h) {
-                h.innerHTML = speaker.name;
-            });
-            document.querySelectorAll(`[data-region="slot-${ speaker.role }"] video`).forEach(function(video) {
-                video.poster = speaker.pictureurl;
-            });
-        });
-    }
-
-    /**
      * Process new remote track
      *
      * @param {JitsiTrack} track New track
@@ -226,7 +150,6 @@ export default class MediaManager extends VenueManager {
         } else {
             this.audioTracks[track.getParticipantId()] = track;
         }
-        this.updateMedia();
     }
 
     /**
@@ -246,6 +169,8 @@ export default class MediaManager extends VenueManager {
             fail: Notification.exception,
             methodname: 'block_deft_publish_feed'
         }])[0];
+
+        document.body.dispatchEvent(new CustomEvent('deftaction', { }));
         this.socket.notify();
     }
 
@@ -549,6 +474,7 @@ export default class MediaManager extends VenueManager {
                 }
             });
             this.socket.notify();
+            document.body.dispatchEvent(new CustomEvent('deftaction', { }));
         }
     }
 
@@ -584,6 +510,7 @@ export default class MediaManager extends VenueManager {
             fail: Notification.exception,
             methodname: 'block_deft_venue_settings'
         }]);
+        document.body.dispatchEvent(new CustomEvent('deftaction', { }));
 
         // Release microphone.
         clearInterval(this.meterId);

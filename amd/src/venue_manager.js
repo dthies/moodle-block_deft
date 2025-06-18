@@ -167,19 +167,6 @@ export default class VenueManager {
     }
 
     /**
-     * Handle ICE candidate event
-     *
-     * @param {int} contextid Block context id
-     * @param {int} peerid Recipient id
-     * @param {event} e ICE candidate event
-     */
-    handleICECandidate(contextid, peerid, e) {
-        if (e.candidate) {
-            this.sendSignal(peerid, 'new-ice-candidate', e.candidate);
-        }
-    }
-
-    /**
      * Queue signal to peer
      *
      * @param {int} peerid Id of recipient

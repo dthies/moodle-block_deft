@@ -23,44 +23,6 @@ export class Socket {
     }
 
     /**
-     * Connect to service
-     *
-     * @param {int} contextid Context id of block
-     * @param {string} token Authentication token to connect service
-     * @returns {object}
-     * @chainable
-     */
-    connect(contextid, token) {
-        this.websocket = new WebSocket('wss://deftly.us/ws');
-        this.websocket.onopen = (e) => {
-            this.websocket.send(token);
-            this.listeners.forEach((callback) => {
-                this.websocket.addCommandListener('message', callback);
-                callback.apply(this, [e]);
-            });
-        };
-
-        this.websocket.addEventListener('close', (e) => {
-            Log.debug('Disconnected');
-            if (this.disconnected) {
-                return this;
-            } else if (e.code == 1011) {
-                Log.debug('Authentication failed');
-                this.renewToken(contextid);
-            } else {
-                setTimeout(() => {
-                    Log.debug('Reconnecting');
-                    this.connect(contextid, token);
-                }, 5000);
-            }
-
-            return true;
-        });
-
-        return this;
-    }
-
-    /**
      * Disconnect socket
      *
      * @returns {object}
@@ -68,7 +30,7 @@ export class Socket {
      */
     disconnect() {
         this.disconnected = true;
-        //this.websocket.close();
+        this.connection.disconnect();
 
         return this;
     }

@@ -79,22 +79,22 @@ class jitsi_room implements renderable, templatable {
     /**
      * Constructor
      *
-     * @param task $task Task associated with venue
+     * @param task|null $task Task associated with venue
+     * @param context|null $context Block context
      */
-    public function __construct(task $task) {
+    public function __construct(?task $task = null, $context = null) {
         global $DB, $USER;
 
-        if (
-            !get_config('block_deft', 'enablebridge')
-            || ($task->get_config()->connection !== 'mixed')
-        ) {
-            return;
+        if (empty($context)) {
+            $this->context = \core\context\block::instance($task->get('instance'));
+        } else {
+            $this->context = $context;
         }
 
-        $this->task = $task;
-        $this->itemid = $task->get('id');
-        $this->context = \core\context\block::instance($task->get('instance'));
-        $this->socket = new socket($this->context);
+        if ($task) {
+            $this->task = $task;
+            $this->itemid = $task->get('id');
+        }
     }
 
     /**
@@ -102,9 +102,18 @@ class jitsi_room implements renderable, templatable {
      *
      * @return string
      */
-    protected function get_room() {
+    public function get_room() {
 
-        return "blockdeft{$this->context->id}";
+        return "blockdeft{$this->context->instanceid}" . ($this->task ? "task{$this->itemid}" : '');
+    }
+
+    /**
+     * Return the server host
+     *
+     * @return string
+     */
+    public function get_server() {
+        return get_config('block_deft', 'jitsiserver');
     }
 
     /**
@@ -112,7 +121,7 @@ class jitsi_room implements renderable, templatable {
      *
      * @return string
      */
-    protected function get_jwt() {
+    public function get_jwt() {
         global $USER;
 
         $header = json_encode([
@@ -178,7 +187,6 @@ class jitsi_room implements renderable, templatable {
             && get_config('block_deft', 'enablebridge')
             && get_config('block_deft', 'enablevideo'),
             'taskid' => $this->task->get('id'),
-            'token' => $this->socket->get_token(),
             'title' => format_string($this->task->get_config()->name),
             'uniqueid' => uniqid(),
         ];

@@ -35,8 +35,11 @@
     </div>
 </div>
 {{#js}}
-    require(['block_deft/comment', 'block_deft/refresh'], function(Comment, Refresh) {
-        var refresh = new Refresh({{ contextid }}, '#block-deft-{{uniqid}} [data-region="deft-view"]', '{{ token }}', {{ throttle }});
+    require([
+        'block_deft/comment',
+        {{# room }}'block_deft/jitsi/refresh'{{/ room }}{{^ room }}'block_deft/refresh'{{/ room }}
+    ], function(Comment, Refresh) {
+        var refresh = new Refresh({{ contextid }}, '#block-deft-{{uniqid}} [data-region="deft-view"]', '{{ token }}', {{ throttle }}, '{{ server }}', '{{ room }}');
         Comment.init({{ contextid }}, '#block-deft-{{uniqid}}', refresh);
     });
 {{/js}}
