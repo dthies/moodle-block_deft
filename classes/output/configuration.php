@@ -58,7 +58,7 @@ class configuration implements renderable, templatable {
         $finishurl = new moodle_url('/blocks/deft/toolconfigure.php', [
             'registration' => 'complete',
         ]);
-        if (!get_config('block_deft', 'enableupdating')) {
+        if (get_config('block_deft', 'enableupdating') != 1) {
             return [
                 'disabled' => true,
                 'returnurl' => $url->out(false),

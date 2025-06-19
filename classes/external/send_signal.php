@@ -101,7 +101,7 @@ class send_signal extends external_api {
                     AND r.component = 'block_deft'",
             [$SESSION->deft_session->peerid]
         ));
-        if (get_config('block_deft', 'enablebridge') == 2) {
+        if (get_config('block_deft', 'enableupdating') == 2) {
             $data = new stdClass();
             $data->feed = $DB->get_field_sql(
                 "SELECT v.username

@@ -94,7 +94,7 @@ class publish_feed extends external_api {
         $task = new task();
         $task->from_record($record);
 
-        if (get_config('block_deft', 'enablebridge') == 2) {
+        if (get_config('block_deft', 'enableupdating') == 2) {
             $room = new jitsi_room($task);
             return $room->publish($publish);
         }

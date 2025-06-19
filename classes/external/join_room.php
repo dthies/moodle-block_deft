@@ -102,7 +102,7 @@ class join_room extends external_api {
         require_login();
         require_capability('block/deft:joinvenue', $context);
 
-        if (get_config('block_deft', 'enablebridge') == 2) {
+        if (get_config('block_deft', 'enableupdating') == 2) {
             $jitsiroom = new jitsi_room($task);
             return $jitsiroom->join($peer, $plugin);
         }

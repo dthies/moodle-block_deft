@@ -109,6 +109,7 @@ const handleSubmit = (e) => {
         modalForm.addEventListener(modalForm.events.FORM_SUBMITTED, submitForm);
         modalForm.show();
     }
+    document.body.dispatchEvent(new CustomEvent('deftaction', { }));
 };
 
 /**
