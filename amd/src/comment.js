@@ -64,6 +64,9 @@ export default {
                             refresh.update();
                             return;
                     }
+                    modalForm.addEventListener(modalForm.events.FORM_SUBMITTED, () => {
+                        document.body.dispatchEvent(new CustomEvent('deftaction', { }));
+                    });
                     modalForm.show();
                 }
             });

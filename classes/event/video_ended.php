@@ -85,4 +85,13 @@ class video_ended extends base {
     public function get_description() {
         return "The user with id '$this->userid' ended video in venue for task with id '$this->objectid'.";
     }
+
+    /**
+     * Creates an instance from the record from db table block_deft_peer
+     *
+     * @param stdClass $record
+     * @return self
+     */
+    public static function create_from_record($record) {
+    }
 }

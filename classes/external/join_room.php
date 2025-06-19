@@ -18,7 +18,9 @@ namespace block_deft\external;
 
 use block_deft\janus;
 use block_deft\socket;
+use block_deft\task;
 use block_deft\venue_manager;
+use block_deft\output\jitsi_room;
 use cache;
 use context;
 use context_block;
@@ -80,23 +82,36 @@ class join_room extends external_api {
             'feed' => $feed,
         ]);
 
-        $task = $DB->get_record_select(
-            'block_deft',
-            'id IN (SELECT taskid FROM {block_deft_peer} WHERE id = ? AND status = 0)',
-            [$id]
-        );
+        if (!$peer = $DB->get_record(
+            'block_deft_peer',
+            [
+                'id' => $id,
+                'status' => 0,
+            ]
+        )) {
+            return [
+                'id' => 0,
+                'status' => false,
+            ];
+        }
+        $task = new task($peer->taskid);
 
-        $context = context_block::instance($task->instance);
+        $context = context_block::instance($task->get('instance'));
         self::validate_context($context);
 
         require_login();
         require_capability('block/deft:joinvenue', $context);
 
+        if (get_config('block_deft', 'enableupdating') == 2) {
+            $jitsiroom = new jitsi_room($task);
+            return $jitsiroom->join($peer, $plugin);
+        }
+
         $janus = new janus($session);
 
         $token = $DB->get_field('block_deft_room', 'token', [
             'roomid' => $room,
-            'itemid' => $task->id,
+            'itemid' => $task->get('id'),
             'component' => 'block_deft',
         ]);
 
@@ -117,13 +132,13 @@ class join_room extends external_api {
                 require_capability('block/deft:sharevideo', $context);
                 $DB->set_field('block_deft_peer', 'status', 1, [
                     'type' => 'video',
-                    'taskid' => $task->id,
+                    'taskid' => $task->get('id'),
                 ]);
                 $feedid = $DB->insert_record('block_deft_peer', [
                     'sessionid' => $DB->get_field('sessions', 'id', [
                         'sid' => session_id(),
                     ]),
-                    'taskid' => $task->id,
+                    'taskid' => $task->get('id'),
                     'timecreated' => time(),
                     'timemodified' => time(),
                     'type' => 'video',
@@ -140,7 +155,7 @@ class join_room extends external_api {
             ];
             $params = [
                 'context' => $context,
-                'objectid' => $task->id,
+                'objectid' => $task->get('id'),
             ];
 
             $event = \block_deft\event\audiobridge_launched::create($params);

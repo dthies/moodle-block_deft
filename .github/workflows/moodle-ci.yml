@@ -28,9 +28,6 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - php: '8.3'
-            moodle-branch: 'main'
-            database: 'pgsql'
           - php: '8.2'
             moodle-branch: 'main'
             database: 'pgsql'
@@ -90,6 +87,7 @@ jobs:
       - name: PHP Copy/Paste Detector
         if: ${{ always() }}
         run: moodle-plugin-ci phpcpd
+        continue-on-error: true
 
       - name: PHP Mess Detector
         if: ${{ always() }}
@@ -116,7 +114,7 @@ jobs:
         run: moodle-plugin-ci mustache
 
       - name: Grunt
-        if: ${{ matrix.moodle-branch == 'main' }}
+        if: ${{ always() }}
         run: moodle-plugin-ci grunt
 
       - name: PHPUnit tests

@@ -17,6 +17,7 @@
 namespace block_deft\external;
 
 use block_deft\janus;
+use block_deft\output\jitsi_room;
 use block_deft\socket;
 use block_deft\task;
 use block_deft\venue_manager;
@@ -92,6 +93,11 @@ class publish_feed extends external_api {
 
         $task = new task();
         $task->from_record($record);
+
+        if (get_config('block_deft', 'enableupdating') == 2) {
+            $room = new jitsi_room($task);
+            return $room->publish($publish);
+        }
 
         $record = $DB->get_record('block_deft_room', [
             'roomid' => $room,

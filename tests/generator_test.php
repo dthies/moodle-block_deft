@@ -22,6 +22,7 @@ namespace block_deft;
  * @package    block_deft
  * @copyright  2024 Daniel Thies <dethies@gmail.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @group      block_deft
  * @covers     \block_deft_generator
  */
 final class generator_test extends \advanced_testcase {

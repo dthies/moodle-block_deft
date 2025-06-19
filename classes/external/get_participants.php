@@ -75,7 +75,7 @@ class get_participants extends external_api {
         $participants = $DB->get_records('block_deft_peer', [
             'taskid' => $taskid,
             'type' => 'venue',
-        ], '', 'id, userid, mute, status');
+        ], '', 'id, userid, mute, status, username');
 
         $data = json_decode($DB->get_field(
             'block_deft_room',
@@ -117,6 +117,7 @@ class get_participants extends external_api {
                     'content' => new external_value(PARAM_RAW, 'Rendered content to display for participant'),
                     'mute' => new external_value(PARAM_BOOL, 'Whether audio should be muted'),
                     'userid' => new external_value(PARAM_INT, 'User id'),
+                    'username' => new external_value(PARAM_TEXT, 'User name'),
                     'status' => new external_value(PARAM_BOOL, 'Whether connection should be closed'),
                 ]),
             ),

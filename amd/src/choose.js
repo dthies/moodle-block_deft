@@ -17,7 +17,7 @@ var contextid;
  *
  * @param {Event} e Change event
  */
-const handleChange = (e) => {
+const handleChange = async(e) => {
     let form = e.target.closest('.deft-choice-selector form');
     if (form) {
         let formdata = new FormData(form),
@@ -28,7 +28,7 @@ const handleChange = (e) => {
             option = formdata.get('option');
         e.stopPropagation();
         e.preventDefault();
-        Fragment.loadFragment(
+        await Fragment.loadFragment(
             component,
             'choose',
             contextid,
@@ -37,6 +37,9 @@ const handleChange = (e) => {
                 option: option
             }
         ).catch(Log.debug);
+
+        document.body.dispatchEvent(new CustomEvent('deftaction', { }));
+
         document.activeElement.blur();
     }
 };

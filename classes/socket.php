@@ -31,6 +31,7 @@ require_once($CFG->dirroot . '/mod/lti/locallib.php');
 use cache;
 use context;
 use moodle_exception;
+use block_deft\output\jitsi_room;
 use stdClass;
 
 require_once($CFG->dirroot . '/mod/lti/locallib.php');
@@ -69,9 +70,14 @@ class socket {
     protected $iceservers = null;
 
     /**
-     * @var $int itemid Optional id to distinguish socket context
+     * @var int $itemid Optional id to distinguish socket context
      */
     protected $itemid = null;
+
+    /**
+     * @var ?jitsi_room $itemid Optional id to distinguish socket context
+     */
+    protected ?jitsi_room $room = null;
 
     /**
      * Constructor
@@ -82,6 +88,9 @@ class socket {
     public function __construct(context $context, ?int $itemid = null) {
         $this->context = $context;
         $this->itemid = $itemid;
+        if (get_config('block_deft', 'enableupdating') == 2) {
+            $this->room = new jitsi_room(null, $context);
+        }
     }
 
     /**
@@ -90,7 +99,6 @@ class socket {
      * @return stdClass|null
      */
     public function dispatch(): ?stdClass {
-
         return $this->execute([
             'action' => 'update',
         ]);
@@ -136,6 +144,9 @@ class socket {
     public function get_token() {
         if (!get_config('block_deft', 'enableupdating')) {
             return;
+        }
+        if ($this->room) {
+            return $this->room->get_jwt();
         }
 
         $this->validate();
@@ -216,5 +227,23 @@ class socket {
         ) {
             throw new moodle_exception('blockunavailable');
         }
+    }
+
+    /**
+     * Return the server host
+     *
+     * @return string
+     */
+    public function get_server() {
+        return $this->room ? get_config('block_deft', 'jitsiserver') : '';
+    }
+
+    /**
+     * Return the conference room if needed
+     *
+     * @return string
+     */
+    public function get_room() {
+        return $this->room ? $this->room->get_room() : '';
     }
 }

@@ -27,6 +27,9 @@
     }
 }}
 <div>
+    {{# disabled }}
+        <p><a href="{{ returnurl }}">{{# str }} returntosettings, block_deft {{/ str }}</a></p>
+    {{/ disabled }}
     {{^ configured }}
         <div class="registrationcontainer"></div>
         {{# error }}

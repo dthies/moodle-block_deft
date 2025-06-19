@@ -173,5 +173,19 @@ function xmldb_block_deft_upgrade($oldversion) {
         upgrade_block_savepoint(true, 2023042910, 'deft');
     }
 
+    if ($oldversion < 2025062200) {
+        // Define field username to be added to block_deft_peer.
+        $table = new xmldb_table('block_deft_peer');
+        $field = new xmldb_field('username', XMLDB_TYPE_CHAR, '80', null, XMLDB_NOTNULL, null, null, 'type');
+
+        // Conditionally launch add field username.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Deft savepoint reached.
+        upgrade_block_savepoint(true, 2025062200, 'deft');
+    }
+
     return true;
 }

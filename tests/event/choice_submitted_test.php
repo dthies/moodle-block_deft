@@ -30,12 +30,12 @@ use block_deft\task;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  * @group      block_deft
  */
-final class task_deleted_test extends advanced_testcase {
+final class choice_submitted_test extends advanced_testcase {
     /**
-     * Test task_deleted event.
-     * @covers \block_deft\event\task_deleted
+     * Test choice_submitted event.
+     * @covers \block_deft\event\choice_submitted
      */
-    public function test_task_deleted(): void {
+    public function test_choice_submitted(): void {
         $this->resetAfterTest();
 
         $this->setAdminUser();
@@ -45,22 +45,38 @@ final class task_deleted_test extends advanced_testcase {
         $this->assertInstanceOf('block_deft_generator', $generator);
         $this->assertEquals('deft', $generator->get_blockname());
 
-        $bi = $generator->create_instance();
-        $task = $generator->create_task($bi->id);
-        $taskid = $task->get('id');
+        $course = $this->getDataGenerator()->create_course();
+        $user = $this->getDataGenerator()->create_and_enrol($course, 'student');
+        $bi = $generator->create_instance(['parentcontextid' => \context_course::instance($course->id)->id]);
+
+        $task = $generator->create_task($bi->id, [
+            'type' => 'choice',
+        ], [
+            'question' => 'One, Two, Three...',
+            'option' => [
+                'Rock',
+                'Paper',
+                'Scissors',
+            ],
+        ]);
 
         // Triggering and capturing the event.
         $sink = $this->redirectEvents();
-        $task->delete();
+
+        block_deft_output_fragment_choose([
+            'context' => \context_block::instance($bi->id),
+            'id' => (string)$task->get('id'),
+            'option' => 1,
+        ]);
 
         $events = $sink->get_events();
         $this->assertCount(1, $events);
         $event = reset($events);
 
         // Checking that the event contains the expected values.
-        $this->assertInstanceOf('\block_deft\event\task_deleted', $event);
+        $this->assertInstanceOf('\block_deft\event\choice_submitted', $event);
         $this->assertEquals(context_block::instance($bi->id), $event->get_context());
-        $this->assertEquals($taskid, $event->objectid);
+        $this->assertEquals($task->get('id'), $event->objectid);
         $this->assertEventContextNotUsed($event);
     }
 }
