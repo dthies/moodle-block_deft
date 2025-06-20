@@ -86,7 +86,7 @@ class peer_room implements renderable, templatable {
      * @return int
      */
     public function get_roomid(): int {
-        return $this->roomid;
+        return $this->socket->get_room();
     }
 
     /**
@@ -105,7 +105,7 @@ class peer_room implements renderable, templatable {
             'canmanage' => has_capability('block/deft:moderate', $this->context),
             'contextid' => $this->context->id,
             'echocancellation' => !empty(get_config('block_deft', 'echocancellation')),
-            'enablevideo' => true,
+            'enablevideo' => false,
             'iceservers' => json_encode($this->socket->ice_servers()),
             'noisesuppression' => !empty(get_config('block_deft', 'noisesuppression')),
             'throttle' => get_config('block_deft', 'throttle'),
@@ -113,13 +113,9 @@ class peer_room implements renderable, templatable {
             'peers' => '[]',
             'peerconnection' => ($config->connection ?? 'peer') == 'peer',
             'samplerate' => get_config('block_deft', 'samplerate'),
-            'roomid' => '',
-            'server' => '',
-            'sharevideo' => has_capability('block/deft:sharevideo', $this->context)
-            && !empty($config->connection)
-            && ('peer' != $config->connection)
-            && get_config('block_deft', 'enablebridge')
-            && get_config('block_deft', 'enablevideo'),
+            'room' => $this->socket->get_room(),
+            'server' => $this->socket->get_server(),
+            'sharevideo' => false,
             'taskid' => $this->task->get('id'),
             'token' => $this->socket->get_token(),
             'title' => format_string($this->task->get_config()->name),

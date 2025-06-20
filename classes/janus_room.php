@@ -436,7 +436,7 @@ class janus_room implements renderable, templatable {
             'canmanage' => has_capability('block/deft:moderate', $this->context),
             'contextid' => $this->context->id,
             'echocancellation' => !empty(get_config('block_deft', 'echocancellation')),
-            'enablevideo' => true,
+            'enablevideo' => get_config('block_deft', 'enablevideo'),
             'iceservers' => json_encode($this->socket->ice_servers()),
             'noisesuppression' => !empty(get_config('block_deft', 'noisesuppression')),
             'throttle' => get_config('block_deft', 'throttle'),

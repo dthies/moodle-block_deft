@@ -49,6 +49,6 @@
     require([
         'block_deft/venue_manager',
     ], function(VenueManager) {
-        new VenueManager({{ contextid }}, '{{ token }}', {{ peers }}, {{ peerid }}, {{{ iceservers }}}, {{ autogaincontrol }}, {{ echocancellation }}, {{ noisesuppression }}, {{ samplerate }}, 0, '');
+        new VenueManager({{ contextid }}, '{{ token }}', {{ peers }}, {{ peerid }}, {{{ iceservers }}}, {{ autogaincontrol }}, {{ echocancellation }}, {{ noisesuppression }}, {{ samplerate }}, '{{ room }}', '{{ server }}');
 });
 {{/js}}

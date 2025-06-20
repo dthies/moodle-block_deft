@@ -103,12 +103,11 @@ if ($hassiteconfig) {
         ));
 
         $link = '<a href="https://deftly.us" target="_blank">deftly.us</a>';
-        $settings->add(new admin_setting_configselect(
+        $settings->add(new admin_setting_configcheckbox(
             'block_deft/enablebridge',
             new lang_string('enablebridge', 'block_deft'),
             new lang_string('enablebridge_desc', 'block_deft', $link),
             0,
-            $bridges
         ));
 
         $settings->add(new admin_setting_configcheckbox(

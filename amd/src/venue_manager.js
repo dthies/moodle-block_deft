@@ -10,10 +10,12 @@
 import Ajax from "core/ajax";
 import Fragment from 'core/fragment';
 import {get_string as getString} from 'core/str';
+import JitsiMeetJS from "block_deft/jitsi/lib-jitsi-meet.min";
 import ModalEvents from 'core/modal_events';
 import Notification from "core/notification";
 import Log from "core/log";
 import Socket from "block_deft/socket";
+import JitsiSocket from "block_deft/jitsi/socket";
 import adapter from "core/adapter";
 
 export default class VenueManager {
@@ -109,6 +111,7 @@ export default class VenueManager {
         document.querySelector('body').addEventListener('click', this.closeConnections.bind(this));
 
         window.onbeforeunload = this.closeConnections.bind(this);
+        document.body.dispatchEvent(new CustomEvent('deftaction', { }));
 
         this.audioInput = navigator.mediaDevices.getUserMedia({
             audio: {
@@ -134,10 +137,48 @@ export default class VenueManager {
         });
         this.audioInput.then(this.monitorVolume.bind(this)).catch(Log.debug);
 
-        this.socket = new Socket(this.contextid, this.token);
-        this.socket.subscribe(() => {
-            this.sendSignals();
+        if (!this.token) {
+            return;
+        }
+
+        if (this.server == 'wss://deftly.us/janus/ws') {
+            this.socket = new Socket(this.contextid, this.token);
+            this.socket.subscribe(() => {
+                this.sendSignals();
+            });
+
+            return;
+        }
+
+        const domain = this.server;
+
+        JitsiMeetJS.init();
+        JitsiMeetJS.setLogLevel(JitsiMeetJS.logLevels.DEBUG);
+
+        this.connection = new JitsiMeetJS.JitsiConnection(null, this.token, {
+            serviceUrl: `https://${ domain }/http-bind`,
+            hosts: {
+                domain: domain,
+                muc: `conference.${ domain }`
+            }
         });
+        this.connection.addEventListener(JitsiMeetJS.events.connection.CONNECTION_ESTABLISHED, () => {
+            this.room = this.connection.initJitsiConference(this.roomid, {
+                disableSimulcast: true
+            });
+
+            this.socket = new JitsiSocket(this.room);
+            this.socket.subscribe(() => {
+                this.sendSignals();
+            });
+            document.body.addEventListener('deftaction', () => {
+                this.socket.notify();
+            });
+
+            this.room.join();
+        });
+
+        this.connection.connect();
     }
 
     /**
@@ -534,7 +575,10 @@ export default class VenueManager {
             venue.dispatchEvent(event);
         });
 
+        document.body.dispatchEvent(new CustomEvent('deftaction', { }));
         window.beforeunload = null;
+        window.close();
+        this.sockect.disconnect();
     }
 
     /**
@@ -616,6 +660,7 @@ export default class VenueManager {
                     option.classList.remove('hidden');
                 }
             });
+            document.body.dispatchEvent(new CustomEvent('deftaction', { }));
         }
     }
 

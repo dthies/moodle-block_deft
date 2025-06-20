@@ -28,6 +28,12 @@ jobs:
       fail-fast: false
       matrix:
         include:
+          - php: '8.4'
+            moodle-branch: 'main'
+            database: 'mariadb'
+          - php: '8.3'
+            moodle-branch: 'main'
+            database: 'pgsql'
           - php: '8.2'
             moodle-branch: 'MOODLE_500_STABLE'
             database: 'mariadb'
@@ -111,7 +117,7 @@ jobs:
         run: moodle-plugin-ci mustache
 
       - name: Grunt
-        if: ${{ matrix.moodle-branch == 'main' }}
+        if: ${{ always() }}
         run: moodle-plugin-ci grunt
 
       - name: PHPUnit tests

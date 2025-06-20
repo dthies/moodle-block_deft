@@ -483,7 +483,7 @@ export default class MediaManager extends VenueManager {
      *
      * @param {Event} e Button click
      */
-    async closeConnections(e) {
+    closeConnections(e) {
         if (e && e.type == 'click') {
             const button = e.target.closest('[data-region="deft-venue"] a[data-action="close"]');
             if (button) {
@@ -502,7 +502,7 @@ export default class MediaManager extends VenueManager {
             });
         }
         document.querySelector('body').classList.remove('block_deft_raisehand');
-        await Ajax.call([{
+        Ajax.call([{
             args: {
                 mute: false,
                 "status": true

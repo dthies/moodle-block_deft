@@ -91,7 +91,7 @@ class admin_setting_deftoverview extends admin_setting {
         $url = new moodle_url("/blocks/deft/toolconfigure.php");
 
         $ltitype = $DB->get_record('lti_types', ['tooldomain' => 'deftly.us']);
-        if (!get_config('block_deft', 'enableupdating')) {
+        if (get_config('block_deft', 'enableupdating') != 1) {
             $return = new lang_string('enableservicemessage', 'block_deft');
         } else if ($ltitype) {
             $return .= new lang_string('statusok', 'block_deft');

@@ -173,7 +173,7 @@ class jitsi_room implements renderable, templatable {
             'canmanage' => has_capability('block/deft:moderate', $this->context),
             'contextid' => $this->context->id,
             'email' => $USER->email,
-            'enablevideo' => true,
+            'enablevideo' => get_config('block_deft', 'enablevideo'),
             'fullname' => fullname($USER),
             'jwt' => $this->get_jwt(),
             'throttle' => get_config('block_deft', 'throttle'),

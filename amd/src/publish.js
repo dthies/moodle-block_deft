@@ -182,8 +182,8 @@ export default class Publish {
      */
     handleClick(e) {
         const button = e.target.closest(
-            '[data-roomid="' + this.roomid + '"] [data-action="publish"],  [data-roomid="'
-                + this.roomid + '"] [data-action="unpublish"]'
+            '[data-contextid="' + this.contextid + '"][data-action="publish"],  [data-contextid="'
+                + this.contextid + '"][data-action="unpublish"]'
         );
         if (button) {
             const action = button.getAttribute('data-action'),

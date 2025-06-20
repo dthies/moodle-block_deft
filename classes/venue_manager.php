@@ -157,7 +157,7 @@ class venue_manager implements renderable, templatable {
 
         if (($config->connection ?? 'peer') == 'peer') {
             $room = new peer_room($this->task);
-        } else if (get_config('block_deft', 'enablebridge') == 1) {
+        } else if (get_config('block_deft', 'enableupdating') == 1) {
             $room = new janus_room($this->task);
         } else {
             $room = new jitsi_room($this->task);
@@ -166,7 +166,7 @@ class venue_manager implements renderable, templatable {
         return [
             'canmanage' => has_capability('block/deft:moderate', $this->context),
             'contextid' => $this->context->id,
-            'enablevideo' => true,
+            'enablevideo' => get_config('block_deft', 'enablevideo'),
             'iceservers' => json_encode($this->socket->ice_servers()),
             'intro' => format_text(
                 file_rewrite_pluginfile_urls(
@@ -189,7 +189,7 @@ class venue_manager implements renderable, templatable {
             'popup' => !isset($this->task->get_config()->windowoption) || $this->task->get_config()->windowoption != 'openinwindow',
             'samplerate' => get_config('block_deft', 'samplerate'),
             'sessions' => array_values($this->sessions),
-            'sharedisplay' => get_config('block_deft', 'enablebridge') == 1,
+            'sharedisplay' => get_config('block_deft', 'enableupdating') == 1,
             'sharevideo' => has_capability('block/deft:sharevideo', $this->context)
             && !empty($config->connection)
             && ('peer' != $config->connection)
