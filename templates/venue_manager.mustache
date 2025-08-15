@@ -54,6 +54,7 @@
                     <div class="card-text">{{{ intro }}}</div>
                 </div>
             </div>
+            {{{ media }}}
             {{# user }}
                 <div class="card col-12" data-peerid={{ peerid }}>
                     {{# picture }}
@@ -92,8 +93,11 @@
                     </div>
                 </div>
             {{/ user }}
-            {{{ media }}}
             {{/ peerid }}
+        </div>
+        <div id="deft_audio" class="row p-0"></div>
+        <div id="room" class="hidden">
+            <audio class="rounded centered" id="roomaudio" autoplay></audio>
         </div>
     </div>
 </div>

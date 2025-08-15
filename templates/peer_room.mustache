@@ -36,19 +36,10 @@
         "uniqueid": "eworio"
     }
 }}
-            {{# enablevideo }}
-                <div class="col col-12">
-                    <video id="deft_venue_remote_video" width="100%" controls autoplay class="hidden"></video>
-                </div>
-            {{/ enablevideo }}
-        <div id="deft_audio" class="row p-0"></div>
-        <div id="room" class="hidden">
-            <audio class="rounded centered" id="roomaudio" autoplay></audio>
-        </div>
 {{#js}}
     require([
         'block_deft/venue_manager',
     ], function(VenueManager) {
-        new VenueManager({{ contextid }}, '{{ token }}', {{ peers }}, {{ peerid }}, {{{ iceservers }}}, {{ autogaincontrol }}, {{ echocancellation }}, {{ noisesuppression }}, {{ samplerate }}, '{{ room }}', '{{ server }}');
+        new VenueManager({{ contextid }}, '{{ token }}', {{ peers }}, {{ peerid }}, {{{ iceservers }}}, {{ autogaincontrol }}, {{ echocancellation }}, {{ noisesuppression }}, {{ samplerate }}, 0, '{{ server }}');
 });
 {{/js}}

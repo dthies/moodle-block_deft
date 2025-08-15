@@ -141,7 +141,7 @@ export default class VenueManager {
             return;
         }
 
-        if (this.server == 'wss://deftly.us/janus/ws') {
+        if (!this.server || this.server == 'wss://deftly.us/janus/ws') {
             this.socket = new Socket(this.contextid, this.token);
             this.socket.subscribe(() => {
                 this.sendSignals();
@@ -205,6 +205,19 @@ export default class VenueManager {
             };
             this.peerConnections[String(peerid)] = pc;
         });
+    }
+
+    /**
+     * Handle ICE candidate event
+     *
+     * @param {int} contextid Block context id
+     * @param {int} peerid Recipient id
+     * @param {event} e ICE candidate event
+     */
+    handleICECandidate(contextid, peerid, e) {
+        if (e.candidate) {
+            this.sendSignal(peerid, 'new-ice-candidate', e.candidate);
+        }
     }
 
     /**

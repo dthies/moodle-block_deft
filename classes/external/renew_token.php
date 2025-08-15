@@ -75,7 +75,7 @@ class renew_token extends external_api {
      */
     public static function execute_returns(): external_single_structure {
         return new external_single_structure([
-            'token' => new external_value(PARAM_ALPHANUM, 'Valid authentication token for deftly.us'),
+            'token' => new external_value(PARAM_TEXT, 'Valid authentication token for deftly.us'),
         ]);
     }
 }

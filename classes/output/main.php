@@ -78,8 +78,6 @@ class main implements renderable, templatable {
             'manageurl' => $manageurl->out(true),
             'throttle' => get_config('block_deft', 'throttle'),
             'token' => $this->socket->get_token(),
-            'room' => $this->socket->get_room(),
-            'server' => $this->socket->get_server(),
         ];
     }
 }

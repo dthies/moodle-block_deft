@@ -128,8 +128,6 @@ export default class MediaManager extends VenueManager {
         connection.connect();
 
         this.addListeners();
-
-        return true;
     }
 
     /**
@@ -150,6 +148,7 @@ export default class MediaManager extends VenueManager {
         } else {
             this.audioTracks[track.getParticipantId()] = track;
         }
+        document.body.dispatchEvent(new CustomEvent('deftaction', { }));
     }
 
     /**
@@ -197,6 +196,7 @@ export default class MediaManager extends VenueManager {
 
         if (response.status) {
         }
+            document.body.dispatchEvent(new CustomEvent('deftaction', { }));
             this.socket.notify();
 
         return response;

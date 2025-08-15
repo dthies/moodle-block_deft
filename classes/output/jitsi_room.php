@@ -205,6 +205,7 @@ class jitsi_room implements renderable, templatable {
         $peer->username = $username;
 
         $DB->update_record('block_deft_peer', $peer);
+        $task = new task($peer->taskid);
 
         $params = [
             'context' => \core\context\block::instance($this->task->get('instance')),

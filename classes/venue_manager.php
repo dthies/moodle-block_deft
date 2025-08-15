@@ -143,8 +143,6 @@ class venue_manager implements renderable, templatable {
 
         $url = new moodle_url('/blocks/deft/venue.php', ['id' => $this->task->get('id')]);
 
-        $config = $this->task->get_config();
-
         $user = clone ($USER);
         $user->fullname = fullname($user);
         $userpicture = new user_picture($user);
@@ -155,8 +153,10 @@ class venue_manager implements renderable, templatable {
             'size' => 36,
         ]);
 
+        $config = $this->task->get_config();
+        [$roomid, $roomtoken, $server] = $this->get_room();
         if (($config->connection ?? 'peer') == 'peer') {
-            $room = new peer_room($this->task);
+            $room = new peer_room($this->context, $this->task);
         } else if (get_config('block_deft', 'enableupdating') == 1) {
             $room = new janus_room($this->task);
         } else {
@@ -164,9 +164,11 @@ class venue_manager implements renderable, templatable {
         }
 
         return [
+            'autogaincontrol' => !empty(get_config('block_deft', 'autogaincontrol')),
             'canmanage' => has_capability('block/deft:moderate', $this->context),
             'contextid' => $this->context->id,
             'enablevideo' => get_config('block_deft', 'enablevideo'),
+            'echocancellation' => !empty(get_config('block_deft', 'echocancellation')),
             'iceservers' => json_encode($this->socket->ice_servers()),
             'intro' => format_text(
                 file_rewrite_pluginfile_urls(
@@ -355,5 +357,28 @@ class venue_manager implements renderable, templatable {
             'status = 0 AND taskid = ?',
             [$this->task->get('id')]
         ));
+    }
+
+    /**
+     * Return room information for task
+     *
+     * @return array
+     */
+    protected function get_room() {
+        global $SESSION;
+
+        if (($this->task->get_config()->connection ?? 'peer') == 'peer') {
+            return [0, '', ''];
+        }
+
+        try {
+            $room = new janus_room($this->task);
+        } catch (moodle_exception $e) {
+            return [0, '', ''];
+        }
+
+        $token = $room->get_token();
+
+        return [$room->get_roomid(), $room->get_token(), $room->get_server()];
     }
 }

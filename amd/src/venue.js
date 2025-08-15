@@ -23,7 +23,7 @@ let venue = null;
  *
  * @param {Event} e Change event
  */
-const handleClick = async(e) => {
+const handleClick = (e) => {
     'use strict';
 
     let button = e.target.closest('.block_deft_venue button[data-action]:not([disabled])');
@@ -33,7 +33,7 @@ const handleClick = async(e) => {
         url.searchParams.set('task', task);
         switch (button.getAttribute('data-action')) {
             case 'close':
-                await Ajax.call([{
+                Ajax.call([{
                     args: {
                         mute: false,
                         "status": true
@@ -48,7 +48,7 @@ const handleClick = async(e) => {
                     document.querySelectorAll('.venue_manager').forEach(container => {
                         container.innerHTML = '';
                     });
-                    await ModalFactory.create({
+                    ModalFactory.create({
                         large: true,
                         type: ModalFactory.types.SAVE_CANCEL,
                         title: getString('venue', 'block_deft'),
@@ -68,8 +68,6 @@ const handleClick = async(e) => {
                                 fail: Notification.exception,
                                 methodname: 'block_deft_venue_settings'
                             }]);
-                            const venueClosed = new CustomEvent('venueclosed', { });
-                            document.body.dispatchEvent(venueClosed);
                         });
                         modal.show();
 
@@ -91,7 +89,7 @@ const handleClick = async(e) => {
                 }
                 break;
             case 'mute':
-                await Ajax.call([{
+                Ajax.call([{
                     args: {
                         mute: true,
                         "status": false
@@ -104,7 +102,7 @@ const handleClick = async(e) => {
                 venue.show();
                 break;
             case 'unmute':
-                await Ajax.call([{
+                Ajax.call([{
                     args: {
                         mute: false,
                         "status": false
@@ -118,8 +116,6 @@ const handleClick = async(e) => {
         }
         e.stopPropagation();
         e.preventDefault();
-
-        document.body.dispatchEvent(new CustomEvent('deftaction', { }));
         document.activeElement.blur();
     }
 };
