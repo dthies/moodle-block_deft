@@ -121,9 +121,7 @@ export default class VenueManager {
                 sampleRate: this.samplerate
             },
             video: false
-        }).catch((e) => {
-            Log.debug(e);
-
+        }).catch(() => {
             Ajax.call([{
                 args: {
                     mute: true,
@@ -199,7 +197,6 @@ export default class VenueManager {
             pc.onconnectionstatechange = this.handleStateChange.bind(this, peerid);
             pc.oniceconnectionstatechange = () => {
                 if (pc.iceConnectionState === "failed") {
-                    Log.debug('restart');
                     pc.restartIce();
                 }
             };
@@ -268,7 +265,6 @@ export default class VenueManager {
             },
             contextid: this.contextid,
             done: response => {
-                Log.debug(response);
                 response.settings.forEach(peer => {
                     if (peer.id == Number(this.peerid)) {
                         if (peer.status) {
@@ -372,7 +368,6 @@ export default class VenueManager {
                 pc.onnegotiationneeded = this.negotiate.bind(this, this.contextid, pc, signal.frompeer);
                 pc.oniceconnectionstatechange = () => {
                     if (pc.iceConnectionState === "failed") {
-                        Log.debug('restart');
                         pc.restartIce();
                     }
                 };
@@ -400,25 +395,20 @@ export default class VenueManager {
                 && (this.makingOffer.has(String(signal.frompeer)) || pc.signalingState !== "stable")
             ) {
                 this.ignoreOffer.add(String(signal.frompeer));
-                Log.debug('ignore offer');
                 return;
             }
             this.ignoreOffer.delete(String(signal.frompeer));
             pc.setRemoteDescription(description).then(() => {
-                Log.debug('Set Remote');
                 return this.audioInput;
             }).then(audioStream => {
                     if (audioStream) {
-                        Log.debug('audio stream');
                         if (pc.getTransceivers().length < 2) {
                             audioStream.getAudioTracks().forEach(track => {
                                 pc.addTransceiver(track, {streams: [audioStream]});
                             });
                         }
                     }
-                    Log.debug('Create answer');
                     if (description.type == 'offer') {
-                        Log.debug('Set local');
                         return pc.setLocalDescription();
                     }
                     return audioStream;
@@ -489,8 +479,6 @@ export default class VenueManager {
     handleMessage(peerid, e) {
         const message = JSON.parse(e.data);
         if (message.hasOwnProperty('raisehand')) {
-            Log.debug(peerid);
-            Log.debug(message);
             document.querySelectorAll('[data-peerid="' + peerid + '"] [data-action="raisehand"]').forEach(button => {
                 if (message.raisehand) {
                     button.classList.add('hidden');
@@ -632,7 +620,6 @@ export default class VenueManager {
         const button = e.target.closest(
             'a[data-action="mute"], a[data-action="unmute"]'
         );
-        Log.debug(e);
         if (button) {
             const action = button.getAttribute('data-action'),
                 peerid = button.closest('[data-peerid]').getAttribute('data-peerid');

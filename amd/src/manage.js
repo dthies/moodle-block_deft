@@ -9,7 +9,6 @@
 
 import ModalForm from 'core_form/modalform';
 import Templates from 'core/templates';
-import Log from 'core/log';
 import {get_string as getString} from 'core/str';
 
 var contextid;
@@ -22,7 +21,6 @@ var contextid;
 const submitForm = (e) => {
     'use strict';
 
-    Log.debug('Form submitted');
     if (e.detail && e.detail.order) {
         e.detail.order.forEach((task) => {
             document.querySelector('.tasks > div').appendChild(
@@ -95,7 +93,6 @@ const handleSubmit = (e) => {
                 title = getString('edit' + type, 'block_deft');
                 break;
         }
-        Log.debug('Create ' + type);
         let modalForm = new ModalForm({
             formClass: component + "\\form\\" + (action === 'status' ? "status_" : "edit_") + type,
             args: {

@@ -26,7 +26,6 @@ var connection;
 import Ajax from "core/ajax";
 import Fragment from 'core/fragment';
 import JitsiMeetJS from "block_deft/jitsi/lib-jitsi-meet.min";
-import Log from "core/log";
 import Notification from "core/notification";
 import Socket from "block_deft/jitsi/socket";
 import VenueManager from "block_deft/venue_manager";
@@ -142,7 +141,6 @@ export default class MediaManager extends VenueManager {
      * @param {JitsiTrack} track New track
      */
     onRemoteTrack(track) {
-        Log.debug(track);
         if (track.getType() == 'video') {
             this.videoTracks[track.getParticipantId()] = track;
         } else {
@@ -534,22 +532,18 @@ export default class MediaManager extends VenueManager {
      * @param {int} source Feed to subscribe
      */
     subscribeTo(source) {
-        Log.debug(source);
         if (!source || !this.videoTracks[source]) {
             document.querySelectorAll('[data-region="deft-venue"] video').forEach(video => {
                 video.classList.add('hidden');
             });
-            Log.debug('no source');
             this.currentFeed = null;
 
             return;
         }
 
         if (this.currentFeed == source) {
-            Log.debug('no change');
             return;
         }
-        Log.debug(this.currentFeed);
         this.currentFeed = source;
 
         const track = this.videoTracks[source];

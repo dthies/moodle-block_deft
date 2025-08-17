@@ -123,12 +123,9 @@ export default class {
             const position = comments.scrollTop,
                 task = comments.closest('[data-task]').getAttribute('data-task'),
                 recurse = setScroll;
-            Log.debug(position);
             setScroll = () => {
                 content.querySelectorAll('[data-task="' + task + '"]').forEach((task) => {
                     task.querySelector('.block_deft_comments').scrollTop = position;
-                    Log.debug(task.querySelector('.block_deft_comments'));
-                    Log.debug(position);
                 });
                 recurse();
             };

@@ -117,7 +117,6 @@ export default class Publish {
      * @param {String} jsep negotiation
      */
     onMessage(msg, jsep) {
-        Log.debug(msg);
         Janus.debug(" ::: Got a message :::", msg);
         const event = msg.videoroom;
         Janus.debug("Event: " + event);
@@ -201,7 +200,6 @@ export default class Publish {
             });
             switch (action) {
                 case 'publish':
-                    Log.debug(type);
                     if (type == 'display') {
                         this.shareDisplay();
                     } else {
@@ -314,8 +312,7 @@ export default class Publish {
             this.deviceType = 'display';
 
             return videoStream;
-        }).catch((e) => {
-            Log.debug(e);
+        }).catch(() => {
             return videoInput;
         });
     }
