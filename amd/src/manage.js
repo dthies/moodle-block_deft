@@ -50,6 +50,7 @@ const submitForm = (e) => {
             Templates.runTemplateJS(js);
         });
     }
+    document.body.dispatchEvent(new CustomEvent('deftaction', { }));
 };
 
 /**

@@ -69,6 +69,19 @@ export class Socket {
             fail: Notification.exception
         }]);
     }
+
+    /**
+     * Connect to service
+     *
+     * @param {int} contextid Context id of block
+     * @param {string} token Authentication token to connect service
+     * @returns {object}
+     * @chainable
+     */
+    connect(contextid, token) {
+        Log.debug(token);
+        return this;
+    }
 }
 
 export default Socket;

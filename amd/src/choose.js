@@ -38,6 +38,7 @@ const handleChange = (e) => {
             }
         ).catch(Log.debug);
         document.activeElement.blur();
+        document.body.dispatchEvent(new CustomEvent('deftaction', { }));
     }
 };
 

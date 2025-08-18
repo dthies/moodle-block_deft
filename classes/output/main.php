@@ -77,6 +77,8 @@ class main implements renderable, templatable {
             'canuse' => has_capability('block/deft:manage', $this->context),
             'manageurl' => $manageurl->out(true),
             'throttle' => get_config('block_deft', 'throttle'),
+            'server' => $this->socket->get_server(),
+            'room' => $this->socket->get_room(),
             'token' => $this->socket->get_token(),
         ];
     }

@@ -21,6 +21,8 @@ export default class {
                     data = new FormData(form),
                     params = new URLSearchParams(data);
                 form.setAttribute('data-value', params.toString());
+                document.body.dispatchEvent(new CustomEvent('deftaction', { }));
+
                 return true;
             }).fail(Notification.exception);
         });
