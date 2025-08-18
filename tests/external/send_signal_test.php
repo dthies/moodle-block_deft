@@ -30,38 +30,33 @@ use course_modinfo;
 use block_deft\venue_manager;
 
 /**
- * External function test for raise_hand
+ * External function test for send_signal
  *
  * @package    block_deft
  * @copyright  2024 Daniel Thies <dethies@gmail.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- * @covers     \block_deft\external\raise_hand
+ * @covers     \block_deft\external\send_signal
  * @group      block_deft
  */
-final class raise_hand_test extends externallib_advanced_testcase {
+final class send_signal_test extends externallib_advanced_testcase {
     /**
-     * Test test_raise_hand invalid id.
+     * Test test_send_signal invalid id.
      */
-    public function test_raise_hand_invalid_id(): void {
+    public function test_send_signal_invalid_id(): void {
         $this->resetAfterTest();
         $this->setAdminUser();
 
         // Setup scenario.
         $scenario = $this->setup_scenario();
 
-        $result = raise_hand::execute(true, '');
-        $result = external_api::clean_returnvalue(raise_hand::execute_returns(), $result);
-        $this->assertFalse($result['status']);
-
-        $result = raise_hand::execute(false, '');
-        $result = external_api::clean_returnvalue(raise_hand::execute_returns(), $result);
-        $this->assertFalse($result['status']);
+        $this->expectException('moodle_exception');
+        send_signal::execute(1, [], 0);
     }
 
     /**
-     * Test test_raise_hand user not enrolled.
+     * Test test_send_signal user not enrolled.
      */
-    public function test_raise_hand_user_not_enrolled(): void {
+    public function test_send_signal_user_not_enrolled(): void {
         $this->resetAfterTest();
         $this->setAdminUser();
 
@@ -73,14 +68,16 @@ final class raise_hand_test extends externallib_advanced_testcase {
         $this->setUser($usernotenrolled);
         $this->expectException('moodle_exception');
         $manager = new venue_manager($scenario->contextblock, $scenario->task);
-        raise_hand::execute($scenario->contextblock->id, true);
+        send_signal::execute($scenario->contextblock->id, [], 0);
         $this->assertTrue($result['status']);
     }
 
     /**
-     * Test test_raise_hand user student.
+     * Test test_send_signal user student.
      */
-    public function test_raise_hand_user_student(): void {
+    public function test_send_signal_user_student(): void {
+        global $SESSION;
+
         $this->resetAfterTest();
         $this->setAdminUser();
 
@@ -94,67 +91,29 @@ final class raise_hand_test extends externallib_advanced_testcase {
         // Trigger and capture the event.
         $sink = $this->redirectEvents();
 
-        $result = raise_hand::execute(true, '');
-        $result = external_api::clean_returnvalue(raise_hand::execute_returns(), $result);
-        $this->assertTrue($result['status']);
-
-        $events = $sink->get_events();
-        $this->assertCount(1, $events);
-        $event = array_shift($events);
-
-        // Checking that the event contains the expected values.
-        $this->assertInstanceOf('\block_deft\event\hand_raise_sent', $event);
-        $this->assertEquals($scenario->contextblock, $event->get_context());
-        $venue = new \moodle_url('/blocks/deft/venue.php', ['task' => $scenario->task->get('id')]);
-        $this->assertEquals($venue, $event->get_url());
-        $this->assertEventContextNotUsed($event);
-        $this->assertNotEmpty($event->get_name());
-
-        $data = $event->get_data();
-        $this->assertEquals($scenario->student->id, $data['userid']);
+        $result = send_signal::execute($scenario->contextblock->id, [], 0);
+        $result = external_api::clean_returnvalue(send_signal::execute_returns(), $result);
+        $this->assertEqualsCanonicalizing([
+            'messages' => [],
+            'feed' => '',
+            'peers' => [
+                $SESSION->deft_session->peerid,
+            ],
+            'settings' => [
+                [
+                    'peerid' => $SESSION->deft_session->peerid,
+                    'message' => false,
+                    'type' => false,
+                    'username' => '',
+                ],
+            ],
+        ], $result);
     }
 
     /**
-     * Test test_lower_hand user student.
+     * Test test_send_signal user missing capabilities.
      */
-    public function test_lower_hand_user_student(): void {
-        $this->resetAfterTest();
-        $this->setAdminUser();
-
-        // Setup scenario.
-        $scenario = $this->setup_scenario();
-
-        $this->setUser($scenario->student);
-
-        $manager = new venue_manager($scenario->contextblock, $scenario->task);
-
-        // Trigger and capture the event.
-        $sink = $this->redirectEvents();
-
-        $result = raise_hand::execute(false, '');
-        $result = external_api::clean_returnvalue(raise_hand::execute_returns(), $result);
-        $this->assertTrue($result['status']);
-
-        $events = $sink->get_events();
-        $this->assertCount(1, $events);
-        $event = array_shift($events);
-
-        // Checking that the event contains the expected values.
-        $this->assertInstanceOf('\block_deft\event\hand_lower_sent', $event);
-        $this->assertEquals($scenario->contextblock, $event->get_context());
-        $venue = new \moodle_url('/blocks/deft/venue.php', ['task' => $scenario->task->get('id')]);
-        $this->assertEquals($venue, $event->get_url());
-        $this->assertEventContextNotUsed($event);
-        $this->assertNotEmpty($event->get_name());
-
-        $data = $event->get_data();
-        $this->assertEquals($scenario->student->id, $data['userid']);
-    }
-
-    /**
-     * Test test_raise_hand user missing capabilities.
-     */
-    public function test_raise_hand_user_missing_capabilities(): void {
+    public function test_send_signal_user_missing_capabilities(): void {
         global $DB;
 
         $this->resetAfterTest();
@@ -174,13 +133,8 @@ final class raise_hand_test extends externallib_advanced_testcase {
         $this->setUser($scenario->student);
         $manager = new venue_manager($scenario->contextblock, $scenario->task);
 
-        $result = raise_hand::execute(true, '');
-        $result = external_api::clean_returnvalue(raise_hand::execute_returns(), $result);
-        $this->assertFalse($result['status']);
-
-        $result = raise_hand::execute(false, '');
-        $result = external_api::clean_returnvalue(raise_hand::execute_returns(), $result);
-        $this->assertFalse($result['status']);
+        $this->expectException('moodle_exception');
+        send_signal::execute($scenario->contextblock->id, [], 0);
     }
 
     /**

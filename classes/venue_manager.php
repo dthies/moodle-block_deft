@@ -237,7 +237,12 @@ class venue_manager implements renderable, templatable {
     public static function receive_signals(int $lastsignal): array {
         global $DB, $SESSION, $USER;
 
-        $peerid = $SESSION->deft_session->peerid;
+        if (
+            empty($SESSION->deft_session)
+            || !$peerid = $SESSION->deft_session->peerid
+        ) {
+            throw new moodle_exception('novenue');
+        }
 
         // Delete old records.
         $DB->delete_records_select('block_deft_signal', 'topeer = :topeer AND id <= :lastsignal', [
