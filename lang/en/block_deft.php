@@ -114,6 +114,7 @@ $string['mute'] = 'Mute';
 $string['noisesuppression'] = 'Noise suppression';
 $string['noisesuppression_desc'] = 'Reduce noise that does not sound like speech.  This may distort music or other sounds';
 $string['notregistered'] = 'The service is not activated yet. That needs to be done in the Deft response block settings.';
+$string['openinblock'] = 'Open in block';
 $string['openinpopup'] = 'Open in popup';
 $string['openinwindow'] = 'Open in window';
 $string['overview'] = 'Overview';

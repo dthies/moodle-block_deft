@@ -119,6 +119,7 @@ class venue implements renderable, templatable {
             'canjoin' => has_capability('block/deft:joinvenue', $this->context),
             'count' => count($peers),
             'contextid' => $this->context->id,
+            'full' => $this->config->windowoption != 'openinblock',
             'peers' => array_values($peers),
             'lastmodified' => max($lastmodified, $this->task->timemodified, $settings->timemodified ?? 0),
             'limit' => $this->config->limit ?? 0,
@@ -130,7 +131,7 @@ class venue implements renderable, templatable {
                 'para' => true,
             ]),
             'peerid' => $settings->peerid ?? 0,
-            'popup' => !isset($this->config->windowoption) || $this->config->windowoption != 'openinwindow',
+            'popup' => !isset($this->config->windowoption) || $this->config->windowoption == 'openinpopup',
             'url' => $url->out(),
         ];
     }

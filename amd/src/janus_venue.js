@@ -13,6 +13,7 @@ import Log from "core/log";
 import Notification from "core/notification";
 import PublishBase from 'block_deft/publish';
 import Subscribe from 'block_deft/subscribe';
+import Templates from "core/templates";
 import * as Toast from 'core/toast';
 import VenueManager from "block_deft/venue_manager";
 
@@ -584,6 +585,7 @@ export default class JanusManager extends VenueManager {
             this.remoteFeed.janus.destroy();
             this.remoteFeed = null;
         }
+        Templates.replaceNodeContents('[data-region="block_deft_venue_static"]', '');
     }
 }
 

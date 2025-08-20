@@ -169,6 +169,7 @@ class venue_manager implements renderable, templatable {
             'contextid' => $this->context->id,
             'enablevideo' => get_config('block_deft', 'enablevideo'),
             'echocancellation' => !empty(get_config('block_deft', 'echocancellation')),
+            'full' => $config->windowoption != 'openinblock',
             'iceservers' => json_encode($this->socket->ice_servers()),
             'intro' => format_text(
                 file_rewrite_pluginfile_urls(
@@ -188,7 +189,7 @@ class venue_manager implements renderable, templatable {
             'peerid' => $SESSION->deft_session->peerid,
             'peerconnection' => ($config->connection ?? 'peer') == 'peer',
             'peers' => json_encode(array_keys($this->sessions)),
-            'popup' => !isset($this->task->get_config()->windowoption) || $this->task->get_config()->windowoption != 'openinwindow',
+            'popup' => !isset($this->task->get_config()->windowoption) || $this->task->get_config()->windowoption == 'openinpopup',
             'samplerate' => get_config('block_deft', 'samplerate'),
             'sessions' => array_values($this->sessions),
             'sharedisplay' => get_config('block_deft', 'enableupdating') == 1,

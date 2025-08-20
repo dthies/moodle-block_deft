@@ -83,6 +83,18 @@ const handleClick = (e) => {
                         const root = venue.getRoot();
                         Templates.replaceNodeContents(root[0].querySelector('.modal-content .modal-body'), html, js);
                     }).fail(Notification.exception);
+                } else if (button.getAttribute('data-type') === 'static') {
+                    const contextid = button.getAttribute('data-contextid');
+                    Fragment.loadFragment(
+                         'block_deft',
+                         'venue_manager',
+                         contextid,
+                         {
+                             taskid: task
+                         }
+                     ).then((html, js) => {
+                          Templates.replaceNodeContents('[data-region="block_deft_venue_static"]', html, js);
+                    }).fail(Notification.exception);
                 } else {
                     document.querySelector('body').classList.remove('block_deft_venue_page');
                     window.open(url, 'block_deft_venue', 'popup,height=400,width=600');

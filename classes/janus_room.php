@@ -45,10 +45,10 @@ use templatable;
  */
 class janus_room implements renderable, templatable {
     /** @var $context The context of the block */
-    protected $context = null;
+    private $context = null;
 
     /** @var $socket Socket object */
-    protected $socket = null;
+    private $socket = null;
 
     /** @var $task Task configuration */
     protected $task = null;

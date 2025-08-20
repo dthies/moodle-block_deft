@@ -59,6 +59,7 @@ class edit_venue extends edit_task {
         $mform->addElement('select', 'windowoption', get_string('windowoption', 'block_deft'), [
             'openinpopup' => get_string('openinpopup', 'block_deft'),
             'openinwindow' => get_string('openinwindow', 'block_deft'),
+            'openinblock' => get_string('openinblock', 'block_deft'),
         ]);
 
         if (get_config('block_deft', 'enablebridge')) {

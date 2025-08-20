@@ -29,7 +29,7 @@
         <div class="block_deft_venue p-3">{{{ content }}}
             <div class="peer-container">
             {{^ active }}
-             <button class="btn btn-primary m-1 w-100" {{^ canjoin }} disabled="disabled" {{/ canjoin }} data-action="join" {{^ popup }} data-type="modal" data-contextid="{{ contextid }}" {{/ popup }} title="{{# str }} join, block_deft {{/ str }}"><i class="icon fa fa-sign-in"></i> {{# str }} join, block_deft {{/ str }}</button>
+             <button class="btn btn-primary m-1 w-100" {{^ canjoin }} disabled="disabled" {{/ canjoin }} data-action="join" {{^ popup }} data-type="{{# full }}modal{{/ full}}{{^ full }}static{{/ full}}" data-contextid="{{ contextid }}" {{/ popup }} title="{{# str }} join, block_deft {{/ str }}"><i class="icon fa fa-sign-in"></i> {{# str }} join, block_deft {{/ str }}</button>
             {{/ active }}
             {{# canjoin }}
             {{# active }}

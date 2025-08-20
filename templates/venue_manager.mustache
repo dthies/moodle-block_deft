@@ -48,14 +48,17 @@
             </div>
             {{/ peerid }}
             {{# peerid }}
+            {{# user }}
+{{# full }}
             <div class="card col col-12 text-center p-3">
                 <div class="card-body">
                     <h4 class="card-title">{{ title }}</h4>
                     <div class="card-text">{{{ intro }}}</div>
                 </div>
             </div>
+{{/ full }}
             {{{ media }}}
-            {{# user }}
+{{# full }}
                 <div class="card col-12" data-peerid={{ peerid }}>
                     {{# picture }}
                         <img src="{{ pictureurl }}" class="card-img-top img-fluid rounded-circle">
@@ -71,25 +74,28 @@
                         </div>
                         {{> block_deft/volume_indicator }}
                     </div>
+{{/ full }}
                     <div class="card-footer p-1">
                         <p class="text-center h3 p-0  m-1">
                                         {{# sharevideo }}
-                                            <a href="#" class="card-link m-0 p-1" data-action="publish" data-type="camera" data-roomid="{{ roomid }}" data-contextid="{{ contextid }}" title="{{# str }} sharevideo, block_deft {{/ str }}">
+                                            <a href="#" class="btn btn-secondary card-link m-0 p-1" data-action="publish" data-type="camera" data-roomid="{{ roomid }}" data-contextid="{{ contextid }}" title="{{# str }} sharevideo, block_deft {{/ str }}">
                                                 <i class="icon fa fa-camera bg-secondary rounded-circle m-0 p-2"></i>
                                             </a>
-                                            <a href="#" class="card-link m-0 p-1 hidden" data-action="unpublish" data-roomid="{{ roomid }}" data-contextid="{{ contextid }}" title="{{# str }} stopvideo, block_deft {{/ str }}">
+                                            <a href="#" class="btn btn-secondary card-link m-0 p-1 hidden" data-action="unpublish" data-roomid="{{ roomid }}" data-contextid="{{ contextid }}" title="{{# str }} stopvideo, block_deft {{/ str }}">
                                                 <i class="icon fa fa-stop bg-danger rounded-circle m-0 p-2"></i>
                                             </a>
                                             {{# sharedisplay }}
-                                            <a href="#" class="card-link m-0 p-1" data-action="publish" data-type="display" data-roomid="{{ roomid }}" data-contextid="{{ contextid }}" title="{{# str }} sharevideo, block_deft {{/ str }}">
+                                            <a href="#" class="btn btn-secondary card-link m-0 p-1" data-action="publish" data-type="display" data-roomid="{{ roomid }}" data-contextid="{{ contextid }}" title="{{# str }} sharevideo, block_deft {{/ str }}">
                                                 <i class="icon fa fa-television bg-secondary rounded-circle m-0 p-2"></i>
                                             </a>
                                             {{/ sharedisplay }}
                                         {{/ sharevideo }}
-                            <a href="#" class="card-link m-0 p-1" data-action="mute" title="{{# str }} mute, block_deft {{/ str }}"><i class="icon fa fa-microphone bg-secondary rounded-circle m-0 p-2"></i></a><a href="#" class="card-link hidden m-0 p-1" data-action="unmute" title="{{# str }} unmute, block_deft {{/ str }}"><i class="icon fa fa-microphone-slash bg-warning rounded-circle m-0 p-2"></i></a>
-                            <a href="#" class="card-link m-0 p-1" data-action="raisehand" title="{{# str }} raisehand, block_deft {{/ str }}"><i class="icon fa fa-hand-grab-o bg-secondary rounded-circle m-0 p-2"></i></a><a href="#" class="card-link hidden m-0 p-1" data-action="lowerhand" title="{{# str }} lowerhand, block_deft {{/ str }}"><i class="icon fa fa-hand-stop-o bg-success rounded-circle m-0 p-2"></i></a>
-                            <a href="#" class="card-link m-0 p-1" data-action="close" title="{{# str }} close, block_deft {{/ str }}"><i class="icon fa fa-sign-out bg-secondary rounded-circle m-0 p-2"></i></a>
+{{# full }}
+                            <a href="#" class="btn btn-secondary card-link m-0 p-1" data-action="mute" title="{{# str }} mute, block_deft {{/ str }}"><i class="icon fa fa-microphone bg-secondary rounded-circle m-0 p-2"></i></a><a href="#" class="btn btn-secondary card-link hidden m-0 p-1" data-action="unmute" title="{{# str }} unmute, block_deft {{/ str }}"><i class="icon fa fa-microphone-slash bg-warning rounded-circle m-0 p-2"></i></a>
+                            <a href="#" class="btn btn-secondary card-link m-0 p-1" data-action="raisehand" title="{{# str }} raisehand, block_deft {{/ str }}"><i class="icon fa fa-hand-grab-o bg-secondary rounded-circle m-0 p-2"></i></a><a href="#" class="btn btn-secondary card-link hidden m-0 p-1" data-action="lowerhand" title="{{# str }} lowerhand, block_deft {{/ str }}"><i class="icon fa fa-hand-stop-o bg-success rounded-circle m-0 p-2"></i></a>
+                            <a href="#" class="btn btn-secondary card-link m-0 p-1" data-action="close" title="{{# str }} close, block_deft {{/ str }}"><i class="icon fa fa-sign-out bg-secondary rounded-circle m-0 p-2"></i></a>
                         </p>
+{{/ full }}
                     </div>
                 </div>
             {{/ user }}
