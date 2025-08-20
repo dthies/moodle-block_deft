@@ -330,9 +330,11 @@ class provider implements
                     get_string('privacy:task', 'block_deft', $task->get('id')),
                     get_string('privacy:responses', 'block_deft'),
                 ], (object)$response);
-            } else if ($results = array_filter($peers, function($peer) use ($task) {
-                return $peer->instance == $task->get('instance');
-            })) {
+            } else if (
+                $results = array_filter($peers, function ($peer) use ($task) {
+                    return $peer->instance == $task->get('instance');
+                })
+            ) {
                 writer::with_context($context)->export_data([
                     get_string('privacy:task', 'block_deft', $task->get('id')),
                     get_string('privacy:connections', 'block_deft'),

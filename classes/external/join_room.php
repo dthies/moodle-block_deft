@@ -82,13 +82,15 @@ class join_room extends external_api {
             'feed' => $feed,
         ]);
 
-        if (!$peer = $DB->get_record(
-            'block_deft_peer',
-            [
+        if (
+            !$peer = $DB->get_record(
+                'block_deft_peer',
+                [
                 'id' => $id,
                 'status' => 0,
-            ]
-        )) {
+                ]
+            )
+        ) {
             return [
                 'id' => 0,
                 'status' => false,

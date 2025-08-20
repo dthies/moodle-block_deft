@@ -271,6 +271,5 @@ final class provider_test extends provider_testcase {
         $appctx = new approved_contextlist($this->users[2], 'block_deft', [$context->id]);
         provider::export_user_data($appctx);
         $this->assertFalse(writer::with_context($context)->has_any_data());
-
     }
 }

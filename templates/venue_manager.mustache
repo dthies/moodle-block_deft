@@ -24,6 +24,7 @@
         "autogaincontrol": true,
         "contextid": 2,
         "echocancellation": true,
+        "full": true,
         "iceservers": "[]",
         "intro": "Hello world",
         "noisesuppression": true,
@@ -34,7 +35,9 @@
         "server": "wss://deftly.us/janus/ws",
         "title": "Venue",
         "throttle": 100,
-        "uniqueid": "eworio"
+        "uniqueid": "eworio",
+        "user": {
+        }
     }
 }}
 <div id="block-deft-{{uniqid}}" class="block-deft block-cards" data-task="{{ taskid }}" data-region="deft-venue" data-roomid="{{ roomid }}">
@@ -49,53 +52,55 @@
             {{/ peerid }}
             {{# peerid }}
             {{# user }}
-{{# full }}
-            <div class="card col col-12 text-center p-3">
-                <div class="card-body">
-                    <h4 class="card-title">{{ title }}</h4>
-                    <div class="card-text">{{{ intro }}}</div>
+                {{# full }}
+                <div class="card col col-12 text-center p-3">
+                    <div class="card-body">
+                        <h4 class="card-title">{{ title }}</h4>
+                        <div class="card-text">{{{ intro }}}</div>
+                    </div>
                 </div>
-            </div>
-{{/ full }}
-            {{{ media }}}
-{{# full }}
-                <div class="card col-12" data-peerid={{ peerid }}>
+                {{/ full }}
+                {{{ media }}}
+                <div class="card col col-12 p-0" data-peerid={{ peerid }}>
+                    {{# full }}
                     {{# picture }}
                         <img src="{{ pictureurl }}" class="card-img-top img-fluid rounded-circle">
                     {{/ picture }}
                     {{^ picture }}
                         {{{ avatar }}}
                     {{/ picture }}
-                    <div class="card-body">
+                    {{/ full }}
+                    <div class="card-body p-0">
+                        {{# full }}
                         <div class="card-head">
                             <h5 class="text-center">
                                 {{ fullname }}
                             </h5>
+                            {{> block_deft/volume_indicator }}
                         </div>
-                        {{> block_deft/volume_indicator }}
-                    </div>
-{{/ full }}
-                    <div class="card-footer p-1">
+                        {{/ full }}
+                        <div class="card-footer p-0">
                         <p class="text-center h3 p-0  m-1">
-                                        {{# sharevideo }}
-                                            <a href="#" class="btn btn-secondary card-link m-0 p-1" data-action="publish" data-type="camera" data-roomid="{{ roomid }}" data-contextid="{{ contextid }}" title="{{# str }} sharevideo, block_deft {{/ str }}">
-                                                <i class="icon fa fa-camera bg-secondary rounded-circle m-0 p-2"></i>
-                                            </a>
-                                            <a href="#" class="btn btn-secondary card-link m-0 p-1 hidden" data-action="unpublish" data-roomid="{{ roomid }}" data-contextid="{{ contextid }}" title="{{# str }} stopvideo, block_deft {{/ str }}">
-                                                <i class="icon fa fa-stop bg-danger rounded-circle m-0 p-2"></i>
-                                            </a>
-                                            {{# sharedisplay }}
-                                            <a href="#" class="btn btn-secondary card-link m-0 p-1" data-action="publish" data-type="display" data-roomid="{{ roomid }}" data-contextid="{{ contextid }}" title="{{# str }} sharevideo, block_deft {{/ str }}">
-                                                <i class="icon fa fa-television bg-secondary rounded-circle m-0 p-2"></i>
-                                            </a>
-                                            {{/ sharedisplay }}
-                                        {{/ sharevideo }}
-{{# full }}
-                            <a href="#" class="btn btn-secondary card-link m-0 p-1" data-action="mute" title="{{# str }} mute, block_deft {{/ str }}"><i class="icon fa fa-microphone bg-secondary rounded-circle m-0 p-2"></i></a><a href="#" class="btn btn-secondary card-link hidden m-0 p-1" data-action="unmute" title="{{# str }} unmute, block_deft {{/ str }}"><i class="icon fa fa-microphone-slash bg-warning rounded-circle m-0 p-2"></i></a>
-                            <a href="#" class="btn btn-secondary card-link m-0 p-1" data-action="raisehand" title="{{# str }} raisehand, block_deft {{/ str }}"><i class="icon fa fa-hand-grab-o bg-secondary rounded-circle m-0 p-2"></i></a><a href="#" class="btn btn-secondary card-link hidden m-0 p-1" data-action="lowerhand" title="{{# str }} lowerhand, block_deft {{/ str }}"><i class="icon fa fa-hand-stop-o bg-success rounded-circle m-0 p-2"></i></a>
-                            <a href="#" class="btn btn-secondary card-link m-0 p-1" data-action="close" title="{{# str }} close, block_deft {{/ str }}"><i class="icon fa fa-sign-out bg-secondary rounded-circle m-0 p-2"></i></a>
+                            {{# sharevideo }}
+                                <a href="#" class="btn btn-secondary card-link m-0 p-1" data-action="publish" data-type="camera" data-roomid="{{ roomid }}" data-contextid="{{ contextid }}" title="{{# str }} sharevideo, block_deft {{/ str }}">
+                                    <i class="icon fa fa-camera bg-secondary rounded-circle m-0 p-2"></i>
+                                </a>
+                                <a href="#" class="btn btn-secondary card-link m-0 p-1 hidden" data-action="unpublish" data-roomid="{{ roomid }}" data-contextid="{{ contextid }}" title="{{# str }} stopvideo, block_deft {{/ str }}">
+                                    <i class="icon fa fa-stop bg-danger rounded-circle m-0 p-2"></i>
+                                </a>
+                                {{# sharedisplay }}
+                                <a href="#" class="btn btn-secondary card-link m-0 p-1" data-action="publish" data-type="display" data-roomid="{{ roomid }}" data-contextid="{{ contextid }}" title="{{# str }} sharevideo, block_deft {{/ str }}">
+                                    <i class="icon fa fa-television bg-secondary rounded-circle m-0 p-2"></i>
+                                </a>
+                                {{/ sharedisplay }}
+                            {{/ sharevideo }}
+                            {{# full }}
+                                <a href="#" class="btn btn-secondary card-link m-0 p-1" data-action="mute" title="{{# str }} mute, block_deft {{/ str }}"><i class="icon fa fa-microphone bg-secondary rounded-circle m-0 p-2"></i></a><a href="#" class="btn btn-secondary card-link hidden m-0 p-1" data-action="unmute" title="{{# str }} unmute, block_deft {{/ str }}"><i class="icon fa fa-microphone-slash bg-warning rounded-circle m-0 p-2"></i></a>
+                                <a href="#" class="btn btn-secondary card-link m-0 p-1" data-action="raisehand" title="{{# str }} raisehand, block_deft {{/ str }}"><i class="icon fa fa-hand-grab-o bg-secondary rounded-circle m-0 p-2"></i></a><a href="#" class="btn btn-secondary card-link hidden m-0 p-1" data-action="lowerhand" title="{{# str }} lowerhand, block_deft {{/ str }}"><i class="icon fa fa-hand-stop-o bg-success rounded-circle m-0 p-2"></i></a>
+                                <a href="#" class="btn btn-secondary card-link m-0 p-1" data-action="close" title="{{# str }} close, block_deft {{/ str }}"><i class="icon fa fa-sign-out bg-secondary rounded-circle m-0 p-2"></i></a>
+                            {{/ full }}
                         </p>
-{{/ full }}
+                        </div>
                     </div>
                 </div>
             {{/ user }}
