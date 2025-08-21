@@ -94,7 +94,7 @@ const handleClick = (e) => {
                          }
                      ).then((html, js) => {
                           Templates.replaceNodeContents(
-                              e.target.closest('[data-block="deft"]')
+                              e.target.closest('[data-region="deft-main"]')
                                   .querySelector('[data-region="block_deft_venue_static"]'),
                               html,
                               js);
