@@ -93,7 +93,11 @@ const handleClick = (e) => {
                              taskid: task
                          }
                      ).then((html, js) => {
-                          Templates.replaceNodeContents('[data-region="block_deft_venue_static"]', html, js);
+                          Templates.replaceNodeContents(
+                              e.target.closest('[data-block="deft"]')
+                                  .querySelector('[data-region="block_deft_venue_static"]'),
+                              html,
+                              js);
                     }).fail(Notification.exception);
                 } else {
                     document.querySelector('body').classList.remove('block_deft_venue_page');
