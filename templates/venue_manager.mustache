@@ -62,17 +62,15 @@
                 {{/ full }}
                 {{{ media }}}
                 <div class="card col col-12 p-0" data-peerid={{ peerid }}>
-                    {{# full }}
+                    <div class="card-body p-0">
+                        <div class="card-head text-center">
+                        {{# full }}
                     {{# picture }}
                         <img src="{{ pictureurl }}" class="card-img-top img-fluid rounded-circle">
                     {{/ picture }}
                     {{^ picture }}
                         {{{ avatar }}}
                     {{/ picture }}
-                    {{/ full }}
-                    <div class="card-body p-0">
-                        {{# full }}
-                        <div class="card-head">
                             <h5 class="text-center">
                                 {{ fullname }}
                             </h5>

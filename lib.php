@@ -121,6 +121,7 @@ function block_deft_output_fragment_venue($args) {
         'status' => 0,
         'type' => 'venue',
     ]);
+    $task = new task($peer->taskid);
     require_capability('block/deft:joinvenue', $context);
 
     if (!$peer || !$user = core_user::get_user($peer->userid)) {
@@ -128,7 +129,7 @@ function block_deft_output_fragment_venue($args) {
     }
     $url = new moodle_url('/user/view.php', [
         'id' => $user->id,
-        'course' => $context->get_course_context->instance,
+        'course' => $context->get_course_context()->instance,
     ]);
     $user->fullname = fullname($user);
     $userpicture = new user_picture($user);
@@ -142,6 +143,8 @@ function block_deft_output_fragment_venue($args) {
     $user->profileurl = $url->out(false);
 
     return $OUTPUT->render_from_template('block_deft/venue_user', [
+        'full' => $task->get_config()->windowoption != 'openinblock',
+        'course' => $context->get_course_context()->id,
         'peerid' => $peerid,
         'user' => $user,
         'mute' => $peer->mute,

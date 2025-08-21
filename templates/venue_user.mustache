@@ -28,7 +28,7 @@
     }
 }}
 
-<div id="deft-venue-peer-{{peerid}}" data-peerid="{{ peerid }}" class="card hidden">
+<div id="deft-venue-peer-{{peerid}}" data-peerid="{{ peerid }}" class="card{{^ full }} hidden{{/ full }}">
     {{# user }}
         {{# picture }}
             <img src="{{ pictureurl }}" class="card-img-top rounded-circle">
