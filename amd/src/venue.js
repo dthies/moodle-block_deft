@@ -98,7 +98,7 @@ const handleClick = (e) => {
                          }
                      ).then((html, js) => {
                          if (!e.target.closest('[data-region="deft-main"]')) {
-                             return;
+                             return html;
                          }
                          Templates.replaceNodeContents(
                              e.target.closest('[data-region="deft-main"]')
@@ -106,6 +106,7 @@ const handleClick = (e) => {
                              html,
                              js
                          );
+                         return html;
                     }).fail(Notification.exception);
                 } else {
                     document.querySelector('body').classList.remove('block_deft_venue_page');

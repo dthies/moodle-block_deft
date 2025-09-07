@@ -502,7 +502,6 @@ export default class VenueManager {
                 indicator.setAttribute('data-volume', message.volume.smooth);
             });
         }
-        //this.peerAudioPlayer(peerid);
     }
 
     /**

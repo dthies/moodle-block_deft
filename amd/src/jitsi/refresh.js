@@ -63,8 +63,6 @@ export default class {
             document.body.addEventListener('deftaction', () => {
                 this.socket.notify();
             });
-            this.room.on(JitsiMeetJS.events.conference.CONFERENCE_JOINED, async() => {
-            });
 
             this.room.join();
         });

@@ -133,6 +133,7 @@ export default class MediaManager extends VenueManager {
      * Start to establish the peer connections
      */
     startConnection() {
+        return;
     }
 
     /**
@@ -157,7 +158,6 @@ export default class MediaManager extends VenueManager {
     async publish(publish) {
         await Ajax.call([{
             args: {
-                //id: this.room.myUserId(),
                 id: this.peerid,
                 publish: publish,
                 room: 0
@@ -182,7 +182,6 @@ export default class MediaManager extends VenueManager {
             args: {
                 handle: 0,
                 id: Number(this.peerid),
-                //plugin: pluginHandle.plugin,
                 plugin: this.room.myUserId(),
                 room: 0,
                 session: 0,
@@ -193,9 +192,9 @@ export default class MediaManager extends VenueManager {
         }])[0];
 
         if (response.status) {
-        }
             document.body.dispatchEvent(new CustomEvent('deftaction', { }));
             this.socket.notify();
+        }
 
         return response;
     }
@@ -346,9 +345,6 @@ export default class MediaManager extends VenueManager {
                 });
                 if (!response.peers.includes(Number(this.peerid))) {
                     return;
-                }
-                if (response.peers.includes(Number(response.feed))) {
-                } else {
                 }
             },
             fail: Notification.exception,
