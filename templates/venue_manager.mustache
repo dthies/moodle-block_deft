@@ -61,10 +61,10 @@
                 </div>
                 {{/ full }}
                 {{{ media }}}
-                <div class="card col col-12 p-0" data-peerid={{ peerid }}>
-                    <div class="card-body p-0">
-                        <div class="card-head text-center">
+                <div class="card {{^ full }}border-0 {{/ full}}col col-12 p-0" data-peerid={{ peerid }}>
+                    <div class="card-body {{^ full }}border-0 {{/ full}}p-0">
                         {{# full }}
+                        <div class="card-head text-center">
                     {{# picture }}
                         <img src="{{ pictureurl }}" class="card-img-top img-fluid rounded-circle">
                     {{/ picture }}
@@ -77,7 +77,7 @@
                             {{> block_deft/volume_indicator }}
                         </div>
                         {{/ full }}
-                        <div class="card-footer p-0">
+                        <div class="card-footer {{^ full }}border-0 {{/ full}}p-0">
                         <p class="text-center h3 p-0  m-1">
                             {{# sharevideo }}
                                 <a href="#" class="btn btn-secondary card-link m-0 p-1" data-action="publish" data-type="camera" data-roomid="{{ roomid }}" data-contextid="{{ contextid }}" title="{{# str }} sharevideo, block_deft {{/ str }}">

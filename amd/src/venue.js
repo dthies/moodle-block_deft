@@ -41,6 +41,10 @@ const handleClick = (e) => {
                     fail: Notification.exception,
                     methodname: 'block_deft_venue_settings'
                 }]);
+                document.querySelectorAll('[data-region="block_deft_venue_static"]').forEach(venue => {
+                    const event = new Event('venueclosed', {bubbles: true});
+                    venue.dispatchEvent(event);
+                });
                 break;
             case 'join':
                 if (button.getAttribute('data-type') === 'modal') {
@@ -93,11 +97,15 @@ const handleClick = (e) => {
                              taskid: task
                          }
                      ).then((html, js) => {
-                          Templates.replaceNodeContents(
-                              e.target.closest('[data-region="deft-main"]')
-                                  .querySelector('[data-region="block_deft_venue_static"]'),
-                              html,
-                              js);
+                         if (!e.target.closest('[data-region="deft-main"]')) {
+                             return;
+                         }
+                         Templates.replaceNodeContents(
+                             e.target.closest('[data-region="deft-main"]')
+                                 .querySelector('[data-region="block_deft_venue_static"]'),
+                             html,
+                             js
+                         );
                     }).fail(Notification.exception);
                 } else {
                     document.querySelector('body').classList.remove('block_deft_venue_page');

@@ -61,7 +61,7 @@ export default class VenueManager {
         window.adapter = adapter;
 
         if (!window.RTCPeerConnection) {
-            document.querySelectorAll('.venue_manager').forEach((venue) => {
+            document.querySelectorAll('.venue_manager, [data-region="block_deft_venue_static"]').forEach((venue) => {
                 const e = new Event('venueclosed', {bubbles: true});
                 venue.dispatchEvent(e);
             });
