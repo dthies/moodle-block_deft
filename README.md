@@ -8,30 +8,33 @@ and change the visibilities and other conditions of the items. Comments
 may also be enabled to conduct discussions.
 
 An external service is available to enable updating the contents in users
-browsers via the websocket protocol. The service is free for testing and
-limited usage, but will be capped for larger sites without a service
-agreement in the future. The service is linked as an External Tool
-(LTI), but user information is not shared with the service other than
-what is necessary to provide connection i.e IP number associated with
-block's context.
+browsers via the websocket protocol. The service is free for testing
+and limited usage, but will be capped for larger sites without a service
+agreement in the future. The service is linked as an External Tool (LTI),
+but user information is not shared with the service other than what is
+necessary to provide connection i.e IP number associated with block's
+context. Alternatively the plugin can be configured to use a self hosted
+Jitsi server as a backend.
 
 The service will remain free for smaller sites, but sites with larger usage
-may be require a service agreement after 60 day to prevent usage caps.
+may be require a service agreement to prevent usage caps.
 
 ## Installing via uploaded ZIP file ##
 
 1. Log in to your Moodle site as an admin and go to _Site administration >
    Plugins > Install plugins_.
-2. Upload the ZIP file with the plugin code. You should only be prompted to add
-   extra details if your plugin type is not automatically detected.
+2. Upload the ZIP file with the plugin code. You should only be prompted
+   to add extra details if your plugin type is not automatically detected.
 3. Check the plugin validation report and finish the installation.
 4. Ensure Deft response block is enabled.
-5. To enable live updating of block go to admin settings for Deft response. Check
-   the enable updating box and save. Return to setting page and a button to activate
-   the service should appear. Clicking the button should add deftly.us as an
-   External tool. If this is successful then usage information will be displayed
-   on the settings page. If not contact the developers for urls and instructions to
-   configure manually.
+5. To enable live updating of block go to admin settings for Deft response.
+   Choose either Deft service or Jitsi server and save. Return to
+   setting page and a button to activate the service Deft should appear
+   if selected. Clicking the button should add deftly.us as an External
+   tool. If this is successful then usage information will be displayed
+   on the settings page. If not contact the developers for urls and
+   instructions to configure manually. If Jitsi server option is selected
+   provide appropriate information in that section.
 
 ## Installing manually ##
 
