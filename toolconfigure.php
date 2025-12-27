@@ -24,18 +24,19 @@
 
 require_once('../../config.php');
 require_once($CFG->libdir . '/adminlib.php');
-require_once($CFG->dirroot . '/mod/lti/lib.php');
-require_once($CFG->dirroot . '/mod/lti/locallib.php');
-
-$cartridgeurl = optional_param('cartridgeurl', '', PARAM_URL);
 
 // No guest autologin.
 require_login(0, false);
-admin_externalpage_setup('ltitoolconfigure');
+$baseurl = new moodle_url('/blocks/deft/toolconfig.php');
+$PAGE->set_pagelayout('admin');
+$PAGE->set_url($baseurl);
+$PAGE->set_context(\core\context\system::instance());
+$PAGE->set_heading(get_string('testconnection', 'block_deft'));
 
 $pageurl = new moodle_url('/blocks/deft/toolconfigure.php');
 $PAGE->set_url($pageurl);
 $PAGE->set_title("{$SITE->shortname}: " . get_string('toolregistration', 'mod_lti'));
+
 $output = $PAGE->get_renderer('block_deft');
 
 echo $output->header();
