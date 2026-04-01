@@ -41,7 +41,7 @@ class task extends persistent {
     /**
      * @var TABLE Database table
      */
-    const TABLE = 'block_deft';
+    public const TABLE = 'block_deft';
 
     /**
      * Return the definition of the properties of this model.

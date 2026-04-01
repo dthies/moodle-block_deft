@@ -12,7 +12,7 @@ import Config from 'core/config';
 import Fragment from 'core/fragment';
 import {get_string as getString} from 'core/str';
 import ModalEvents from 'core/modal_events';
-import ModalFactory from 'core/modal_factory';
+import Modal from 'core/modal_save_cancel';
 import Notification from 'core/notification';
 import Templates from 'core/templates';
 
@@ -52,9 +52,8 @@ const handleClick = (e) => {
                     document.querySelectorAll('.venue_manager').forEach(container => {
                         container.innerHTML = '';
                     });
-                    ModalFactory.create({
+                    Modal.create({
                         large: true,
-                        type: ModalFactory.types.SAVE_CANCEL,
                         title: getString('venue', 'block_deft'),
                         body: '<div class="venue_manager"></div>',
                     }).then(function(modal) {
@@ -83,10 +82,10 @@ const handleClick = (e) => {
                                 taskid: task
                             }
                         );
-                    }).done((html, js) => {
+                    }).then((html, js) => {
                         const root = venue.getRoot();
-                        Templates.replaceNodeContents(root[0].querySelector('.modal-content .modal-body'), html, js);
-                    }).fail(Notification.exception);
+                        Templates.replaceNodeContents(root[0].querySelector('.modal-content .modal-body'), html, js || '');
+                    }).catch(Notification.exception);
                 } else if (button.getAttribute('data-type') === 'static') {
                     const contextid = button.getAttribute('data-contextid');
                     Fragment.loadFragment(
@@ -104,7 +103,7 @@ const handleClick = (e) => {
                              e.target.closest('[data-region="deft-main"]')
                                  .querySelector('[data-region="block_deft_venue_static"]'),
                              html,
-                             js
+                             js || ''
                          );
                          return html;
                     }).fail(Notification.exception);

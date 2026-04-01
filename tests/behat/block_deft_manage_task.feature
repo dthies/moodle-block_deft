@@ -23,6 +23,8 @@ Feature: The deft response block allows managers and teachers to interact with s
     And the following "blocks" exist:
       | blockname  | contextlevel | reference | pagetypepattern | defaultregion |
       | deft       | System       | 1         | site-index      | side-post     |
+    And the following config values are set as admin:
+      | enablemyhome | 1 |
 
   Scenario: Manager adds text task which is not visible
     Given I log in as "admin"

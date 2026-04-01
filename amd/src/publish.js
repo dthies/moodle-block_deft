@@ -97,8 +97,7 @@ export default class Publish {
         }).catch(Notification.exception);
     }
 
-    onLocalTrack(track, on) {
-        Log.debug(on);
+    onLocalTrack() {
         return;
     }
 
@@ -106,8 +105,8 @@ export default class Publish {
         return;
     }
 
-    onAttached(publishers) {
-        Log.debug(publishers);
+    onAttached() {
+        return;
     }
 
     /**
