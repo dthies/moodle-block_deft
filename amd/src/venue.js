@@ -9,6 +9,7 @@
 
 import Ajax from 'core/ajax';
 import Config from 'core/config';
+import Log from 'core/log';
 import Fragment from 'core/fragment';
 import {get_string as getString} from 'core/str';
 import ModalEvents from 'core/modal_events';
@@ -23,7 +24,7 @@ let venue = null;
  *
  * @param {Event} e Change event
  */
-const handleClick = (e) => {
+const handleClick = async (e) => {
     'use strict';
 
     let button = e.target.closest('.block_deft_venue button[data-action]:not([disabled])');
@@ -52,40 +53,40 @@ const handleClick = (e) => {
                     document.querySelectorAll('.venue_manager').forEach(container => {
                         container.innerHTML = '';
                     });
-                    Modal.create({
+                    const modal = await Modal.create({
                         large: true,
                         title: getString('venue', 'block_deft'),
                         body: '<div class="venue_manager"></div>',
-                    }).then(function(modal) {
-                        const root = modal.getRoot();
-                        venue = modal;
-                        modal.setSaveButtonText(getString('hide'));
-                        modal.setButtonText('cancel', getString('leave', 'block_deft'));
-                        document.querySelector('body').classList.add('block_deft_venue_page');
-                        root.on(ModalEvents.cancel, function() {
-                            Ajax.call([{
-                                args: {
-                                    mute: false,
-                                    "status": true
-                                },
-                                fail: Notification.exception,
-                                methodname: 'block_deft_venue_settings'
-                            }]);
-                        });
-                        modal.show();
+                    });
+                    Log.debug(modal);
+                    const root = modal.getRoot();
+                    venue = modal;
+                    modal.setSaveButtonText(getString('hide'));
+                    modal.setButtonText('cancel', getString('leave', 'block_deft'));
+                    document.querySelector('body').classList.add('block_deft_venue_page');
+                    root.on(ModalEvents.cancel, function() {
+                        Ajax.call([{
+                            args: {
+                                mute: false,
+                                "status": true
+                            },
+                            fail: Notification.exception,
+                            methodname: 'block_deft_venue_settings'
+                        }]);
+                    });
+                    modal.show();
 
-                        return Fragment.loadFragment(
-                            'block_deft',
-                            'venue_manager',
-                            contextid,
-                            {
-                                taskid: task
-                            }
-                        );
-                    }).then((html, js) => {
+                    Fragment.loadFragment(
+                        'block_deft',
+                        'venue_manager',
+                        contextid,
+                        {
+                            taskid: task
+                        }
+                    ).then((html, js) => {
                         const root = venue.getRoot();
-                        Templates.replaceNodeContents(root[0].querySelector('.modal-content .modal-body'), html, js || '');
-                    }).catch(Notification.exception);
+                        Templates.replaceNodeContents(root[0].querySelector('.modal-content .modal-body'), html, js);
+                    }).fail(Notification.exception);
                 } else if (button.getAttribute('data-type') === 'static') {
                     const contextid = button.getAttribute('data-contextid');
                     Fragment.loadFragment(
